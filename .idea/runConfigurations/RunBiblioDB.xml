@@ -1,7 +1,7 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="RunBiblioDB" type="Application" factoryName="Application">
     <option name="MAIN_CLASS_NAME" value="manager.BiblioMenu" />
-    <module name="Biblioteca" />
+    <module name="GABI" />
     <method v="2">
       <option name="Make" enabled="true" />
     </method>
