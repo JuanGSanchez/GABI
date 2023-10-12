@@ -31,6 +31,14 @@ public class Prestamo implements Comparable<Prestamo>, Serializable {
      * Fecha del préstamo
      */
     private final LocalDate fechaPres;
+    /**
+     * Libro asociado al préstamo
+     */
+    private final Libro libro;
+    /**
+     * Socio asociado al préstamo
+     */
+    private final Socio socio;
 
     /**
      * Constructor completo de la clase,
@@ -54,10 +62,27 @@ public class Prestamo implements Comparable<Prestamo>, Serializable {
      * @param fechaPres fecha del préstamo
      */
     public Prestamo(int idPres, int idSoc, int idLib, LocalDate fechaPres) {
+        this(idPres, idSoc, idLib, fechaPres, null, null);
+    }
+
+    /**
+     * Constructor completo de la clase,
+     * designado para recolección de entrada con más detalle
+     *
+     * @param idPres    ID del préstamo
+     * @param idSoc     ID del socio
+     * @param idLib     ID del libro
+     * @param fechaPres fecha del préstamo
+     * @param libro     Libro asociado al préstamo
+     * @param socio     Socio asociado al préstamo
+     */
+    public Prestamo(int idPres, int idSoc, int idLib, LocalDate fechaPres, Libro libro, Socio socio) {
         this.idPres = idPres;
         this.idSoc = idSoc;
         this.idLib = idLib;
         this.fechaPres = fechaPres;
+        this.libro = libro;
+        this.socio = socio;
     }
 
     /**
@@ -94,6 +119,24 @@ public class Prestamo implements Comparable<Prestamo>, Serializable {
      */
     public final LocalDate getFechaPres() {
         return fechaPres;
+    }
+
+    /**
+     * Método getter de la variable libro
+     *
+     * @return Libro asociado al préstamo
+     */
+    public Libro getLibro() {
+        return libro;
+    }
+
+    /**
+     * Método getter de la variable socio
+     *
+     * @return Socio asociado al préstamo
+     */
+    public Socio getSocio() {
+        return socio;
     }
 
     /**
@@ -136,8 +179,12 @@ public class Prestamo implements Comparable<Prestamo>, Serializable {
      */
     @Override
     public String toString() {
-        return this.getClass().getSimpleName() + " " + idPres + ": Libro " + idLib + " a Socio " + idSoc + " el "
-               + fechaPres.format(DateTimeFormatter.ISO_LOCAL_DATE);
+        String desc = this.getClass().getSimpleName() + " " + idPres + ": Libro " + idLib + " a Socio " + idSoc + " el "
+                      + fechaPres.format(DateTimeFormatter.ISO_LOCAL_DATE);
+        if (libro != null) {
+            desc += "\n\t" + libro + "\n\t" + socio;
+        }
+        return desc;
     }
 
     /**

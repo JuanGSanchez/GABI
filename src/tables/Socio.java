@@ -4,6 +4,9 @@
 package tables;
 
 import java.io.Serializable;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Clase de la tabla de datos de socios,
@@ -29,18 +32,37 @@ public class Socio implements Comparable<Socio>, Serializable {
      * Apellidos del socio
      */
     private final String apellidos;
+    /**
+     * Lista de libros prestados
+     */
+    private final List<Libro> libroList;
 
     /**
      * Constructor completo de la clase
+     * designado para creación de entrada
      *
      * @param idSoc     ID del socio
      * @param nombre    Nombre del socio
      * @param apellidos Apellidos del socio
      */
     public Socio(int idSoc, String nombre, String apellidos) {
+        this(idSoc, nombre, apellidos, null);
+    }
+
+    /**
+     * Constructor completo de la clase
+     * designado para recolección de entrada
+     *
+     * @param idSoc     ID del socio
+     * @param nombre    Nombre del socio
+     * @param apellidos Apellidos del socio
+     * @param libroList Lista de libros prestados
+     */
+    public Socio(int idSoc, String nombre, String apellidos, List<Libro> libroList) {
         this.idSoc = idSoc;
         this.nombre = nombre;
         this.apellidos = apellidos;
+        this.libroList = libroList;
     }
 
     /**
@@ -68,6 +90,15 @@ public class Socio implements Comparable<Socio>, Serializable {
      */
     public final String getApellidos() {
         return apellidos;
+    }
+
+    /**
+     * Método getter de la variable libroList
+     *
+     * @return Lista de libros prestados
+     */
+    public List<Libro> getLibroList() {
+        return libroList;
     }
 
     /**
@@ -108,8 +139,14 @@ public class Socio implements Comparable<Socio>, Serializable {
      */
     @Override
     public String toString() {
-        return this.getClass().getSimpleName() + " " + idSoc + ":   " + String.format("%-20s", nombre)
-               + "   " + String.format("%-40s", apellidos);
+        String desc = this.getClass().getSimpleName() + " " + idSoc + ":   " + String.format("%-20s", nombre)
+                      + "   " + String.format("%-40s", apellidos);
+        if (libroList != null) {
+            desc += "\n\t";
+            desc += libroList.stream().sorted(Comparator.comparing(Libro::getIdLib)).map(Libro::toString).collect(Collectors.joining("\n\t"));
+        }
+
+        return desc;
     }
 
     /**
