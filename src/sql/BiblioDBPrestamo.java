@@ -3,7 +3,9 @@
  */
 package sql;
 
+import tables.Libro;
 import tables.Prestamo;
+import tables.Socio;
 
 import java.sql.*;
 import java.time.LocalDate;
@@ -145,6 +147,49 @@ public class BiblioDBPrestamo implements BiblioDAO<Prestamo> {
                         rs.getInt(3),
                         rs.getDate(4).toLocalDate()));
             }
+        } catch (SQLException sqle) {
+            System.err.println("  Error inesperado durante el contacto con la base de datos\n" + sqle.getMessage());
+        }
+
+        return listPrestamo;
+    }
+
+    /**
+     * Método para extraer todas las entradas de la tabla de datos Préstamos,
+     * junto a detalles de libro y socio asociados
+     *
+     * @return Lista de objetos Préstamo por cada entrada de la tabla de datos
+     */
+    @Override
+    public List<Prestamo> searchDetailTB() {
+        String query1 = "SELECT * FROM prestamos";
+        String query2 = "SELECT * FROM socios WHERE idsoc = ?";
+        String query3 = "SELECT * FROM libros WHERE idlib = ?";
+        List<Prestamo> listPrestamo = new ArrayList<>();
+
+        try (Connection con = DriverManager.getConnection(url);
+             Statement stmt1 = con.createStatement();
+             PreparedStatement pStmt2 = con.prepareStatement(query2);
+             PreparedStatement pStmt3 = con.prepareStatement(query3);
+             ResultSet rs1 = stmt1.executeQuery(query1)) {
+            ResultSet rs2 = pStmt2.getResultSet();
+            ResultSet rs3 = pStmt3.getResultSet();
+            while (rs1.next()) {
+                pStmt2.setInt(1, rs1.getInt(2));
+                pStmt3.setInt(1, rs1.getInt(3));
+                rs2 = pStmt2.executeQuery();
+                rs3 = pStmt3.executeQuery();
+                rs2.next();
+                rs3.next();
+                listPrestamo.add(new Prestamo(rs1.getInt(1),
+                        rs1.getInt(2),
+                        rs1.getInt(3),
+                        rs1.getDate(4).toLocalDate(),
+                        new Socio(rs2.getInt(1), rs2.getString(2), rs2.getString(3)),
+                        new Libro(rs3.getInt(1), rs3.getString(2),rs3.getString(3), rs3.getBoolean(4))));
+            }
+            rs2.close();
+            rs3.close();
         } catch (SQLException sqle) {
             System.err.println("  Error inesperado durante el contacto con la base de datos\n" + sqle.getMessage());
         }

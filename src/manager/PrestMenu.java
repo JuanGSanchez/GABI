@@ -158,6 +158,7 @@ final class PrestMenu {
      */
     private static int[] addPrestamo(Scanner scan, int nPres, int idPres) {
         boolean isValid;
+        boolean isPossible = true;
         boolean repeat;
         int idSoc = 0;
         int idLib = 0;
@@ -226,6 +227,7 @@ final class PrestMenu {
                 }
             } catch (RuntimeException re) {
                 System.err.println(re.getMessage());
+                isPossible = false;
             }
 
             // Comprobar límite de préstamos a socio al final,
@@ -288,12 +290,14 @@ final class PrestMenu {
                 }
             } catch (RuntimeException re) {
                 System.err.println(re.getMessage());
+                isPossible = false;
             }
 
             // Comprobación de disponibilidad de libro al final,
             // por ahorro de conexiones a la base de datos
 
             try {
+                if (!isPossible) throw new RuntimeException("Alguno de los valores introducidos no ha sido reconocido");
                 BiblioDBPrestamo.getInstance().addTB(new Prestamo(nPres + 1, idSoc, idLib));
                 ++nPres;
             } catch (RuntimeException re) {
@@ -316,35 +320,58 @@ final class PrestMenu {
     private static void listPrestamos(Scanner scan) {
         boolean isValid = false;
         int opt;
-        List<Prestamo> arrayPrestamos = new ArrayList<>();
+        List<Prestamo> arrayPrestamos;
 
         System.out.println("    Listado de Préstamos");
         do {
             System.out.println("\nSelecciona ordenación de listado -\n" + searchMenu);
             try {
                 opt = scan.nextInt();
-                arrayPrestamos = BiblioDBPrestamo.getInstance().searchTB();
             } catch (InputMismatchException ime) {
                 opt = -1;
             }
             scan.nextLine();
             switch (opt) {
                 case 1:
+                    System.out.println("\nIntroduce 1 para desplegar más detalles");
+                    if (scan.nextLine().equals("1")) {
+                        arrayPrestamos = BiblioDBPrestamo.getInstance().searchDetailTB();
+                    } else {
+                        arrayPrestamos = BiblioDBPrestamo.getInstance().searchTB();
+                    }
                     System.out.println("Ordenación por ID del préstamo...");
                     arrayPrestamos.stream().sorted(Prestamo::compareTo).forEach(System.out::println);
                     isValid = true;
                     break;
                 case 2:
+                    System.out.println("\nIntroduce 1 para desplegar más detalles");
+                    if (scan.nextLine().equals("1")) {
+                        arrayPrestamos = BiblioDBPrestamo.getInstance().searchDetailTB();
+                    } else {
+                        arrayPrestamos = BiblioDBPrestamo.getInstance().searchTB();
+                    }
                     System.out.println("Ordenación por ID del socio...");
                     arrayPrestamos.stream().sorted(Comparator.comparing(Prestamo::getIdSoc)).forEach(System.out::println);
                     isValid = true;
                     break;
                 case 3:
+                    System.out.println("\nIntroduce 1 para desplegar más detalles");
+                    if (scan.nextLine().equals("1")) {
+                        arrayPrestamos = BiblioDBPrestamo.getInstance().searchDetailTB();
+                    } else {
+                        arrayPrestamos = BiblioDBPrestamo.getInstance().searchTB();
+                    }
                     System.out.println("Ordenación por ID del libro...");
                     arrayPrestamos.stream().sorted(Comparator.comparing(Prestamo::getIdLib)).forEach(System.out::println);
                     isValid = true;
                     break;
                 case 4:
+                    System.out.println("\nIntroduce 1 para desplegar más detalles");
+                    if (scan.nextLine().equals("1")) {
+                        arrayPrestamos = BiblioDBPrestamo.getInstance().searchDetailTB();
+                    } else {
+                        arrayPrestamos = BiblioDBPrestamo.getInstance().searchTB();
+                    }
                     System.out.println("Ordenación por fecha...");
                     arrayPrestamos.stream().sorted(Comparator.comparing(Prestamo::getFechaPres)).forEach(System.out::println);
                     isValid = true;

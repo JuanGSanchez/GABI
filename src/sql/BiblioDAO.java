@@ -42,6 +42,15 @@ public interface BiblioDAO<T> {
     List<T> searchTB();
 
     /**
+     * Método de búsqueda de entradas en la tabla de datos
+     * asociada a la clase T, añadiendo más detalles
+     *
+     * @return Lista de objetos de la clase T, construidos
+     * desde los datos recuperados de la tabla
+     */
+    List<T> searchDetailTB();
+
+    /**
      * Método para eliminar una entrada en la tabla de datos
      * asociada a la clase T
      *

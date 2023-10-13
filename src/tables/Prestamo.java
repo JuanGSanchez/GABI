@@ -73,16 +73,16 @@ public class Prestamo implements Comparable<Prestamo>, Serializable {
      * @param idSoc     ID del socio
      * @param idLib     ID del libro
      * @param fechaPres fecha del préstamo
-     * @param libro     Libro asociado al préstamo
      * @param socio     Socio asociado al préstamo
+     * @param libro     Libro asociado al préstamo
      */
-    public Prestamo(int idPres, int idSoc, int idLib, LocalDate fechaPres, Libro libro, Socio socio) {
+    public Prestamo(int idPres, int idSoc, int idLib, LocalDate fechaPres, Socio socio, Libro libro) {
         this.idPres = idPres;
         this.idSoc = idSoc;
         this.idLib = idLib;
         this.fechaPres = fechaPres;
-        this.libro = libro;
         this.socio = socio;
+        this.libro = libro;
     }
 
     /**
@@ -122,21 +122,21 @@ public class Prestamo implements Comparable<Prestamo>, Serializable {
     }
 
     /**
-     * Método getter de la variable libro
-     *
-     * @return Libro asociado al préstamo
-     */
-    public Libro getLibro() {
-        return libro;
-    }
-
-    /**
      * Método getter de la variable socio
      *
      * @return Socio asociado al préstamo
      */
     public Socio getSocio() {
         return socio;
+    }
+
+    /**
+     * Método getter de la variable libro
+     *
+     * @return Libro asociado al préstamo
+     */
+    public Libro getLibro() {
+        return libro;
     }
 
     /**
@@ -182,7 +182,7 @@ public class Prestamo implements Comparable<Prestamo>, Serializable {
         String desc = this.getClass().getSimpleName() + " " + idPres + ": Libro " + idLib + " a Socio " + idSoc + " el "
                       + fechaPres.format(DateTimeFormatter.ISO_LOCAL_DATE);
         if (libro != null) {
-            desc += "\n\t" + libro + "\n\t" + socio;
+            desc += "\n\t" + socio + "\n\t" + libro;
         }
         return desc;
     }

@@ -204,30 +204,47 @@ final class SocioMenu {
     private static void listSocios(Scanner scan) {
         boolean isValid = false;
         int opt;
-        List<Socio> arraySocios = new ArrayList<>();
+        List<Socio> arraySocios;
 
         System.out.println("    Listado de Socios");
         do {
             System.out.println("\nSelecciona ordenación de listado -\n" + searchMenu);
             try {
                 opt = scan.nextInt();
-                arraySocios = BiblioDBSocio.getInstance().searchTB();
             } catch (InputMismatchException ime) {
                 opt = -1;
             }
             scan.nextLine();
             switch (opt) {
                 case 1:
+                    System.out.println("\nIntroduce 1 para desplegar más detalles");
+                    if (scan.nextLine().equals("1")) {
+                        arraySocios = BiblioDBSocio.getInstance().searchDetailTB();
+                    } else {
+                        arraySocios = BiblioDBSocio.getInstance().searchTB();
+                    }
                     System.out.println("Ordenación por ID...");
                     arraySocios.stream().sorted(Socio::compareTo).forEach(System.out::println);
                     isValid = true;
                     break;
                 case 2:
+                    System.out.println("\nIntroduce 1 para desplegar más detalles");
+                    if (scan.nextLine().equals("1")) {
+                        arraySocios = BiblioDBSocio.getInstance().searchDetailTB();
+                    } else {
+                        arraySocios = BiblioDBSocio.getInstance().searchTB();
+                    }
                     System.out.println("Ordenación por nombre...");
                     arraySocios.stream().sorted(Comparator.comparing(Socio::getNombre).thenComparing(Socio::getApellidos)).forEach(System.out::println);
                     isValid = true;
                     break;
                 case 3:
+                    System.out.println("\nIntroduce 1 para desplegar más detalles");
+                    if (scan.nextLine().equals("1")) {
+                        arraySocios = BiblioDBSocio.getInstance().searchDetailTB();
+                    } else {
+                        arraySocios = BiblioDBSocio.getInstance().searchTB();
+                    }
                     System.out.println("Ordenación por apellidos...");
                     arraySocios.stream().sorted(Comparator.comparing(Socio::getApellidos).thenComparing(Socio::getNombre)).forEach(System.out::println);
                     isValid = true;

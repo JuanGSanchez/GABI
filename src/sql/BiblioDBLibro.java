@@ -137,6 +137,17 @@ public final class BiblioDBLibro implements BiblioDAO<Libro> {
     }
 
     /**
+     * Método para extraer todas las entradas de la tabla de datos Libros;
+     * implementación invisible al no poseer estos objetos mayores detalles
+     *
+     * @return Lista de objetos Libro por cada entrada de la tabla de datos
+     */
+    @Override
+    public List<Libro> searchDetailTB() {
+        return null;
+    }
+
+    /**
      * Método para extraer entradas de la tabla de datos Libros
      * según un fragmento de texto dado para buscar en una de las
      * columnas de texto de la tabla

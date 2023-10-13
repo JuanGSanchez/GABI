@@ -142,8 +142,9 @@ public class Socio implements Comparable<Socio>, Serializable {
         String desc = this.getClass().getSimpleName() + " " + idSoc + ":   " + String.format("%-20s", nombre)
                       + "   " + String.format("%-40s", apellidos);
         if (libroList != null) {
-            desc += "\n\t";
+            if (!libroList.isEmpty()) desc += "\n\t";
             desc += libroList.stream().sorted(Comparator.comparing(Libro::getIdLib)).map(Libro::toString).collect(Collectors.joining("\n\t"));
+            desc += "\n\t " + libroList.size() + " " + (libroList.size() == 1 ? "libro prestado" : "libros prestados") + " en total";
         }
 
         return desc;
