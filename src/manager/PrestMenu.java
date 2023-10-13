@@ -82,8 +82,8 @@ final class PrestMenu {
      * Método del menú principal del gestor de Préstamos, desde el cual
      * se acceden a las acciones disponibles
      *
-     * @param scan Entrada de datos por teclado
-     * @param nPres Número de préstamos en activo dentro de la base de datos
+     * @param scan   Entrada de datos por teclado
+     * @param nPres  Número de préstamos en activo dentro de la base de datos
      * @param idPres Máxima ID de préstamos dentro de la base de datos
      * @return Valores actualizados de nPres y idPres
      */
@@ -151,14 +151,14 @@ final class PrestMenu {
     /**
      * Método para registrar nuevos préstamos en la base de datos
      *
-     * @param scan Entrada de datos por teclado
-     * @param nPres Número de préstamos en activo dentro de la base de datos
+     * @param scan   Entrada de datos por teclado
+     * @param nPres  Número de préstamos en activo dentro de la base de datos
      * @param idPres Máxima ID de préstamos dentro de la base de datos
      * @return Valores actualizados de nPres y idPres
      */
     private static int[] addPrestamo(Scanner scan, int nPres, int idPres) {
         boolean isValid;
-        boolean isPossible = true;
+        boolean isPossible;
         boolean repeat;
         int idSoc = 0;
         int idLib = 0;
@@ -170,134 +170,137 @@ final class PrestMenu {
             isValid = false;
             System.out.println("\n    Nuevo Préstamo\n");
 
-            System.out.println("Introduce socio receptor del préstamo - ");
             do {
-                System.out.println("\n  Selecciona criterio de búsqueda:\n" + searchSocioMenu);
+                System.out.println("Introduce socio receptor del préstamo - ");
+                do {
+                    System.out.println("\n  Selecciona criterio de búsqueda:\n" + searchSocioMenu);
+                    try {
+                        opt = scan.nextInt();
+                    } catch (InputMismatchException ime) {
+                        opt = -1;
+                    }
+                    scan.nextLine();
+                    switch (opt) {
+                        case 1:
+                            System.out.println("Introduce " + searchSocioVar[opt - 1] + " -");
+                            idSoc = scan.nextInt();
+                            scan.nextLine();
+                            isValid = true;
+                            break;
+                        case 2:
+                        case 3:
+                            System.out.println("Introduce " + searchSocioVar[opt - 1] + " -");
+                            fragString = scan.nextLine();
+                            isValid = true;
+                            break;
+                        case 0:
+                            System.out.println("  Volviendo al menú del gestor...");
+                            return new int[]{nPres, idPres};
+                        default:
+                            System.err.println("  Entrada no válida");
+                    }
+                } while (!isValid);
+
                 try {
-                    opt = scan.nextInt();
-                } catch (InputMismatchException ime) {
-                    opt = -1;
-                }
-                scan.nextLine();
-                switch (opt) {
-                    case 1:
-                        System.out.println("Introduce " + searchSocioVar[opt - 1] + " -");
-                        idSoc = scan.nextInt();
-                        scan.nextLine();
-                        isValid = true;
-                        break;
-                    case 2:
-                    case 3:
-                        System.out.println("Introduce " + searchSocioVar[opt - 1] + " -");
-                        fragString = scan.nextLine();
-                        isValid = true;
-                        break;
-                    case 0:
-                        System.out.println("  Volviendo al menú del gestor...");
-                        return new int[]{nPres, idPres};
-                    default:
-                        System.err.println("  Entrada no válida");
-                }
-            } while (!isValid);
-
-            try {
-                if (opt != 1) {
-                    List<Socio> socios = BiblioDBSocio.getInstance().searchTB(opt, fragString);
-                    Set<Integer> idsocs = socios.stream().map(Socio::getIdSoc).collect(Collectors.toSet());
-                    socios.stream().sorted(Socio::compareTo).forEach(System.out::println);
-                    do {
-                        System.out.println("Introduce ID del socio de la lista anterior\n" +
-                                           "(-1 para cancelar operación) -");
-                        try {
-                            ID = scan.nextInt();
-                            if (ID == -1) {
-                                System.out.println("  Operación cancelada, volviendo al menú del gestor...");
-                                return new int[]{nPres, idPres};
-                            } else if (!idsocs.add(ID)) {
-                                idSoc = ID;
-                                isValid = false;
-                            } else {
-                                System.err.println("El ID proporcionado no se encuentra en la lista");
+                    if (opt != 1) {
+                        List<Socio> socios = BiblioDBSocio.getInstance().searchTB(opt, fragString);
+                        Set<Integer> idsocs = socios.stream().map(Socio::getIdSoc).collect(Collectors.toSet());
+                        socios.stream().sorted(Socio::compareTo).forEach(System.out::println);
+                        do {
+                            System.out.println("Introduce ID del socio de la lista anterior\n" +
+                                               "(-1 para cancelar operación):");
+                            try {
+                                ID = scan.nextInt();
+                                if (ID == -1) {
+                                    System.out.println("  Operación cancelada, volviendo al menú del gestor...");
+                                    return new int[]{nPres, idPres};
+                                } else if (!idsocs.add(ID)) {
+                                    idSoc = ID;
+                                    isValid = false;
+                                } else {
+                                    System.err.println("El ID proporcionado no se encuentra en la lista");
+                                }
+                            } catch (InputMismatchException ime) {
+                                System.err.println("Entrada no válida");
                             }
-                        } catch (InputMismatchException ime) {
-                            System.err.println("Entrada no válida");
-                        }
-                        scan.nextLine();
-                    } while (isValid);
+                            scan.nextLine();
+                        } while (isValid);
+                    } else {
+                        BiblioDBSocio.getInstance().searchTB(idSoc);
+                    }
+                    isPossible = true;
+                } catch (RuntimeException re) {
+                    System.err.println(re.getMessage());
+                    isPossible = false;
                 }
-            } catch (RuntimeException re) {
-                System.err.println(re.getMessage());
-                isPossible = false;
-            }
+            } while (!isPossible);
 
-            // Comprobar límite de préstamos a socio al final,
-            // por ahorro de conexiones a la base de datos
-
-            System.out.println("Introduce libro a ser prestado - ");
             do {
-                System.out.println("\nSelecciona criterio de búsqueda -\n" + searchLibroMenu);
+                System.out.println("Introduce libro a ser prestado - ");
+                do {
+                    System.out.println("\nSelecciona criterio de búsqueda:\n" + searchLibroMenu);
+                    try {
+                        opt = scan.nextInt();
+                    } catch (InputMismatchException ime) {
+                        opt = -1;
+                    }
+                    scan.nextLine();
+                    switch (opt) {
+                        case 1:
+                            System.out.println("Introduce " + searchLibroVar[opt - 1] + " -");
+                            idLib = scan.nextInt();
+                            scan.nextLine();
+                            isValid = true;
+                            break;
+                        case 2:
+                        case 3:
+                            System.out.println("Introduce " + searchLibroVar[opt - 1] + " -");
+                            fragString = scan.nextLine();
+                            isValid = true;
+                            break;
+                        case 0:
+                            System.out.println("  Volviendo al menú del gestor...");
+                            return new int[]{nPres, idPres};
+                        default:
+                            System.err.println("  Entrada no válida");
+                    }
+                } while (!isValid);
+
                 try {
-                    opt = scan.nextInt();
-                } catch (InputMismatchException ime) {
-                    opt = -1;
-                }
-                scan.nextLine();
-                switch (opt) {
-                    case 1:
-                        System.out.println("Introduce " + searchLibroVar[opt - 1] + " -");
-                        idLib = scan.nextInt();
-                        scan.nextLine();
-                        isValid = true;
-                        break;
-                    case 2:
-                    case 3:
-                        System.out.println("Introduce " + searchLibroVar[opt - 1] + " -");
-                        fragString = scan.nextLine();
-                        isValid = true;
-                        break;
-                    case 0:
-                        System.out.println("  Volviendo al menú del gestor...");
-                        return new int[]{nPres, idPres};
-                    default:
-                        System.err.println("  Entrada no válida");
-                }
-            } while (!isValid);
-
-            try {
-                if (opt != 1) {
-                    List<Libro> libros = BiblioDBLibro.getInstance().searchTB(opt, fragString);
-                    Set<Integer> idlibs = libros.stream().map(Libro::getIdLib).collect(Collectors.toSet());
-                    libros.stream().sorted(Libro::compareTo).forEach(System.out::println);
-                    do {
-                        System.out.println("Introduce ID del libro de la lista anterior\n" +
-                                           "(-1 para cancelar operación) -");
-                        try {
-                            ID = scan.nextInt();
-                            if (ID == -1) {
-                                System.out.println("  Operación cancelada, volviendo al menú del gestor...");
-                                return new int[]{nPres, idPres};
-                            } else if (!idlibs.add(ID)) {
-                                idLib = ID;
-                                isValid = false;
-                            } else {
-                                System.err.println("El ID proporcionado no se encuentra en la lista");
+                    if (opt != 1) {
+                        List<Libro> libros = BiblioDBLibro.getInstance().searchTB(opt, fragString);
+                        Set<Integer> idlibs = libros.stream().map(Libro::getIdLib).collect(Collectors.toSet());
+                        libros.stream().sorted(Libro::compareTo).forEach(System.out::println);
+                        do {
+                            System.out.println("Introduce ID del libro de la lista anterior\n" +
+                                               "(-1 para cancelar operación):");
+                            try {
+                                ID = scan.nextInt();
+                                if (ID == -1) {
+                                    System.out.println("  Operación cancelada, volviendo al menú del gestor...");
+                                    return new int[]{nPres, idPres};
+                                } else if (!idlibs.add(ID)) {
+                                    idLib = ID;
+                                    isValid = false;
+                                } else {
+                                    System.err.println("El ID proporcionado no se encuentra en la lista");
+                                }
+                            } catch (InputMismatchException ime) {
+                                System.err.println("Entrada no válida");
                             }
-                        } catch (InputMismatchException ime) {
-                            System.err.println("Entrada no válida");
-                        }
-                        scan.nextLine();
-                    } while (isValid);
+                            scan.nextLine();
+                        } while (isValid);
+                    } else {
+                        BiblioDBLibro.getInstance().searchTB(idLib);
+                    }
+                    isPossible = true;
+                } catch (RuntimeException re) {
+                    System.err.println(re.getMessage());
+                    isPossible = false;
                 }
-            } catch (RuntimeException re) {
-                System.err.println(re.getMessage());
-                isPossible = false;
-            }
-
-            // Comprobación de disponibilidad de libro al final,
-            // por ahorro de conexiones a la base de datos
+            } while (!isPossible);
 
             try {
-                if (!isPossible) throw new RuntimeException("Alguno de los valores introducidos no ha sido reconocido");
                 BiblioDBPrestamo.getInstance().addTB(new Prestamo(nPres + 1, idSoc, idLib));
                 ++nPres;
             } catch (RuntimeException re) {
@@ -461,8 +464,8 @@ final class PrestMenu {
     /**
      * Método para retirar préstamos resueltos de la base de datos
      *
-     * @param scan Entrada de datos por teclado
-     * @param nPres Número de préstamos en activo dentro de la base de datos
+     * @param scan   Entrada de datos por teclado
+     * @param nPres  Número de préstamos en activo dentro de la base de datos
      * @param idPres Máxima ID de préstamos dentro de la base de datos
      * @return Valores actualizados de nPres y idPres
      */

@@ -157,7 +157,7 @@ public final class BiblioDBSocio implements BiblioDAO<Socio> {
              ResultSet rs1 = stmt1.executeQuery(query1)) {
             List<Libro> libroList;
             ResultSet rs2 = pStmt2.getResultSet();
-            ResultSet rs3 = pStmt3.getResultSet();
+            ResultSet rs3;
             while (rs1.next()) {
                 libroList = new ArrayList<>();
                 pStmt2.setInt(1, rs1.getInt(1));
@@ -170,6 +170,7 @@ public final class BiblioDBSocio implements BiblioDAO<Socio> {
                             rs3.getString(2),
                             rs3.getString(3),
                             rs3.getBoolean(4)));
+                    rs3.close();
                 }
                 listSocio.add(new Socio(rs1.getInt(1),
                         rs1.getString(2),
@@ -177,7 +178,6 @@ public final class BiblioDBSocio implements BiblioDAO<Socio> {
                         libroList));
             }
             rs2.close();
-            rs3.close();
         } catch (SQLException sqle) {
             System.err.println("  Error inesperado durante el contacto con la base de datos\n" + sqle.getMessage());
         }

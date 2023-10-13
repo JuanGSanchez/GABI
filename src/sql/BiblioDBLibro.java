@@ -127,7 +127,8 @@ public final class BiblioDBLibro implements BiblioDAO<Libro> {
             while (rs.next()) {
                 listLibro.add(new Libro(rs.getInt(1),
                         rs.getString(2),
-                        rs.getString(3)));
+                        rs.getString(3),
+                        rs.getBoolean(4)));
             }
         } catch (SQLException sqle) {
             System.err.println("  Error inesperado durante el contacto con la base de datos\n" + sqle.getMessage());
@@ -167,7 +168,8 @@ public final class BiblioDBLibro implements BiblioDAO<Libro> {
             while (rs.next()) {
                 listLibros.add(new Libro(rs.getInt(1),
                         rs.getString(2),
-                        rs.getString(3)));
+                        rs.getString(3),
+                        rs.getBoolean(4)));
             }
             rs.close();
             if (listLibros.isEmpty()) {
@@ -194,7 +196,10 @@ public final class BiblioDBLibro implements BiblioDAO<Libro> {
             pStmt.setInt(1, ID);
             ResultSet rs = pStmt.executeQuery();
             if (rs.next()) {
-                Libro newLibro = new Libro(ID, rs.getString(2), rs.getString(3), rs.getBoolean(4));
+                Libro newLibro = new Libro(ID,
+                        rs.getString(2),
+                        rs.getString(3),
+                        rs.getBoolean(4));
                 rs.close();
                 return newLibro;
             } else {
@@ -227,6 +232,7 @@ public final class BiblioDBLibro implements BiblioDAO<Libro> {
             ResultSet rs = pStmt1.executeQuery();
             if (rs.next()) {
                 if (rs.getBoolean(1)) {
+                    rs.close();
                     throw new SQLException("El libro se encuentra prestado aún");
                 }
                 rs.close();

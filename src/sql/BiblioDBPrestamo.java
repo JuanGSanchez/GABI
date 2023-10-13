@@ -88,38 +88,50 @@ public class BiblioDBPrestamo implements BiblioDAO<Prestamo> {
     @Override
     public void addTB(Prestamo prestamo) {
         String query1 = "SELECT COUNT(*) FROM prestamos WHERE idsoc = ?";
-        String query2 = "UPDATE libros SET prestado = ? WHERE idlib = ?";
-        String query3 = "INSERT INTO prestamos VALUES (?,?,?,?)";
+        String query2 = "SELECT prestado FROM libros WHERE idlib = ?";
+        String query3 = "UPDATE libros SET prestado = ? WHERE idlib = ?";
+        String query4 = "INSERT INTO prestamos VALUES (?,?,?,?)";
 
         try (Connection con = DriverManager.getConnection(url);
              PreparedStatement pStmt1 = con.prepareStatement(query1);
              PreparedStatement pStmt2 = con.prepareStatement(query2);
-             PreparedStatement pStmt3 = con.prepareStatement(query3)) {
+             PreparedStatement pStmt3 = con.prepareStatement(query3);
+             PreparedStatement pStmt4 = con.prepareStatement(query4)) {
             pStmt1.setInt(1, prestamo.getIdSoc());
             ResultSet rs = pStmt1.executeQuery();
             rs.next();
-            if (rs.getInt(1) == 10) {
+            if (rs.getInt(1) >= 10) {
                 rs.close();
                 throw new SQLException("Límite de préstamos alcanzado por el socio");
             }
             rs.close();
 
-            pStmt2.setBoolean(1, true);
-            pStmt2.setInt(2, prestamo.getIdLib());
-            int updates = pStmt2.executeUpdate();
-            if (updates == 0) {
-                throw new SQLException("Libro ya prestado o inexistente");
-            } else if (updates > 1) {
-                pStmt2.setBoolean(1, false);
-                pStmt2.executeUpdate();
+            pStmt2.setInt(1, prestamo.getIdLib());
+            ResultSet rs2 = pStmt2.executeQuery();
+            if (rs2.next()) {
+                if (rs2.getBoolean(1)) {
+                    rs2.close();
+                    throw new SQLException("Libro ya prestado");
+                }
+            } else {
+                rs2.close();
+                throw new SQLException("Libro inexistente");
+            }
+            rs2.close();
+
+            pStmt3.setBoolean(1, true);
+            pStmt3.setInt(2, prestamo.getIdLib());
+            if (pStmt3.executeUpdate() > 1) {
+                pStmt3.setBoolean(1, false);
+                pStmt3.executeUpdate();
                 throw new SQLException("Error inesperado en la localización del libro");
             }
 
-            pStmt3.setInt(1, prestamo.getIdPres());
-            pStmt3.setInt(2, prestamo.getIdSoc());
-            pStmt3.setInt(3, prestamo.getIdLib());
-            pStmt3.setDate(4, Date.valueOf(prestamo.getFechaPres()));
-            if (pStmt3.executeUpdate() == 1) {
+            pStmt4.setInt(1, prestamo.getIdPres());
+            pStmt4.setInt(2, prestamo.getIdSoc());
+            pStmt4.setInt(3, prestamo.getIdLib());
+            pStmt4.setDate(4, Date.valueOf(prestamo.getFechaPres()));
+            if (pStmt4.executeUpdate() == 1) {
                 System.out.println("  nuevo préstamo registrado con éxito.");
             } else throw new SQLException("Ha habido un problema inesperado\nal intentar registrar el préstamo");
 
@@ -186,7 +198,7 @@ public class BiblioDBPrestamo implements BiblioDAO<Prestamo> {
                         rs1.getInt(3),
                         rs1.getDate(4).toLocalDate(),
                         new Socio(rs2.getInt(1), rs2.getString(2), rs2.getString(3)),
-                        new Libro(rs3.getInt(1), rs3.getString(2),rs3.getString(3), rs3.getBoolean(4))));
+                        new Libro(rs3.getInt(1), rs3.getString(2), rs3.getString(3), rs3.getBoolean(4))));
             }
             rs2.close();
             rs3.close();
