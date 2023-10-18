@@ -6,7 +6,9 @@ package manager;
 import sql.BiblioDBLibro;
 import sql.BiblioDBPrestamo;
 import sql.BiblioDBSocio;
+import sql.UserDerby;
 
+import java.util.IllegalFormatException;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
@@ -69,11 +71,32 @@ public final class BiblioMenu {
      * @param args Lista de argumentos String por consola (sin uso actualmente)
      */
     public static void main(String[] args) {
+        boolean isUser = false;
         boolean checkMenu = true;
         int optionMenu;
         int[] count;
+        String name;
+        String password;
 
         System.out.println("\t\t|- G.A.B.I -|\n(Gestor Autónomo de Biblioteca Interactivo)");
+
+        do {
+            try {
+                System.out.print("\nIntroduce nombre de usuario: ");
+                name = scanMenu.nextLine();
+//                Console console = System.console();
+//                char[] password = console.readPassword("\nIntroduce contraseña: ");
+//                Arrays.fill(password, 'x');
+                System.out.print("\nIntroduce contraseña: ");
+                password = scanMenu.nextLine();
+                UserDerby.getInstance().tryUser(name, password.toCharArray());
+                isUser = true;
+            } catch (IllegalFormatException ife) {
+                System.err.println("\nError en la lectura por consola\n");
+            } catch (RuntimeException re) {
+                System.err.println("\nError en el acceso a la base de datos: " + re.getMessage() + "\n");
+            }
+        } while (!isUser);
 
         do {
             count = BiblioDBLibro.getInstance().countTB();

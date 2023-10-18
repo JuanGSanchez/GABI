@@ -6,9 +6,13 @@ package sql;
 import tables.Libro;
 import tables.Socio;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 /**
  * Clase principal de métodos de conexión a la base de datos
@@ -26,20 +30,38 @@ public final class BiblioDBSocio implements BiblioDAO<Socio> {
     /**
      * URL de la base de datos utilizada por este código
      */
-    private final String url = "jdbc:derby://localhost:1527/biblioteca;create=true";
+    private final String url;
     /**
      * Nombre de usuario para el acceso a la base de datos
      */
-    private final String user = "root";
+    private final String user = "admin";
     /**
      * Contraseña de cuenta para el acceso a la base de datos
      */
-    private final String password = "root";
+    private final String password = "1234";
+    /**
+     * Lista de propiedades del programa
+     */
+    private final Properties configProps;
+    /**
+     * Ruta completa de la tabla de datos manejada en esta clase
+     */
+    private final String tableName;
 
     /**
      * Constructor privado de la clase
      */
     private BiblioDBSocio() {
+        configProps = new Properties();
+        try (FileInputStream fis = new FileInputStream("src/configuration.properties")) {
+            configProps.load(fis);
+        } catch (FileNotFoundException ffe) {
+            System.err.println("  Error, no se encontró el archivo de propiedades del programa");
+        } catch (IOException ioe) {
+            System.err.println("  Error leyendo las propiedades del programa: " + ioe.getMessage());
+        }
+        url = configProps.getProperty("database-url") + "/" + configProps.getProperty("database");
+        tableName = configProps.getProperty("database-name") + "." + configProps.getProperty("database-table-2");
     }
 
     /**
@@ -58,10 +80,10 @@ public final class BiblioDBSocio implements BiblioDAO<Socio> {
      */
     @Override
     public int[] countTB() {
-        String query1 = "SELECT COUNT(*) FROM socios";
-        String query2 = "SELECT idsoc FROM socios WHERE idsoc = (SELECT max(idsoc) FROM socios)";
+        String query1 = "SELECT COUNT(*) FROM " + tableName;
+        String query2 = String.format("SELECT idsoc FROM %s WHERE idsoc = (SELECT max(idsoc) FROM %s)", tableName, tableName);
 
-        try (Connection con = DriverManager.getConnection(url);
+        try (Connection con = DriverManager.getConnection(url, user, password);
              Statement stmt1 = con.createStatement();
              Statement stmt2 = con.createStatement();
              ResultSet rs1 = stmt1.executeQuery(query1);
@@ -85,10 +107,10 @@ public final class BiblioDBSocio implements BiblioDAO<Socio> {
      */
     @Override
     public void addTB(Socio socio) {
-        String query1 = "SELECT * FROM socios WHERE LOWER(nombre) = LOWER(?) AND LOWER(apellidos) = LOWER(?)";
-        String query2 = "INSERT INTO socios VALUES (?,?,?)";
+        String query1 = "SELECT * FROM " + tableName + " WHERE LOWER(nombre) = LOWER(?) AND LOWER(apellidos) = LOWER(?)";
+        String query2 = "INSERT INTO " + tableName + " VALUES (?,?,?)";
 
-        try (Connection con = DriverManager.getConnection(url);
+        try (Connection con = DriverManager.getConnection(url, user, password);
              PreparedStatement pStmt1 = con.prepareStatement(query1);
              PreparedStatement pStmt2 = con.prepareStatement(query2)) {
             pStmt1.setString(1, socio.getNombre());
@@ -119,10 +141,10 @@ public final class BiblioDBSocio implements BiblioDAO<Socio> {
      */
     @Override
     public List<Socio> searchTB() {
-        String query = "SELECT * FROM socios";
+        String query = "SELECT * FROM " + tableName;
         List<Socio> listSocio = new ArrayList<>();
 
-        try (Connection con = DriverManager.getConnection(url);
+        try (Connection con = DriverManager.getConnection(url, user, password);
              Statement stmt = con.createStatement();
              ResultSet rs = stmt.executeQuery(query)) {
             while (rs.next()) {
@@ -145,12 +167,12 @@ public final class BiblioDBSocio implements BiblioDAO<Socio> {
      */
     @Override
     public List<Socio> searchDetailTB() {
-        String query1 = "SELECT * FROM socios";
-        String query2 = "SELECT idlib FROM prestamos WHERE idsoc = ?";
-        String query3 = "SELECT * FROM libros WHERE idlib = ?";
+        String query1 = "SELECT * FROM " + tableName;
+        String query2 = "SELECT idlib FROM " + configProps.getProperty("database-name") + "." + configProps.getProperty("database-table-3") + " WHERE idsoc = ?";
+        String query3 = "SELECT * FROM " + configProps.getProperty("database-name") + "." + configProps.getProperty("database-table-1") + " WHERE idlib = ?";
         List<Socio> listSocio = new ArrayList<>();
 
-        try (Connection con = DriverManager.getConnection(url);
+        try (Connection con = DriverManager.getConnection(url, user, password);
              Statement stmt1 = con.createStatement();
              PreparedStatement pStmt2 = con.prepareStatement(query2);
              PreparedStatement pStmt3 = con.prepareStatement(query3);
@@ -195,9 +217,9 @@ public final class BiblioDBSocio implements BiblioDAO<Socio> {
      * @return Lista de objetos Socio que hayan salido de la búsqueda
      */
     public List<Socio> searchTB(int opt, String seed) {
-        String query = "SELECT * FROM socios WHERE LOWER(" + (opt == 2 ? "nombre" : "apellidos") + ") LIKE LOWER(?)";
+        String query = "SELECT * FROM " + tableName + " WHERE LOWER(" + (opt == 2 ? "nombre" : "apellidos") + ") LIKE LOWER(?)";
 
-        try (Connection con = DriverManager.getConnection(url);
+        try (Connection con = DriverManager.getConnection(url, user, password);
              PreparedStatement pStmt = con.prepareStatement(query)) {
             pStmt.setString(1, "%" + seed + "%");
             List<Socio> listSocio = new ArrayList<>();
@@ -225,9 +247,9 @@ public final class BiblioDBSocio implements BiblioDAO<Socio> {
      * @return Objeto Socio con los datos de la entrada encontrada
      */
     public Socio searchTB(int ID) {
-        String query = "SELECT * FROM socios WHERE idsoc = ?";
+        String query = "SELECT * FROM " + tableName + " WHERE idsoc = ?";
 
-        try (Connection con = DriverManager.getConnection(url);
+        try (Connection con = DriverManager.getConnection(url, user, password);
              PreparedStatement pStmt = con.prepareStatement(query)) {
             pStmt.setInt(1, ID);
             ResultSet rs = pStmt.executeQuery();
@@ -253,11 +275,11 @@ public final class BiblioDBSocio implements BiblioDAO<Socio> {
      */
     @Override
     public int deleteTB(int ID) {
-        String query1 = "SELECT * FROM prestamos where idsoc = ?";
-        String query2 = "DELETE FROM socios WHERE idsoc = ?";
-        String query3 = "SELECT idsoc FROM socios WHERE idsoc = (SELECT max(idsoc) FROM socios)";
+        String query1 = "SELECT * FROM " + configProps.getProperty("database-name") + "." + configProps.getProperty("database-table-3") + " WHERE idsoc = ?";
+        String query2 = "DELETE FROM " + tableName + " WHERE idsoc = ?";
+        String query3 = String.format("SELECT idsoc FROM %s WHERE idsoc = (SELECT max(idsoc) FROM %s)", tableName, tableName);
 
-        try (Connection con = DriverManager.getConnection(url);
+        try (Connection con = DriverManager.getConnection(url, user, password);
              PreparedStatement pStmt1 = con.prepareStatement(query1);
              PreparedStatement pStmt2 = con.prepareStatement(query2);
              Statement stmt3 = con.createStatement()) {

@@ -7,10 +7,14 @@ import tables.Libro;
 import tables.Prestamo;
 import tables.Socio;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 /**
  * Clase principal de métodos de conexión a la base de datos
@@ -28,20 +32,38 @@ public class BiblioDBPrestamo implements BiblioDAO<Prestamo> {
     /**
      * URL de la base de datos utilizada por este código
      */
-    private final String url = "jdbc:derby://localhost:1527/biblioteca;create=true";
+    private final String url;
     /**
      * Nombre de usuario para el acceso a la base de datos
      */
-    private final String user = "root";
+    private final String user = "admin";
     /**
      * Contraseña de cuenta para el acceso a la base de datos
      */
-    private final String password = "root";
+    private final String password = "1234";
+    /**
+     * Lista de propiedades del programa
+     */
+    private final Properties configProps;
+    /**
+     * Ruta completa de la tabla de datos manejada en esta clase
+     */
+    private final String tableName;
 
     /**
      * Constructor privado de la clase
      */
     private BiblioDBPrestamo() {
+        configProps = new Properties();
+        try (FileInputStream fis = new FileInputStream("src/configuration.properties")) {
+            configProps.load(fis);
+        } catch (FileNotFoundException ffe) {
+            System.err.println("  Error, no se encontró el archivo de propiedades del programa");
+        } catch (IOException ioe) {
+            System.err.println("  Error leyendo las propiedades del programa: " + ioe.getMessage());
+        }
+        url = configProps.getProperty("database-url") + "/" + configProps.getProperty("database");
+        tableName = configProps.getProperty("database-name") + "." + configProps.getProperty("database-table-3");
     }
 
     /**
@@ -60,10 +82,10 @@ public class BiblioDBPrestamo implements BiblioDAO<Prestamo> {
      */
     @Override
     public int[] countTB() {
-        String query1 = "SELECT COUNT(*) FROM prestamos";
-        String query2 = "SELECT idpres FROM prestamos WHERE idpres = (SELECT max(idpres) FROM prestamos)";
+        String query1 = "SELECT COUNT(*) FROM " + tableName;
+        String query2 = String.format("SELECT idpres FROM %s WHERE idpres = (SELECT max(idpres) FROM %s)", tableName, tableName);
 
-        try (Connection con = DriverManager.getConnection(url);
+        try (Connection con = DriverManager.getConnection(url, user, password);
              Statement stmt1 = con.createStatement();
              Statement stmt2 = con.createStatement();
              ResultSet rs1 = stmt1.executeQuery(query1);
@@ -87,12 +109,12 @@ public class BiblioDBPrestamo implements BiblioDAO<Prestamo> {
      */
     @Override
     public void addTB(Prestamo prestamo) {
-        String query1 = "SELECT COUNT(*) FROM prestamos WHERE idsoc = ?";
-        String query2 = "SELECT prestado FROM libros WHERE idlib = ?";
-        String query3 = "UPDATE libros SET prestado = ? WHERE idlib = ?";
-        String query4 = "INSERT INTO prestamos VALUES (?,?,?,?)";
+        String query1 = "SELECT COUNT(*) FROM " + tableName + " WHERE idsoc = ?";
+        String query2 = "SELECT prestado FROM " + configProps.getProperty("database-name") + "." + configProps.getProperty("database-table-1") + " WHERE idlib = ?";
+        String query3 = "UPDATE " + configProps.getProperty("database-name") + "." + configProps.getProperty("database-table-1") + " SET prestado = ? WHERE idlib = ?";
+        String query4 = "INSERT INTO " + tableName + " VALUES (?,?,?,?)";
 
-        try (Connection con = DriverManager.getConnection(url);
+        try (Connection con = DriverManager.getConnection(url, user, password);
              PreparedStatement pStmt1 = con.prepareStatement(query1);
              PreparedStatement pStmt2 = con.prepareStatement(query2);
              PreparedStatement pStmt3 = con.prepareStatement(query3);
@@ -147,10 +169,10 @@ public class BiblioDBPrestamo implements BiblioDAO<Prestamo> {
      */
     @Override
     public List<Prestamo> searchTB() {
-        String query = "SELECT * FROM prestamos";
+        String query = "SELECT * FROM " + tableName;
         List<Prestamo> listPrestamo = new ArrayList<>();
 
-        try (Connection con = DriverManager.getConnection(url);
+        try (Connection con = DriverManager.getConnection(url, user, password);
              Statement stmt = con.createStatement();
              ResultSet rs = stmt.executeQuery(query)) {
             while (rs.next()) {
@@ -174,12 +196,12 @@ public class BiblioDBPrestamo implements BiblioDAO<Prestamo> {
      */
     @Override
     public List<Prestamo> searchDetailTB() {
-        String query1 = "SELECT * FROM prestamos";
-        String query2 = "SELECT * FROM socios WHERE idsoc = ?";
-        String query3 = "SELECT * FROM libros WHERE idlib = ?";
+        String query1 = "SELECT * FROM " + tableName;
+        String query2 = "SELECT * FROM " + configProps.getProperty("database-name") + "." + configProps.getProperty("database-table-2") + " WHERE idsoc = ?";
+        String query3 = "SELECT * FROM " + configProps.getProperty("database-name") + "." + configProps.getProperty("database-table-1") + " WHERE idlib = ?";
         List<Prestamo> listPrestamo = new ArrayList<>();
 
-        try (Connection con = DriverManager.getConnection(url);
+        try (Connection con = DriverManager.getConnection(url, user, password);
              Statement stmt1 = con.createStatement();
              PreparedStatement pStmt2 = con.prepareStatement(query2);
              PreparedStatement pStmt3 = con.prepareStatement(query3);
@@ -218,9 +240,9 @@ public class BiblioDBPrestamo implements BiblioDAO<Prestamo> {
      * @return Objeto Préstamo con la entrada que haya salido de la búsqueda
      */
     public List<Prestamo> searchTB(int opt, int ID) {
-        String query = "SELECT * FROM prestamos WHERE " + (opt == 1 ? "idpres" : opt == 2 ? "idsoc" : "idlib") + " = ?";
+        String query = "SELECT * FROM " + tableName + " WHERE " + (opt == 1 ? "idpres" : opt == 2 ? "idsoc" : "idlib") + " = ?";
 
-        try (Connection con = DriverManager.getConnection(url);
+        try (Connection con = DriverManager.getConnection(url, user, password);
              PreparedStatement pStmt = con.prepareStatement(query)) {
             pStmt.setInt(1, ID);
             List<Prestamo> listPrestamos = new ArrayList<>();
@@ -249,9 +271,9 @@ public class BiblioDBPrestamo implements BiblioDAO<Prestamo> {
      * @return Lista de objetos Préstamo de las entradas resultantes de la búsqueda
      */
     public List<Prestamo> searchTB(LocalDate date) {
-        String query = "SELECT * FROM prestamos WHERE fechapres = ?";
+        String query = "SELECT * FROM " + tableName + " WHERE fechapres = ?";
 
-        try (Connection con = DriverManager.getConnection(url);
+        try (Connection con = DriverManager.getConnection(url, user, password);
              PreparedStatement pStmt = con.prepareStatement(query)) {
             pStmt.setDate(1, Date.valueOf(date));
             List<Prestamo> listPrestamos = new ArrayList<>();
@@ -281,12 +303,12 @@ public class BiblioDBPrestamo implements BiblioDAO<Prestamo> {
      */
     @Override
     public int deleteTB(int ID) {
-        String query1 = "SELECT idlib FROM prestamos WHERE idpres = ?";
-        String query2 = "UPDATE libros SET prestado = ? WHERE idlib = ?";
-        String query3 = "DELETE FROM prestamos WHERE idpres = ?";
-        String query4 = "SELECT idpres FROM prestamos WHERE idpres = (SELECT max(idpres) FROM prestamos)";
+        String query1 = "SELECT idlib FROM " + tableName + " WHERE idpres = ?";
+        String query2 = "UPDATE " + configProps.getProperty("database-name") + "." + configProps.getProperty("database-table-1") + " SET prestado = ? WHERE idlib = ?";
+        String query3 = "DELETE FROM " + tableName + " WHERE idpres = ?";
+        String query4 = String.format("SELECT idpres FROM %s WHERE idpres = (SELECT max(idpres) FROM %s)", tableName, tableName);
 
-        try (Connection con = DriverManager.getConnection(url);
+        try (Connection con = DriverManager.getConnection(url, user, password);
              PreparedStatement pStmt1 = con.prepareStatement(query1);
              PreparedStatement pStmt2 = con.prepareStatement(query2);
              PreparedStatement pStmt3 = con.prepareStatement(query3);

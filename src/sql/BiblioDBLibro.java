@@ -5,9 +5,13 @@ package sql;
 
 import tables.Libro;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 /**
  * Clase principal de métodos de conexión a la base de datos
@@ -25,20 +29,38 @@ public final class BiblioDBLibro implements BiblioDAO<Libro> {
     /**
      * URL de la base de datos utilizada por este código
      */
-    private final String url = "jdbc:derby://localhost:1527/biblioteca;create=true";
+    private final String url;
     /**
      * Nombre de usuario para el acceso a la base de datos
      */
-    private final String user = "root";
+    private final String user = "admin";
     /**
      * Contraseña de cuenta para el acceso a la base de datos
      */
-    private final String password = "root";
+    private final String password = "1234";
+    /**
+     * Lista de propiedades del programa
+     */
+    private final Properties configProps;
+    /**
+     * Ruta completa de la tabla de datos manejada en esta clase
+     */
+    private final String tableName;
 
     /**
      * Constructor privado de la clase
      */
     private BiblioDBLibro() {
+        configProps = new Properties();
+        try (FileInputStream fis = new FileInputStream("src/configuration.properties")) {
+            configProps.load(fis);
+        } catch (FileNotFoundException ffe) {
+            System.err.println("  Error, no se encontró el archivo de propiedades del programa");
+        } catch (IOException ioe) {
+            System.err.println("  Error leyendo las propiedades del programa: " + ioe.getMessage());
+        }
+        url = configProps.getProperty("database-url") + "/" + configProps.getProperty("database");
+        tableName = configProps.getProperty("database-name") + "." + configProps.getProperty("database-table-1");
     }
 
     /**
@@ -57,10 +79,10 @@ public final class BiblioDBLibro implements BiblioDAO<Libro> {
      */
     @Override
     public int[] countTB() {
-        String query1 = "SELECT COUNT(*) FROM libros";
-        String query2 = "SELECT idlib FROM libros WHERE idlib = (SELECT max(idlib) FROM libros)";
+        String query1 = "SELECT COUNT(*) FROM " + tableName;
+        String query2 = String.format("SELECT idlib FROM %s WHERE idlib = (SELECT max(idlib) FROM %s)", tableName, tableName);
 
-        try (Connection con = DriverManager.getConnection(url);
+        try (Connection con = DriverManager.getConnection(url, user, password);
              Statement stmt1 = con.createStatement();
              Statement stmt2 = con.createStatement();
              ResultSet rs1 = stmt1.executeQuery(query1);
@@ -84,10 +106,10 @@ public final class BiblioDBLibro implements BiblioDAO<Libro> {
      */
     @Override
     public void addTB(Libro libro) {
-        String query1 = "SELECT * FROM libros WHERE LOWER(titulo) = LOWER(?) AND LOWER(autor) = LOWER(?)";
-        String query2 = "INSERT INTO libros VALUES (?,?,?,FALSE)";
+        String query1 = "SELECT * FROM " + tableName + " WHERE LOWER(titulo) = LOWER(?) AND LOWER(autor) = LOWER(?)";
+        String query2 = "INSERT INTO " + tableName + " VALUES (?,?,?,FALSE)";
 
-        try (Connection con = DriverManager.getConnection(url);
+        try (Connection con = DriverManager.getConnection(url, user, password);
              PreparedStatement pStmt1 = con.prepareStatement(query1);
              PreparedStatement pStmt2 = con.prepareStatement(query2)) {
             pStmt1.setString(1, libro.getTitulo());
@@ -118,10 +140,10 @@ public final class BiblioDBLibro implements BiblioDAO<Libro> {
      */
     @Override
     public List<Libro> searchTB() {
-        String query = "SELECT * FROM libros";
+        String query = "SELECT * FROM " + tableName;
         List<Libro> listLibro = new ArrayList<>();
 
-        try (Connection con = DriverManager.getConnection(url);
+        try (Connection con = DriverManager.getConnection(url, user, password);
              Statement stmt = con.createStatement();
              ResultSet rs = stmt.executeQuery(query)) {
             while (rs.next()) {
@@ -158,9 +180,9 @@ public final class BiblioDBLibro implements BiblioDAO<Libro> {
      * @return Lista de objetos Libro que hayan salido de la búsqueda
      */
     public List<Libro> searchTB(int opt, String seed) {
-        String query = "SELECT * FROM libros WHERE LOWER(" + (opt == 2 ? "titulo" : "autor") + ") LIKE LOWER(?)";
+        String query = "SELECT * FROM " + tableName + " WHERE LOWER(" + (opt == 2 ? "titulo" : "autor") + ") LIKE LOWER(?)";
 
-        try (Connection con = DriverManager.getConnection(url);
+        try (Connection con = DriverManager.getConnection(url, user, password);
              PreparedStatement pStmt = con.prepareStatement(query)) {
             pStmt.setString(1, "%" + seed + "%");
             List<Libro> listLibros = new ArrayList<>();
@@ -189,9 +211,9 @@ public final class BiblioDBLibro implements BiblioDAO<Libro> {
      * @return Objeto Libro con los datos de la entrada encontrada
      */
     public Libro searchTB(int ID) {
-        String query = "SELECT * FROM libros WHERE idlib = ?";
+        String query = "SELECT * FROM " + tableName + " WHERE idlib = ?";
 
-        try (Connection con = DriverManager.getConnection(url);
+        try (Connection con = DriverManager.getConnection(url, user, password);
              PreparedStatement pStmt = con.prepareStatement(query)) {
             pStmt.setInt(1, ID);
             ResultSet rs = pStmt.executeQuery();
@@ -220,11 +242,11 @@ public final class BiblioDBLibro implements BiblioDAO<Libro> {
      */
     @Override
     public int deleteTB(int ID) {
-        String query1 = "SELECT prestado FROM libros WHERE idlib = ?";
-        String query2 = "DELETE FROM libros WHERE idlib = ?";
-        String query3 = "SELECT idlib FROM libros WHERE idlib = (SELECT max(idlib) FROM libros)";
+        String query1 = "SELECT prestado FROM " + tableName + " WHERE idlib = ?";
+        String query2 = "DELETE FROM " + tableName + " WHERE idlib = ?";
+        String query3 = String.format("SELECT idlib FROM %s WHERE idlib = (SELECT max(idlib) FROM %s)", tableName, tableName);
 
-        try (Connection con = DriverManager.getConnection(url);
+        try (Connection con = DriverManager.getConnection(url, user, password);
              PreparedStatement pStmt1 = con.prepareStatement(query1);
              PreparedStatement pStmt2 = con.prepareStatement(query2);
              Statement stmt3 = con.createStatement()) {
