@@ -3,9 +3,9 @@
  */
 package manager;
 
-import sql.BiblioDBLibro;
-import sql.BiblioDBPrestamo;
-import sql.BiblioDBSocio;
+import sql.reservoirs.BiblioDBLibro;
+import sql.reservoirs.BiblioDBPrestamo;
+import sql.reservoirs.BiblioDBSocio;
 import tables.Libro;
 import tables.Prestamo;
 import tables.Socio;
@@ -527,15 +527,14 @@ final class PrestMenu {
             } catch (InputMismatchException ime) {
                 optionMenu = -1;
             }
+            scan.nextLine();
             switch (optionMenu) {
                 case 1:
-                    scan.nextLine();
                     count = addPrestamo(scan, nPres, idPres);
                     nPres = count[0];
                     idPres = count[1];
                     break;
                 case 2:
-                    scan.nextLine();
                     if (nPres == 0) {
                         System.err.println("Error, no hay lista de préstamos disponible");
                     } else {
@@ -544,7 +543,6 @@ final class PrestMenu {
                     }
                     break;
                 case 3:
-                    scan.nextLine();
                     if (nPres == 0) {
                         System.err.println("Error, no hay lista de préstamos disponible");
                     } else {
@@ -552,7 +550,6 @@ final class PrestMenu {
                     }
                     break;
                 case 4:
-                    scan.nextLine();
                     if (nPres == 0) {
                         System.err.println("Error, no hay lista de préstamos disponible");
                     } else {
@@ -562,13 +559,11 @@ final class PrestMenu {
                     }
                     break;
                 case 0:
-                    scan.nextLine();
                     System.out.println("Volviendo al menú principal...");
                     checkMenu = false;
                     break;
                 default:
                     System.err.println("Entrada no válida");
-                    scan.nextLine();
             }
         } while (checkMenu);
 

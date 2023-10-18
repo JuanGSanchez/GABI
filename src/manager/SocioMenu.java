@@ -3,7 +3,7 @@
  */
 package manager;
 
-import sql.BiblioDBSocio;
+import sql.reservoirs.BiblioDBSocio;
 import tables.Socio;
 
 import java.util.*;
@@ -369,15 +369,14 @@ final class SocioMenu {
             } catch (InputMismatchException ime) {
                 optionMenu = -1;
             }
+            scan.nextLine();
             switch (optionMenu) {
                 case 1:
-                    scan.nextLine();
                     count = addSocio(scan, nSoc, idSoc);
                     nSoc = count[0];
                     idSoc = count[1];
                     break;
                 case 2:
-                    scan.nextLine();
                     if (nSoc == 0) {
                         System.err.println("Error, no hay lista de socios disponible");
                     } else {
@@ -386,7 +385,6 @@ final class SocioMenu {
                     }
                     break;
                 case 3:
-                    scan.nextLine();
                     if (nSoc == 0) {
                         System.err.println("Error, no hay lista de socios disponible");
                     } else {
@@ -394,7 +392,6 @@ final class SocioMenu {
                     }
                     break;
                 case 4:
-                    scan.nextLine();
                     if (nSoc == 0) {
                         System.err.println("Error, no hay lista de socios disponible");
                     } else {
@@ -404,13 +401,11 @@ final class SocioMenu {
                     }
                     break;
                 case 0:
-                    scan.nextLine();
                     System.out.println("Volviendo al menú principal...");
                     checkMenu = false;
                     break;
                 default:
                     System.err.println("Entrada no válida");
-                    scan.nextLine();
             }
         } while (checkMenu);
 

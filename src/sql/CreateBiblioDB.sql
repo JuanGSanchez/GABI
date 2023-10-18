@@ -3,9 +3,16 @@
 DROP TABLE prestamos;
 DROP TABLE libros;
 DROP TABLE socios;
+DROP TABLE usuarios;
 DROP SCHEMA admin RESTRICT;
 
 CREATE SCHEMA admin;
+
+CREATE TABLE admin.usuarios(
+    iduser INTEGER NOT NULL,
+    nombre VARCHAR(20),
+    PRIMARY KEY (iduser)
+);
 
 CREATE TABLE admin.libros (
     idlib INTEGER NOT NULL,

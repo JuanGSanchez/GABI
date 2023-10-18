@@ -3,12 +3,16 @@
  */
 package manager;
 
-import sql.BiblioDBLibro;
-import sql.BiblioDBPrestamo;
-import sql.BiblioDBSocio;
-import sql.UserDerby;
+import sql.reservoirs.BiblioDBLibro;
+import sql.reservoirs.BiblioDBPrestamo;
+import sql.reservoirs.BiblioDBSocio;
+import sql.users.UserDerby;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.InputMismatchException;
+import java.util.Properties;
 import java.util.Scanner;
 
 /**
@@ -24,14 +28,31 @@ public final class BiblioMenu {
      */
     private static final Scanner scanMenu = new Scanner(System.in);
     /**
-     * Variable para almacenar aparte el texto del menú principal
+     * Lista de propiedades comunes del programa
      */
-    private static final String mainMenu = """
+    private static final Properties configProps = new Properties();
+    /**
+     * Variable para almacenar aparte el texto del menú principal,
+     * versión para usuarios
+     */
+    private static final String mainMenu1 = """
                             
             Seleccione una de las opciones:
               (1) Gestor de Libros
               (2) Gestor de Socios
               (3) Gestor de Préstamos
+              (0) Salir del sistema""";
+    /**
+     * Variable para almacenar aparte el texto del menú principal,
+     * versión para el administrador del programa
+     */
+    private static final String mainMenu2 = """
+                            
+            Seleccione una de las opciones:
+              (1) Gestor de Libros
+              (2) Gestor de Socios
+              (3) Gestor de Préstamos
+              (4) Gestor de Usuarios
               (0) Salir del sistema""";
     /**
      * Número de libros guardados dentro de la base de datos
@@ -62,6 +83,13 @@ public final class BiblioMenu {
      * Constructor privado de la clase para evitar instancias
      */
     private BiblioMenu() {
+        try (FileInputStream fis = new FileInputStream("src/configuration.properties")) {
+            configProps.load(fis);
+        } catch (FileNotFoundException ffe) {
+            System.err.println("  Error, no se encontró el archivo de propiedades del programa");
+        } catch (IOException ioe) {
+            System.err.println("  Error leyendo las propiedades del programa: " + ioe.getMessage());
+        }
     }
 
     /**
@@ -73,6 +101,8 @@ public final class BiblioMenu {
         boolean repeat = true;
         String name = null;
         String password = null;
+
+        new BiblioMenu();
 
         do {
             System.out.println("\t\t|- G.A.B.I -|\n(Gestor Autónomo de Biblioteca Interactivo)");
@@ -188,39 +218,44 @@ public final class BiblioMenu {
             }
             System.out.printf("\nHay %d libros, %d socios y %d préstamos registrados actualmente\n", nLibros, nSocios, nPrestamos);
 
-            System.out.println(mainMenu);
+            System.out.println(name.equals(configProps.getProperty("database-name")) ? mainMenu2 : mainMenu1);
+
             try {
                 optionMenu = scanMenu.nextInt();
             } catch (InputMismatchException ime) {
                 optionMenu = -1;
             }
+            scanMenu.nextLine();
             switch (optionMenu) {
                 case 1:
-                    scanMenu.nextLine();
                     count = lMenu.seleccionMenu(scanMenu, nLibros, idLibros);
                     nLibros = count[0];
                     idLibros = count[1];
                     break;
                 case 2:
-                    scanMenu.nextLine();
                     count = sMenu.seleccionMenu(scanMenu, nSocios, idSocios);
                     nSocios = count[0];
                     idSocios = count[1];
                     break;
                 case 3:
-                    scanMenu.nextLine();
                     count = pMenu.seleccionMenu(scanMenu, nPrestamos, idPrestamos);
                     nPrestamos = count[0];
                     idPrestamos = count[1];
                     break;
+                case 4:
+                    if (name.equals(configProps.getProperty("database-name"))) {
+                        UserMenu uMenu = new UserMenu(name, password, configProps);
+                        uMenu.selectionMenu(scanMenu);
+                    } else {
+                        System.err.println("Entrada no válida");
+                    }
+                    break;
                 case 0:
                     System.out.println("Saliendo del sistema...");
-                    scanMenu.nextLine();
                     checkMenu = false;
                     break;
                 default:
                     System.err.println("Entrada no válida");
-                    scanMenu.nextLine();
             }
         } while (checkMenu);
     }

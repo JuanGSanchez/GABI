@@ -6,7 +6,7 @@ package manager;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import sql.BiblioDBLibro;
+import sql.reservoirs.BiblioDBLibro;
 import tables.Libro;
 
 /**
@@ -110,7 +110,7 @@ final class LibroMenu {
                     } else if (autor.matches(".*[\\d¡!@#$%&ºª'`*.:;()_+=|/<>¿?{}\\[\\]~].*")) {
                         System.err.println("  El nombre no puede contener números o caracteres especiales");
                     } else if (autor.trim().length() > 60) {
-                        System.err.println("  El título no puede superar los 60 caracteres");
+                        System.err.println("  El nombre no puede superar los 60 caracteres");
                     } else if (autor.matches(".*,.*")) {
                         autor = autor.trim();
                         String[] autorArray = autor.split(",");
@@ -366,15 +366,14 @@ final class LibroMenu {
             } catch (InputMismatchException ime) {
                 optionMenu = -1;
             }
+            scan.nextLine();
             switch (optionMenu) {
                 case 1:
-                    scan.nextLine();
                     count = addLibro(scan, nLib, idLib);
                     nLib = count[0];
                     idLib = count[1];
                     break;
                 case 2:
-                    scan.nextLine();
                     if (nLib == 0) {
                         System.err.println("Error, no hay lista de libros disponible");
                     } else {
@@ -383,7 +382,6 @@ final class LibroMenu {
                     }
                     break;
                 case 3:
-                    scan.nextLine();
                     if (nLib == 0) {
                         System.err.println("Error, no hay lista de libros disponible");
                     } else {
@@ -391,7 +389,6 @@ final class LibroMenu {
                     }
                     break;
                 case 4:
-                    scan.nextLine();
                     if (nLib == 0) {
                         System.err.println("Error, no hay lista de libros disponible");
                     } else {
@@ -401,13 +398,11 @@ final class LibroMenu {
                     }
                     break;
                 case 0:
-                    scan.nextLine();
                     System.out.println("Volviendo al menú principal...");
                     checkMenu = false;
                     break;
                 default:
                     System.err.println("Entrada no válida");
-                    scan.nextLine();
             }
         } while (checkMenu);
 

@@ -1,7 +1,8 @@
 /**
  * Paquete de comandos de conexión con la base de datos
+ * para la gestión de repositorios de datos
  */
-package sql;
+package sql.reservoirs;
 
 import java.util.List;
 

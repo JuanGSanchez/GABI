@@ -1,7 +1,12 @@
 /**
  * Paquete de comandos de conexión con la base de datos
+ * para la gestión de usuarios
  */
-package sql;
+package sql.users;
+
+import tables.Usuario;
+
+import java.util.List;
 
 /**
  * Interfaz principal de métodos de conexión a una base de datos
@@ -22,12 +27,29 @@ public interface UserDAO {
     void tryUser(String user, char[] password);
 
     /**
+     * Método para contar el número de usuarios registrados
+     * en la base de datos
+     *
+     * @param user     Nombre del usuario
+     * @param password Contraseña asociada al usuario
+     */
+    int[] countUser(String user, char[] password);
+
+    /**
      * Método para añadir un nuevo usuario a la base de datos
      *
      * @param user     Nombre del usuario
      * @param password Contraseña asociada al usuario
      */
-    void addUser(String user, char[] password);
+    void addUser(String user, char[] password, String newUser, char[] newPassword);
+
+    /**
+     * Método para buscar usuarios de la base de datos
+     *
+     * @param user     Nombre del usuario
+     * @param password Contraseña asociada al usuario
+     */
+    List<Usuario> searchUser(String user, char[] password);
 
     /**
      * Método para eliminar un usuario de la base de datos
