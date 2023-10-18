@@ -32,14 +32,6 @@ public final class BiblioDBSocio implements BiblioDAO<Socio> {
      */
     private final String url;
     /**
-     * Nombre de usuario para el acceso a la base de datos
-     */
-    private final String user = "admin";
-    /**
-     * Contraseña de cuenta para el acceso a la base de datos
-     */
-    private final String password = "1234";
-    /**
      * Lista de propiedades del programa
      */
     private final Properties configProps;
@@ -79,7 +71,7 @@ public final class BiblioDBSocio implements BiblioDAO<Socio> {
      * @return Número de filas de la tabla de datos
      */
     @Override
-    public int[] countTB() {
+    public int[] countTB(String user, String password) {
         String query1 = "SELECT COUNT(*) FROM " + tableName;
         String query2 = String.format("SELECT idsoc FROM %s WHERE idsoc = (SELECT max(idsoc) FROM %s)", tableName, tableName);
 
@@ -106,7 +98,7 @@ public final class BiblioDBSocio implements BiblioDAO<Socio> {
      * @param socio Objeto Socio que registrar en la base de datos
      */
     @Override
-    public void addTB(Socio socio) {
+    public void addTB(String user, String password, Socio socio) {
         String query1 = "SELECT * FROM " + tableName + " WHERE LOWER(nombre) = LOWER(?) AND LOWER(apellidos) = LOWER(?)";
         String query2 = "INSERT INTO " + tableName + " VALUES (?,?,?)";
 
@@ -140,7 +132,7 @@ public final class BiblioDBSocio implements BiblioDAO<Socio> {
      * @return Lista de objetos Socio por cada entrada de la tabla de datos
      */
     @Override
-    public List<Socio> searchTB() {
+    public List<Socio> searchTB(String user, String password) {
         String query = "SELECT * FROM " + tableName;
         List<Socio> listSocio = new ArrayList<>();
 
@@ -166,7 +158,7 @@ public final class BiblioDBSocio implements BiblioDAO<Socio> {
      * @return Lista de objetos Socio por cada entrada de la tabla de datos
      */
     @Override
-    public List<Socio> searchDetailTB() {
+    public List<Socio> searchDetailTB(String user, String password) {
         String query1 = "SELECT * FROM " + tableName;
         String query2 = "SELECT idlib FROM " + configProps.getProperty("database-name") + "." + configProps.getProperty("database-table-3") + " WHERE idsoc = ?";
         String query3 = "SELECT * FROM " + configProps.getProperty("database-name") + "." + configProps.getProperty("database-table-1") + " WHERE idlib = ?";
@@ -185,7 +177,7 @@ public final class BiblioDBSocio implements BiblioDAO<Socio> {
                 pStmt2.setInt(1, rs1.getInt(1));
                 rs2 = pStmt2.executeQuery();
                 while (rs2.next()) {
-                    pStmt3.setInt(1,rs2.getInt(1));
+                    pStmt3.setInt(1, rs2.getInt(1));
                     rs3 = pStmt3.executeQuery();
                     rs3.next();
                     libroList.add(new Libro(rs3.getInt(1),
@@ -216,7 +208,7 @@ public final class BiblioDBSocio implements BiblioDAO<Socio> {
      * @param seed Fragmento de texto que buscar en las entradas de la tabla
      * @return Lista de objetos Socio que hayan salido de la búsqueda
      */
-    public List<Socio> searchTB(int opt, String seed) {
+    public List<Socio> searchTB(String user, String password, int opt, String seed) {
         String query = "SELECT * FROM " + tableName + " WHERE LOWER(" + (opt == 2 ? "nombre" : "apellidos") + ") LIKE LOWER(?)";
 
         try (Connection con = DriverManager.getConnection(url, user, password);
@@ -246,7 +238,7 @@ public final class BiblioDBSocio implements BiblioDAO<Socio> {
      * @param ID Identificación numérica de la entrada en la tabla
      * @return Objeto Socio con los datos de la entrada encontrada
      */
-    public Socio searchTB(int ID) {
+    public Socio searchTB(String user, String password, int ID) {
         String query = "SELECT * FROM " + tableName + " WHERE idsoc = ?";
 
         try (Connection con = DriverManager.getConnection(url, user, password);
@@ -274,7 +266,7 @@ public final class BiblioDBSocio implements BiblioDAO<Socio> {
      * @return ID máxima tras la eliminación de la entrada
      */
     @Override
-    public int deleteTB(int ID) {
+    public int deleteTB(String user, String password, int ID) {
         String query1 = "SELECT * FROM " + configProps.getProperty("database-name") + "." + configProps.getProperty("database-table-3") + " WHERE idsoc = ?";
         String query2 = "DELETE FROM " + tableName + " WHERE idsoc = ?";
         String query3 = String.format("SELECT idsoc FROM %s WHERE idsoc = (SELECT max(idsoc) FROM %s)", tableName, tableName);

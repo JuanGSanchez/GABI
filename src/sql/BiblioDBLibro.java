@@ -31,14 +31,6 @@ public final class BiblioDBLibro implements BiblioDAO<Libro> {
      */
     private final String url;
     /**
-     * Nombre de usuario para el acceso a la base de datos
-     */
-    private final String user = "admin";
-    /**
-     * Contraseña de cuenta para el acceso a la base de datos
-     */
-    private final String password = "1234";
-    /**
      * Lista de propiedades del programa
      */
     private final Properties configProps;
@@ -78,7 +70,7 @@ public final class BiblioDBLibro implements BiblioDAO<Libro> {
      * @return Número de filas de la tabla de datos
      */
     @Override
-    public int[] countTB() {
+    public int[] countTB(String user, String password) {
         String query1 = "SELECT COUNT(*) FROM " + tableName;
         String query2 = String.format("SELECT idlib FROM %s WHERE idlib = (SELECT max(idlib) FROM %s)", tableName, tableName);
 
@@ -105,7 +97,7 @@ public final class BiblioDBLibro implements BiblioDAO<Libro> {
      * @param libro Objeto Libro que registrar en la base de datos
      */
     @Override
-    public void addTB(Libro libro) {
+    public void addTB(String user, String password, Libro libro) {
         String query1 = "SELECT * FROM " + tableName + " WHERE LOWER(titulo) = LOWER(?) AND LOWER(autor) = LOWER(?)";
         String query2 = "INSERT INTO " + tableName + " VALUES (?,?,?,FALSE)";
 
@@ -139,7 +131,7 @@ public final class BiblioDBLibro implements BiblioDAO<Libro> {
      * @return Lista de objetos Libro por cada entrada de la tabla de datos
      */
     @Override
-    public List<Libro> searchTB() {
+    public List<Libro> searchTB(String user, String password) {
         String query = "SELECT * FROM " + tableName;
         List<Libro> listLibro = new ArrayList<>();
 
@@ -166,7 +158,7 @@ public final class BiblioDBLibro implements BiblioDAO<Libro> {
      * @return Lista de objetos Libro por cada entrada de la tabla de datos
      */
     @Override
-    public List<Libro> searchDetailTB() {
+    public List<Libro> searchDetailTB(String user, String password) {
         return null;
     }
 
@@ -179,7 +171,7 @@ public final class BiblioDBLibro implements BiblioDAO<Libro> {
      * @param seed Fragmento de texto que buscar en las entradas de la tabla
      * @return Lista de objetos Libro que hayan salido de la búsqueda
      */
-    public List<Libro> searchTB(int opt, String seed) {
+    public List<Libro> searchTB(String user, String password, int opt, String seed) {
         String query = "SELECT * FROM " + tableName + " WHERE LOWER(" + (opt == 2 ? "titulo" : "autor") + ") LIKE LOWER(?)";
 
         try (Connection con = DriverManager.getConnection(url, user, password);
@@ -210,7 +202,7 @@ public final class BiblioDBLibro implements BiblioDAO<Libro> {
      * @param ID Identificación numérica de la entrada en la tabla
      * @return Objeto Libro con los datos de la entrada encontrada
      */
-    public Libro searchTB(int ID) {
+    public Libro searchTB(String user, String password, int ID) {
         String query = "SELECT * FROM " + tableName + " WHERE idlib = ?";
 
         try (Connection con = DriverManager.getConnection(url, user, password);
@@ -241,7 +233,7 @@ public final class BiblioDBLibro implements BiblioDAO<Libro> {
      * @return ID máxima tras la eliminación de la entrada
      */
     @Override
-    public int deleteTB(int ID) {
+    public int deleteTB(String user, String password, int ID) {
         String query1 = "SELECT prestado FROM " + tableName + " WHERE idlib = ?";
         String query2 = "DELETE FROM " + tableName + " WHERE idlib = ?";
         String query3 = String.format("SELECT idlib FROM %s WHERE idlib = (SELECT max(idlib) FROM %s)", tableName, tableName);

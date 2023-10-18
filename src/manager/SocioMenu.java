@@ -40,92 +40,32 @@ final class SocioMenu {
             \t(2) Por nombre
             \t(3) Por apellidos
             \t(0) Salir""";
+    /**
+     * Nombre de usuario pasado para la base de datos
+     */
+    private final String user;
+    /**
+     * Contraseña de usuario para la base de datos
+     */
+    private final String password;
 
     /**
-     * Constructor privado de la clase para evitar instancias
+     * Constructor de la clase, restringido al paquete
      */
-    private SocioMenu() {
-    }
-
-    /**
-     * Método del menú principal del gestor de socios, desde el cual
-     * se acceden a las acciones disponibles
-     *
-     * @param scan Entrada de datos por teclado
-     * @param nSoc Número de socios registrados dentro de la base de datos
-     * @param idSoc Máxima ID de socios dentro de la base de datos
-     * @return Valores actualizados de nSoc y idSoc
-     */
-    static int[] seleccionMenu(Scanner scan, int nSoc, int idSoc) {
-        boolean checkMenu = true;
-        int optionMenu;
-        int[] count;
-
-        System.out.println("\n\tGESTOR SOCIOS");
-        do {
-            System.out.println(mainMenu);
-            try {
-                optionMenu = scan.nextInt();
-            } catch (InputMismatchException ime) {
-                optionMenu = -1;
-            }
-            switch (optionMenu) {
-                case 1:
-                    scan.nextLine();
-                    count = addSocio(scan, nSoc, idSoc);
-                    nSoc = count[0];
-                    idSoc = count[1];
-                    break;
-                case 2:
-                    scan.nextLine();
-                    if (nSoc == 0) {
-                        System.err.println("Error, no hay lista de socios disponible");
-                    } else {
-                        listSocios(scan);
-                        System.out.println("Total de socios: " + nSoc);
-                    }
-                    break;
-                case 3:
-                    scan.nextLine();
-                    if (nSoc == 0) {
-                        System.err.println("Error, no hay lista de socios disponible");
-                    } else {
-                        searchSocios(scan);
-                    }
-                    break;
-                case 4:
-                    scan.nextLine();
-                    if (nSoc == 0) {
-                        System.err.println("Error, no hay lista de socios disponible");
-                    } else {
-                        count = deleteSocio(scan, nSoc, idSoc);
-                        nSoc = count[0];
-                        idSoc = count[1];
-                    }
-                    break;
-                case 0:
-                    scan.nextLine();
-                    System.out.println("Volviendo al menú principal...");
-                    checkMenu = false;
-                    break;
-                default:
-                    System.err.println("Entrada no válida");
-                    scan.nextLine();
-            }
-        } while (checkMenu);
-
-        return new int[]{nSoc, idSoc};
+    SocioMenu(String user, String password) {
+        this.user = user;
+        this.password = password;
     }
 
     /**
      * Método para dar de alta nuevos socios en la base de datos
      *
-     * @param scan Entrada de datos por teclado
-     * @param nSoc Número de socios registrados dentro de la base de datos
+     * @param scan  Entrada de datos por teclado
+     * @param nSoc  Número de socios registrados dentro de la base de datos
      * @param idSoc Máxima ID de socios dentro de la base de datos
      * @return Valores actualizados de nSoc y idSoc
      */
-    private static int[] addSocio(Scanner scan, int nSoc, int idSoc) {
+    private int[] addSocio(Scanner scan, int nSoc, int idSoc) {
         boolean isValid;
         boolean repeat;
         String nombre = null;
@@ -182,7 +122,7 @@ final class SocioMenu {
             } while (!isValid);
 
             try {
-                BiblioDBSocio.getInstance().addTB(new Socio(nSoc + 1, nombre, apellidos));
+                BiblioDBSocio.getInstance().addTB(user, password, new Socio(nSoc + 1, nombre, apellidos));
                 ++nSoc;
             } catch (RuntimeException re) {
                 System.err.println("  Error durante el registro en la base de datos: " + re.getMessage());
@@ -201,7 +141,7 @@ final class SocioMenu {
      *
      * @param scan Entrada de datos por teclado
      */
-    private static void listSocios(Scanner scan) {
+    private void listSocios(Scanner scan) {
         boolean isValid = false;
         int opt;
         List<Socio> arraySocios;
@@ -219,9 +159,9 @@ final class SocioMenu {
                 case 1:
                     System.out.println("\nIntroduce 1 para desplegar más detalles");
                     if (scan.nextLine().equals("1")) {
-                        arraySocios = BiblioDBSocio.getInstance().searchDetailTB();
+                        arraySocios = BiblioDBSocio.getInstance().searchDetailTB(user, password);
                     } else {
-                        arraySocios = BiblioDBSocio.getInstance().searchTB();
+                        arraySocios = BiblioDBSocio.getInstance().searchTB(user, password);
                     }
                     System.out.println("Ordenación por ID...");
                     arraySocios.stream().sorted(Socio::compareTo).forEach(System.out::println);
@@ -230,9 +170,9 @@ final class SocioMenu {
                 case 2:
                     System.out.println("\nIntroduce 1 para desplegar más detalles");
                     if (scan.nextLine().equals("1")) {
-                        arraySocios = BiblioDBSocio.getInstance().searchDetailTB();
+                        arraySocios = BiblioDBSocio.getInstance().searchDetailTB(user, password);
                     } else {
-                        arraySocios = BiblioDBSocio.getInstance().searchTB();
+                        arraySocios = BiblioDBSocio.getInstance().searchTB(user, password);
                     }
                     System.out.println("Ordenación por nombre...");
                     arraySocios.stream().sorted(Comparator.comparing(Socio::getNombre).thenComparing(Socio::getApellidos)).forEach(System.out::println);
@@ -241,9 +181,9 @@ final class SocioMenu {
                 case 3:
                     System.out.println("\nIntroduce 1 para desplegar más detalles");
                     if (scan.nextLine().equals("1")) {
-                        arraySocios = BiblioDBSocio.getInstance().searchDetailTB();
+                        arraySocios = BiblioDBSocio.getInstance().searchDetailTB(user, password);
                     } else {
-                        arraySocios = BiblioDBSocio.getInstance().searchTB();
+                        arraySocios = BiblioDBSocio.getInstance().searchTB(user, password);
                     }
                     System.out.println("Ordenación por apellidos...");
                     arraySocios.stream().sorted(Comparator.comparing(Socio::getApellidos).thenComparing(Socio::getNombre)).forEach(System.out::println);
@@ -264,7 +204,7 @@ final class SocioMenu {
      *
      * @param scan Entrada de datos por teclado
      */
-    private static void searchSocios(Scanner scan) {
+    private void searchSocios(Scanner scan) {
         boolean isValid;
         boolean repeat;
         int opt;
@@ -305,10 +245,10 @@ final class SocioMenu {
 
             try {
                 if (opt == 1) {
-                    Socio socio = BiblioDBSocio.getInstance().searchTB(ID);
+                    Socio socio = BiblioDBSocio.getInstance().searchTB(user, password, ID);
                     System.out.println(socio);
                 } else {
-                    List<Socio> socios = BiblioDBSocio.getInstance().searchTB(opt, fragString);
+                    List<Socio> socios = BiblioDBSocio.getInstance().searchTB(user, password, opt, fragString);
                     socios.forEach(System.out::println);
                 }
             } catch (RuntimeException re) {
@@ -323,12 +263,12 @@ final class SocioMenu {
     /**
      * Método para dar de baja un socio de la base de datos
      *
-     * @param scan Entrada de datos por teclado
-     * @param nSoc Número de socios registrados dentro de la base de datos
+     * @param scan  Entrada de datos por teclado
+     * @param nSoc  Número de socios registrados dentro de la base de datos
      * @param idSoc Máxima ID de socios dentro de la base de datos
      * @return Valores actualizados de nSoc y idSoc
      */
-    private static int[] deleteSocio(Scanner scan, int nSoc, int idSoc) {
+    private int[] deleteSocio(Scanner scan, int nSoc, int idSoc) {
         boolean isValid;
         boolean repeat;
         int opt;
@@ -369,10 +309,10 @@ final class SocioMenu {
 
             try {
                 if (opt == 1) {
-                    idSoc = BiblioDBSocio.getInstance().deleteTB(ID);
+                    idSoc = BiblioDBSocio.getInstance().deleteTB(user, password, ID);
                     nSoc--;
                 } else {
-                    List<Socio> socios = BiblioDBSocio.getInstance().searchTB(opt, fragString);
+                    List<Socio> socios = BiblioDBSocio.getInstance().searchTB(user, password, opt, fragString);
                     Set<Integer> idsocs = socios.stream().map(Socio::getIdSoc).collect(Collectors.toSet());
                     socios.stream().sorted(Socio::compareTo).forEach(System.out::println);
                     do {
@@ -384,7 +324,7 @@ final class SocioMenu {
                                 System.out.println("  Operación cancelada, volviendo al menú del gestor...");
                                 return new int[]{nSoc, idSoc};
                             } else if (!idsocs.add(ID)) {
-                                idSoc = BiblioDBSocio.getInstance().deleteTB(ID);
+                                idSoc = BiblioDBSocio.getInstance().deleteTB(user, password, ID);
                                 nSoc--;
                                 isValid = false;
                             } else {
@@ -403,6 +343,76 @@ final class SocioMenu {
             System.out.println("\nIntroduce 1 para repetir operación - ");
             repeat = scan.nextLine().equals("1");
         } while (repeat);
+
+        return new int[]{nSoc, idSoc};
+    }
+
+    /**
+     * Método del menú principal del gestor de socios, desde el cual
+     * se acceden a las acciones disponibles
+     *
+     * @param scan  Entrada de datos por teclado
+     * @param nSoc  Número de socios registrados dentro de la base de datos
+     * @param idSoc Máxima ID de socios dentro de la base de datos
+     * @return Valores actualizados de nSoc y idSoc
+     */
+    int[] seleccionMenu(Scanner scan, int nSoc, int idSoc) {
+        boolean checkMenu = true;
+        int optionMenu;
+        int[] count;
+
+        System.out.println("\n\tGESTOR SOCIOS");
+        do {
+            System.out.println(mainMenu);
+            try {
+                optionMenu = scan.nextInt();
+            } catch (InputMismatchException ime) {
+                optionMenu = -1;
+            }
+            switch (optionMenu) {
+                case 1:
+                    scan.nextLine();
+                    count = addSocio(scan, nSoc, idSoc);
+                    nSoc = count[0];
+                    idSoc = count[1];
+                    break;
+                case 2:
+                    scan.nextLine();
+                    if (nSoc == 0) {
+                        System.err.println("Error, no hay lista de socios disponible");
+                    } else {
+                        listSocios(scan);
+                        System.out.println("Total de socios: " + nSoc);
+                    }
+                    break;
+                case 3:
+                    scan.nextLine();
+                    if (nSoc == 0) {
+                        System.err.println("Error, no hay lista de socios disponible");
+                    } else {
+                        searchSocios(scan);
+                    }
+                    break;
+                case 4:
+                    scan.nextLine();
+                    if (nSoc == 0) {
+                        System.err.println("Error, no hay lista de socios disponible");
+                    } else {
+                        count = deleteSocio(scan, nSoc, idSoc);
+                        nSoc = count[0];
+                        idSoc = count[1];
+                    }
+                    break;
+                case 0:
+                    scan.nextLine();
+                    System.out.println("Volviendo al menú principal...");
+                    checkMenu = false;
+                    break;
+                default:
+                    System.err.println("Entrada no válida");
+                    scan.nextLine();
+            }
+        } while (checkMenu);
 
         return new int[]{nSoc, idSoc};
     }

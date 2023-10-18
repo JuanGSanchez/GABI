@@ -40,92 +40,32 @@ final class LibroMenu {
             \t(2) Por título
             \t(3) Por autor
             \t(0) Salir""";
+    /**
+     * Nombre de usuario pasado para la base de datos
+     */
+    private final String user;
+    /**
+     * Contraseña de usuario para la base de datos
+     */
+    private final String password;
 
     /**
-     * Constructor privado de la clase para evitar instancias
+     * Constructor de la clase, restringido al paquete
      */
-    private LibroMenu() {
-    }
-
-    /**
-     * Método del menú principal del gestor de libros, desde el cual se acceden
-     * a las acciones disponibles
-     *
-     * @param scan Entrada de datos por teclado
-     * @param nLib Número de libros guardados dentro de la base de datos
-     * @param idLib Máxima ID de libros dentro de la base de datos
-     * @return Valores actualizados de nLib y idLib
-     */
-    static int[] seleccionMenu(Scanner scan, int nLib, int idLib) {
-        boolean checkMenu = true;
-        int optionMenu;
-        int[] count;
-
-        System.out.println("\n\tGESTOR LIBROS");
-        do {
-            System.out.println(mainMenu);
-            try {
-                optionMenu = scan.nextInt();
-            } catch (InputMismatchException ime) {
-                optionMenu = -1;
-            }
-            switch (optionMenu) {
-                case 1:
-                    scan.nextLine();
-                    count = addLibro(scan, nLib, idLib);
-                    nLib = count[0];
-                    idLib = count[1];
-                    break;
-                case 2:
-                    scan.nextLine();
-                    if (nLib == 0) {
-                        System.err.println("Error, no hay lista de libros disponible");
-                    } else {
-                        listLibros(scan);
-                        System.out.println("Total de libros: " + nLib);
-                    }
-                    break;
-                case 3:
-                    scan.nextLine();
-                    if (nLib == 0) {
-                        System.err.println("Error, no hay lista de libros disponible");
-                    } else {
-                        searchLibros(scan);
-                    }
-                    break;
-                case 4:
-                    scan.nextLine();
-                    if (nLib == 0) {
-                        System.err.println("Error, no hay lista de libros disponible");
-                    } else {
-                        count = deleteLibro(scan, nLib, idLib);
-                        nLib = count[0];
-                        idLib = count[1];
-                    }
-                    break;
-                case 0:
-                    scan.nextLine();
-                    System.out.println("Volviendo al menú principal...");
-                    checkMenu = false;
-                    break;
-                default:
-                    System.err.println("Entrada no válida");
-                    scan.nextLine();
-            }
-        } while (checkMenu);
-
-        return new int[]{nLib, idLib};
+    LibroMenu(String user, String password) {
+        this.user = user;
+        this.password = password;
     }
 
     /**
      * Método para añadir libros a la base de datos
      *
-     * @param scan Entrada de datos por teclado
-     * @param nLib Número de libros guardados dentro de la base de datos
+     * @param scan  Entrada de datos por teclado
+     * @param nLib  Número de libros guardados dentro de la base de datos
      * @param idLib Máxima ID de libros dentro de la base de datos
      * @return Valores actualizados de nLib y idLib
      */
-    private static int[] addLibro(Scanner scan, int nLib, int idLib) {
+    private int[] addLibro(Scanner scan, int nLib, int idLib) {
         boolean isValid;
         boolean repeat;
         String titulo = null;
@@ -195,7 +135,7 @@ final class LibroMenu {
             } while (!isValid);
 
             try {
-                BiblioDBLibro.getInstance().addTB(new Libro(idLib + 1, titulo, autor));
+                BiblioDBLibro.getInstance().addTB(user, password, new Libro(idLib + 1, titulo, autor));
                 nLib++;
                 idLib++;
             } catch (RuntimeException re) {
@@ -216,7 +156,7 @@ final class LibroMenu {
      *
      * @param scan Entrada de datos por teclado
      */
-    private static void listLibros(Scanner scan) {
+    private void listLibros(Scanner scan) {
         boolean isValid = false;
         int opt;
         List<Libro> arrayLibros = new ArrayList<>();
@@ -226,7 +166,7 @@ final class LibroMenu {
             System.out.println("\nSelecciona ordenación de listado -\n" + searchMenu);
             try {
                 opt = scan.nextInt();
-                arrayLibros = BiblioDBLibro.getInstance().searchTB();
+                arrayLibros = BiblioDBLibro.getInstance().searchTB(user, password);
             } catch (InputMismatchException ime) {
                 opt = -1;
             }
@@ -261,7 +201,7 @@ final class LibroMenu {
      *
      * @param scan Entrada de datos por teclado
      */
-    private static void searchLibros(Scanner scan) {
+    private void searchLibros(Scanner scan) {
         boolean isValid;
         boolean repeat;
         int opt;
@@ -302,10 +242,10 @@ final class LibroMenu {
 
             try {
                 if (opt == 1) {
-                    Libro libro = BiblioDBLibro.getInstance().searchTB(ID);
+                    Libro libro = BiblioDBLibro.getInstance().searchTB(user, password, ID);
                     System.out.println(libro);
                 } else {
-                    List<Libro> libros = BiblioDBLibro.getInstance().searchTB(opt, fragString);
+                    List<Libro> libros = BiblioDBLibro.getInstance().searchTB(user, password, opt, fragString);
                     libros.forEach(System.out::println);
                 }
             } catch (RuntimeException re) {
@@ -320,12 +260,12 @@ final class LibroMenu {
     /**
      * Método para eliminar libros de la base de datos
      *
-     * @param scan Entrada de datos por teclado
-     * @param nLib Número de libros guardados dentro de la base de datos
+     * @param scan  Entrada de datos por teclado
+     * @param nLib  Número de libros guardados dentro de la base de datos
      * @param idLib Máxima ID de libros dentro de la base de datos
      * @return Valores actualizados de nLib y idLib
      */
-    private static int[] deleteLibro(Scanner scan, int nLib, int idLib) {
+    private int[] deleteLibro(Scanner scan, int nLib, int idLib) {
         boolean isValid;
         boolean repeat;
         int opt;
@@ -366,10 +306,10 @@ final class LibroMenu {
 
             try {
                 if (opt == 1) {
-                    idLib = BiblioDBLibro.getInstance().deleteTB(ID);
+                    idLib = BiblioDBLibro.getInstance().deleteTB(user, password, ID);
                     nLib--;
                 } else {
-                    List<Libro> libros = BiblioDBLibro.getInstance().searchTB(opt, fragString);
+                    List<Libro> libros = BiblioDBLibro.getInstance().searchTB(user, password, opt, fragString);
                     Set<Integer> idlibs = libros.stream().map(Libro::getIdLib).collect(Collectors.toSet());
                     libros.stream().sorted(Libro::compareTo).forEach(System.out::println);
                     do {
@@ -381,7 +321,7 @@ final class LibroMenu {
                                 System.out.println("  Operación cancelada, volviendo al menú del gestor...");
                                 return new int[]{nLib, idLib};
                             } else if (!idlibs.add(ID)) {
-                                idLib = BiblioDBLibro.getInstance().deleteTB(ID);
+                                idLib = BiblioDBLibro.getInstance().deleteTB(user, password, ID);
                                 nLib--;
                                 isValid = false;
                             } else {
@@ -400,6 +340,76 @@ final class LibroMenu {
             System.out.println("\nIntroduce 1 para repetir operación - ");
             repeat = scan.nextLine().equals("1");
         } while (repeat);
+
+        return new int[]{nLib, idLib};
+    }
+
+    /**
+     * Método del menú principal del gestor de libros, desde el cual se acceden
+     * a las acciones disponibles
+     *
+     * @param scan  Entrada de datos por teclado
+     * @param nLib  Número de libros guardados dentro de la base de datos
+     * @param idLib Máxima ID de libros dentro de la base de datos
+     * @return Valores actualizados de nLib y idLib
+     */
+    int[] seleccionMenu(Scanner scan, int nLib, int idLib) {
+        boolean checkMenu = true;
+        int optionMenu;
+        int[] count;
+
+        System.out.println("\n\tGESTOR LIBROS");
+        do {
+            System.out.println(mainMenu);
+            try {
+                optionMenu = scan.nextInt();
+            } catch (InputMismatchException ime) {
+                optionMenu = -1;
+            }
+            switch (optionMenu) {
+                case 1:
+                    scan.nextLine();
+                    count = addLibro(scan, nLib, idLib);
+                    nLib = count[0];
+                    idLib = count[1];
+                    break;
+                case 2:
+                    scan.nextLine();
+                    if (nLib == 0) {
+                        System.err.println("Error, no hay lista de libros disponible");
+                    } else {
+                        listLibros(scan);
+                        System.out.println("Total de libros: " + nLib);
+                    }
+                    break;
+                case 3:
+                    scan.nextLine();
+                    if (nLib == 0) {
+                        System.err.println("Error, no hay lista de libros disponible");
+                    } else {
+                        searchLibros(scan);
+                    }
+                    break;
+                case 4:
+                    scan.nextLine();
+                    if (nLib == 0) {
+                        System.err.println("Error, no hay lista de libros disponible");
+                    } else {
+                        count = deleteLibro(scan, nLib, idLib);
+                        nLib = count[0];
+                        idLib = count[1];
+                    }
+                    break;
+                case 0:
+                    scan.nextLine();
+                    System.out.println("Volviendo al menú principal...");
+                    checkMenu = false;
+                    break;
+                default:
+                    System.err.println("Entrada no válida");
+                    scan.nextLine();
+            }
+        } while (checkMenu);
 
         return new int[]{nLib, idLib};
     }

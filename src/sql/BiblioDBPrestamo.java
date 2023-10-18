@@ -34,14 +34,6 @@ public class BiblioDBPrestamo implements BiblioDAO<Prestamo> {
      */
     private final String url;
     /**
-     * Nombre de usuario para el acceso a la base de datos
-     */
-    private final String user = "admin";
-    /**
-     * Contraseña de cuenta para el acceso a la base de datos
-     */
-    private final String password = "1234";
-    /**
      * Lista de propiedades del programa
      */
     private final Properties configProps;
@@ -81,7 +73,7 @@ public class BiblioDBPrestamo implements BiblioDAO<Prestamo> {
      * @return Número de filas de la tabla de datos
      */
     @Override
-    public int[] countTB() {
+    public int[] countTB(String user, String password) {
         String query1 = "SELECT COUNT(*) FROM " + tableName;
         String query2 = String.format("SELECT idpres FROM %s WHERE idpres = (SELECT max(idpres) FROM %s)", tableName, tableName);
 
@@ -108,7 +100,7 @@ public class BiblioDBPrestamo implements BiblioDAO<Prestamo> {
      * @param prestamo Objeto Préstamo que registrar en la base de datos
      */
     @Override
-    public void addTB(Prestamo prestamo) {
+    public void addTB(String user, String password, Prestamo prestamo) {
         String query1 = "SELECT COUNT(*) FROM " + tableName + " WHERE idsoc = ?";
         String query2 = "SELECT prestado FROM " + configProps.getProperty("database-name") + "." + configProps.getProperty("database-table-1") + " WHERE idlib = ?";
         String query3 = "UPDATE " + configProps.getProperty("database-name") + "." + configProps.getProperty("database-table-1") + " SET prestado = ? WHERE idlib = ?";
@@ -168,7 +160,7 @@ public class BiblioDBPrestamo implements BiblioDAO<Prestamo> {
      * @return Lista de objetos Préstamo por cada entrada de la tabla de datos
      */
     @Override
-    public List<Prestamo> searchTB() {
+    public List<Prestamo> searchTB(String user, String password) {
         String query = "SELECT * FROM " + tableName;
         List<Prestamo> listPrestamo = new ArrayList<>();
 
@@ -195,7 +187,7 @@ public class BiblioDBPrestamo implements BiblioDAO<Prestamo> {
      * @return Lista de objetos Préstamo por cada entrada de la tabla de datos
      */
     @Override
-    public List<Prestamo> searchDetailTB() {
+    public List<Prestamo> searchDetailTB(String user, String password) {
         String query1 = "SELECT * FROM " + tableName;
         String query2 = "SELECT * FROM " + configProps.getProperty("database-name") + "." + configProps.getProperty("database-table-2") + " WHERE idsoc = ?";
         String query3 = "SELECT * FROM " + configProps.getProperty("database-name") + "." + configProps.getProperty("database-table-1") + " WHERE idlib = ?";
@@ -239,7 +231,7 @@ public class BiblioDBPrestamo implements BiblioDAO<Prestamo> {
      * @param ID  ID que buscar en las entradas de la tabla
      * @return Objeto Préstamo con la entrada que haya salido de la búsqueda
      */
-    public List<Prestamo> searchTB(int opt, int ID) {
+    public List<Prestamo> searchTB(String user, String password, int opt, int ID) {
         String query = "SELECT * FROM " + tableName + " WHERE " + (opt == 1 ? "idpres" : opt == 2 ? "idsoc" : "idlib") + " = ?";
 
         try (Connection con = DriverManager.getConnection(url, user, password);
@@ -270,7 +262,7 @@ public class BiblioDBPrestamo implements BiblioDAO<Prestamo> {
      * @param date Fecha de realización del préstamo
      * @return Lista de objetos Préstamo de las entradas resultantes de la búsqueda
      */
-    public List<Prestamo> searchTB(LocalDate date) {
+    public List<Prestamo> searchTB(String user, String password, LocalDate date) {
         String query = "SELECT * FROM " + tableName + " WHERE fechapres = ?";
 
         try (Connection con = DriverManager.getConnection(url, user, password);
@@ -302,7 +294,7 @@ public class BiblioDBPrestamo implements BiblioDAO<Prestamo> {
      * @return ID máxima tras la eliminación de la entrada
      */
     @Override
-    public int deleteTB(int ID) {
+    public int deleteTB(String user, String password, int ID) {
         String query1 = "SELECT idlib FROM " + tableName + " WHERE idpres = ?";
         String query2 = "UPDATE " + configProps.getProperty("database-name") + "." + configProps.getProperty("database-table-1") + " SET prestado = ? WHERE idlib = ?";
         String query3 = "DELETE FROM " + tableName + " WHERE idpres = ?";

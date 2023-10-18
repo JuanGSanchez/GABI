@@ -1,8 +1,4 @@
 # JavaDB Database setup
-# JDBC URL: jdbc:derby://localhost:1527/BiblioDB
-# Autor: Juan García Sánchez
-# User: admin
-# Password: 1234
 
 DROP TABLE prestamos;
 DROP TABLE libros;

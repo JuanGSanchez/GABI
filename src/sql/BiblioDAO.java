@@ -21,7 +21,7 @@ public interface BiblioDAO<T> {
      *
      * @return Número de entradas en la base de datos
      */
-    int[] countTB();
+    int[] countTB(String user, String password);
 
     /**
      * Método de introducción de una nueva entrada en la
@@ -30,7 +30,7 @@ public interface BiblioDAO<T> {
      * @param t Objeto de la clase T, cuyos datos se introducen
      *          en la tabla de datos
      */
-    void addTB(T t);
+    void addTB(String user, String password, T t);
 
     /**
      * Método de búsqueda de entradas en la tabla de datos
@@ -39,7 +39,7 @@ public interface BiblioDAO<T> {
      * @return Lista de objetos de la clase T, construidos
      * desde los datos recuperados de la tabla
      */
-    List<T> searchTB();
+    List<T> searchTB(String user, String password);
 
     /**
      * Método de búsqueda de entradas en la tabla de datos
@@ -48,7 +48,7 @@ public interface BiblioDAO<T> {
      * @return Lista de objetos de la clase T, construidos
      * desde los datos recuperados de la tabla
      */
-    List<T> searchDetailTB();
+    List<T> searchDetailTB(String user, String password);
 
     /**
      * Método para eliminar una entrada en la tabla de datos
@@ -56,5 +56,5 @@ public interface BiblioDAO<T> {
      *
      * @param ID Identificación numérica de la entrada a eliminar
      */
-    int deleteTB(int ID);
+    int deleteTB(String user, String password, int ID);
 }
