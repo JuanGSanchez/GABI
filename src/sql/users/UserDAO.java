@@ -41,7 +41,7 @@ public interface UserDAO {
      * @param user     Nombre del usuario
      * @param password Contraseña asociada al usuario
      */
-    void addUser(String user, char[] password, String newUser, char[] newPassword);
+    void addUser(String user, char[] password, Usuario newUser);
 
     /**
      * Método para buscar usuarios de la base de datos
@@ -57,6 +57,6 @@ public interface UserDAO {
      * @param user     Nombre del usuario
      * @param password Contraseña asociada al usuario
      */
-    void deleteUser(String user, char[] password);
+    int deleteUser(String user, char[] password, int ID);
 
 }

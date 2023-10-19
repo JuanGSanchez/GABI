@@ -124,6 +124,6 @@ public class Usuario implements Comparable<Usuario> {
      */
     @Override
     public int compareTo(Usuario otherUsuario) {
-        return this.nombre.compareTo(otherUsuario.getNombre());
+        return this.idUser - otherUsuario.getIdUser();
     }
 }

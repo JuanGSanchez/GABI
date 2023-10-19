@@ -117,7 +117,7 @@ public final class UserDerby implements UserDAO {
      * @param password Contraseña asociada al usuario
      */
     @Override
-    public void addUser(String user, char[] password, String newUser, char[] newPassword) {
+    public void addUser(String user, char[] password, Usuario newUser) {
 
     }
 
@@ -146,6 +146,14 @@ public final class UserDerby implements UserDAO {
         return listUsuario;
     }
 
+    public List<Usuario> searchUser(String user, char[] password, String seed) {
+
+    }
+
+    public Usuario searchUser(String user, char[] password, int ID) {
+
+    }
+
     /**
      * Método para eliminar un usuario de la base de datos
      *
@@ -153,7 +161,7 @@ public final class UserDerby implements UserDAO {
      * @param password Contraseña asociada al usuario
      */
     @Override
-    public void deleteUser(String user, char[] password) {
+    public int deleteUser(String user, char[] password, int ID) {
 
     }
 }

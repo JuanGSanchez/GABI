@@ -7,6 +7,7 @@ import sql.users.UserDerby;
 import tables.Usuario;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Clase del menú del gestor de usuarios en el programa
@@ -16,6 +17,10 @@ import java.util.*;
  * @since 10-2023
  */
 final class UserMenu {
+    /**
+     * Lista con fragmentos de texto según el parámetro usado en la consulta
+     */
+    private static final String[] searchVar = {"ID", "nombre o fragmento"};
     /**
      * Método para almacenar aparte el texto del menú principal
      */
@@ -56,6 +61,12 @@ final class UserMenu {
         this.configProps = configProps;
     }
 
+    /**
+     * Método del menú principal del gestor de usuarios, desde el cual se acceden
+     * a las acciones disponibles
+     *
+     * @param scan Entrada de datos por teclado
+     */
     void selectionMenu(Scanner scan) {
         boolean checkMenu = true;
         int optionMenu;
@@ -120,6 +131,14 @@ final class UserMenu {
 
     }
 
+    /**
+     * Método para añadir usuarios a la base de datos
+     *
+     * @param scan    Entrada de datos por teclado
+     * @param nUsers  Número de usuarios registrados en la base de datos
+     * @param idUsers Máxima ID de usuario dentro de la base de datos
+     * @return Valores actualizados de nUsers y idUsers
+     */
     int[] addUsuario(Scanner scan, int nUsers, int idUsers) {
         boolean isValid;
         boolean repeat;
@@ -177,7 +196,7 @@ final class UserMenu {
             } while (!isValid);
 
             try {
-                UserDerby.getInstance().addUser(user, password.toCharArray(), nombre, passwd.toCharArray());
+                UserDerby.getInstance().addUser(user, password.toCharArray(), new Usuario(idUsers + 1, nombre, passwd));
                 nUsers++;
                 idUsers++;
             } catch (RuntimeException re) {
@@ -192,6 +211,12 @@ final class UserMenu {
 
     }
 
+    /**
+     * Método para imprimir en pantalla los usuarios registrados en la base de
+     * datos
+     *
+     * @param scan Entrada de datos por teclado
+     */
     void listUsuarios(Scanner scan) {
         boolean isValid = false;
         int opt;
@@ -210,14 +235,12 @@ final class UserMenu {
             switch (opt) {
                 case 1:
                     System.out.println("Ordenación por ID...");
+                    arrayUsuarios.stream().sorted(Usuario::compareTo).forEach(System.out::println);
                     isValid = true;
                     break;
                 case 2:
-                    System.out.println("Ordenación por título...");
-                    isValid = true;
-                    break;
-                case 3:
-                    System.out.println("Ordenación por autor...");
+                    System.out.println("Ordenación por nombre...");
+                    arrayUsuarios.stream().sorted(Comparator.comparing(Usuario::getNombre).thenComparing(Usuario::getIdUser)).forEach(System.out::println);
                     isValid = true;
                     break;
                 case 0:
@@ -230,11 +253,148 @@ final class UserMenu {
 
     }
 
+    /**
+     * Método para buscar usuarios en la base de datos según ciertos criterios
+     *
+     * @param scan Entrada de datos por teclado
+     */
     void searchUsuarios(Scanner scan) {
+        boolean isValid;
+        boolean repeat;
+        int opt;
+        int ID = 0;
+        String fragString = null;
 
+        do {
+            isValid = false;
+            System.out.println("    Buscador de Usuarios");
+            do {
+                System.out.println("\nSelecciona criterio de búsqueda -\n" + searchMenu);
+                try {
+                    opt = scan.nextInt();
+                } catch (InputMismatchException ime) {
+                    opt = -1;
+                }
+                scan.nextLine();
+                switch (opt) {
+                    case 1:
+                        System.out.println("Introduce " + searchVar[opt - 1] + " -");
+                        ID = scan.nextInt();
+                        scan.nextLine();
+                        isValid = true;
+                        break;
+                    case 2:
+                        System.out.println("Introduce " + searchVar[opt - 1] + " -");
+                        fragString = scan.nextLine();
+                        isValid = true;
+                        break;
+                    case 0:
+                        System.out.println("  Volviendo al menú del gestor...");
+                        return;
+                    default:
+                        System.err.println("  Entrada no válida");
+                }
+            } while (!isValid);
+
+            try {
+                if (opt == 1) {
+                    Usuario usuario = UserDerby.getInstance().searchUser(user, password.toCharArray(), ID);
+                    System.out.println(usuario);
+                } else {
+                    List<Usuario> usuarios = UserDerby.getInstance().searchUser(user, password.toCharArray(), fragString);
+                    usuarios.forEach(System.out::println);
+                }
+            } catch (RuntimeException re) {
+                System.err.println(re.getMessage());
+            }
+
+            System.out.println("\nIntroduce 1 para repetir operación - ");
+            repeat = scan.nextLine().equals("1");
+        } while (repeat);
     }
 
+    /**
+     * Método para eliminar usuarios de la base de datos
+     *
+     * @param scan    Entrada de datos por teclado
+     * @param nUsers  Número de usuarios registrados en la base de datos
+     * @param idUsers Máxima ID de usuario dentro de la base de datos
+     * @return Valores actualizados de nUsers y idUsers
+     */
     int[] deleteUsuarios(Scanner scan, int nUsers, int idUsers) {
+        boolean isValid;
+        boolean repeat;
+        int opt;
+        int ID = 0;
+        String fragString = null;
+
+        do {
+            isValid = false;
+            System.out.println("    Baja de Usuarios");
+            do {
+                System.out.println("\nSelecciona criterio de búsqueda -\n" + searchMenu);
+                try {
+                    opt = scan.nextInt();
+                } catch (InputMismatchException ime) {
+                    opt = -1;
+                }
+                scan.nextLine();
+                switch (opt) {
+                    case 1:
+                        System.out.println("Introduce " + searchVar[opt - 1] + " -");
+                        ID = scan.nextInt();
+                        scan.nextLine();
+                        isValid = true;
+                        break;
+                    case 2:
+                        System.out.println("Introduce " + searchVar[opt - 1] + " -");
+                        fragString = scan.nextLine();
+                        isValid = true;
+                        break;
+                    case 0:
+                        System.out.println("  Volviendo al menú del gestor...");
+                        return new int[]{nUsers, idUsers};
+                    default:
+                        System.err.println("  Entrada no válida");
+                }
+            } while (!isValid);
+
+            try {
+                if (opt == 1) {
+                    idUsers = UserDerby.getInstance().deleteUser(user, password.toCharArray(), ID);
+                    nUsers--;
+                } else {
+                    List<Usuario> usuarios = UserDerby.getInstance().searchUser(user, password.toCharArray(), fragString);
+                    Set<Integer> idusers = usuarios.stream().map(Usuario::getIdUser).collect(Collectors.toSet());
+                    usuarios.stream().sorted(Usuario::compareTo).forEach(System.out::println);
+                    do {
+                        System.out.println("Introduce ID del usuario a eliminar de la lista anterior\n" +
+                                           "(-1 para cancelar operación) -");
+                        try {
+                            ID = scan.nextInt();
+                            if (ID == -1) {
+                                System.out.println("  Operación cancelada, volviendo al menú del gestor...");
+                                return new int[]{nUsers, idUsers};
+                            } else if (!idusers.add(ID)) {
+                                idUsers = UserDerby.getInstance().deleteUser(user, password.toCharArray(), ID);
+                                nUsers--;
+                                isValid = false;
+                            } else {
+                                System.err.println("El ID proporcionado no se encuentra en la lista");
+                            }
+                        } catch (InputMismatchException ime) {
+                            System.err.println("Entrada no válida");
+                        }
+                        scan.nextLine();
+                    } while (isValid);
+                }
+            } catch (RuntimeException re) {
+                System.err.println(re.getMessage());
+            }
+
+            System.out.println("\nIntroduce 1 para repetir operación - ");
+            repeat = scan.nextLine().equals("1");
+        } while (repeat);
 
         return new int[]{nUsers, idUsers};
 
