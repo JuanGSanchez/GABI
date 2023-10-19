@@ -101,6 +101,7 @@ final class UserMenu {
                     if (nUsers == 0) {
                         System.err.println("Error, no hay lista de usuarios disponible");
                     } else {
+                        System.out.println("Total de usuarios: " + nUsers);
                         listUsuarios(scan);
                     }
                     break;

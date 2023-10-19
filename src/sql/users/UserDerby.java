@@ -121,14 +121,17 @@ public final class UserDerby implements UserDAO {
         String setProperty = "CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(";
         String fullAccessUsers = "'derby.database.fullAccessUsers'";
         String query1 = "SELECT COUNT(*) FROM " + tableName;
-        String query2 = "SELECT * FROM " + tableName + " WHERE LOWER(nombre) = LOWER(?)";
-        String query3 = "INSERT INTO " + tableName + " VALUES (?,?)";
+        String query2 = "SELECT nombre FROM " + tableName;
+        String query3 = "SELECT * FROM " + tableName + " WHERE LOWER(nombre) = LOWER(?)";
+        String query4 = "INSERT INTO " + tableName + " VALUES (?,?)";
 
         try (Connection con = DriverManager.getConnection(url, user, String.valueOf(password));
              Statement s1 = con.createStatement();
              Statement s2 = con.createStatement();
-             PreparedStatement pStmt1 = con.prepareStatement(query2);
-             PreparedStatement pStmt2 = con.prepareStatement(query3)) {
+             Statement s3 = con.createStatement();
+             PreparedStatement pStmt1 = con.prepareStatement(query3);
+             PreparedStatement pStmt2 = con.prepareStatement(query4);
+             ResultSet rs3 = s3.executeQuery(query2)) {
             ResultSet rs1 = s1.executeQuery(query1);
             rs1.next();
             if (rs1.getInt(1) >= Integer.parseInt(configProps.getProperty("database-user-maxusers"))) {
@@ -148,7 +151,11 @@ public final class UserDerby implements UserDAO {
             }
 
             s2.executeUpdate(setProperty + "'derby.user." + newUser.getNombre() + "', '" + newUser.getPassword() + "')");
-            s2.executeUpdate(setProperty + fullAccessUsers + ", '" + newUser.getNombre() + "')");
+            StringBuilder listUsers = new StringBuilder("admin,");
+            while (rs3.next()) {
+                listUsers.append(rs3.getString(1)).append(",");
+            }
+            s2.executeUpdate(setProperty + fullAccessUsers + ", '" + listUsers + newUser.getNombre() + "')");
 
             pStmt2.setInt(1, newUser.getIdUser());
             pStmt2.setString(2, newUser.getNombre());
@@ -237,35 +244,45 @@ public final class UserDerby implements UserDAO {
     @Override
     public int deleteUser(String user, char[] password, int ID) {
         String setProperty = "CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(";
+        String fullAccessUsers = "'derby.database.fullAccessUsers'";
         String query1 = "SELECT * FROM " + tableName + " WHERE iduser = ?";
-        String query2 = "DELETE FROM " + tableName + " WHERE iduser = ?";
-        String query3 = String.format("SELECT iduser FROM %s WHERE iduser = (SELECT max(iduser) FROM %s)", tableName, tableName);
+        String query2 = "SELECT nombre FROM " + tableName;
+        String query3 = "DELETE FROM " + tableName + " WHERE iduser = ?";
+        String query4 = String.format("SELECT iduser FROM %s WHERE iduser = (SELECT max(iduser) FROM %s)", tableName, tableName);
 
         try (Connection con = DriverManager.getConnection(url, user, String.valueOf(password));
              Statement s1 = con.createStatement();
+             Statement s2 = con.createStatement();
              PreparedStatement pStmt1 = con.prepareStatement(query1);
-             PreparedStatement pStmt2 = con.prepareStatement(query2);
-             Statement stmt3 = con.createStatement()) {
+             PreparedStatement pStmt3 = con.prepareStatement(query3);
+             Statement stmt4 = con.createStatement()) {
             pStmt1.setInt(1, ID);
-            ResultSet rs = pStmt1.executeQuery();
-            if (rs.next()) {
-                s1.executeUpdate(setProperty + "'derby.user." + rs.getInt(2) + "', null)");
-                rs.close();
+            ResultSet rs1 = pStmt1.executeQuery();
+            if (rs1.next()) {
+                s1.executeUpdate(setProperty + "'derby.user." + rs1.getString(2) + "', null)");
+                rs1.close();
             } else {
-                rs.close();
+                rs1.close();
                 throw new SQLException("No se encuentra usuario con la ID indicada");
             }
 
-            pStmt2.setInt(1, ID);
-            if (pStmt2.executeUpdate() == 1) {
+            pStmt3.setInt(1, ID);
+            if (pStmt3.executeUpdate() == 1) {
+                StringBuilder listUsers = new StringBuilder("admin,");
+                ResultSet rs2 = s2.executeQuery(query2);
+                while (rs2.next()) {
+                    listUsers.append(rs2.getString(1)).append(",");
+                }
+                rs2.close();
+                s1.executeUpdate(setProperty + fullAccessUsers + ", '" + listUsers.deleteCharAt(listUsers.length() - 1) + "')");
                 System.out.println("Usuario eliminado con éxito.");
-                ResultSet rs3 = stmt3.executeQuery(query3);
-                if (rs3.next()) {
-                    int maxIDUser = rs3.getInt(1);
-                    rs3.close();
+                ResultSet rs4 = stmt4.executeQuery(query4);
+                if (rs4.next()) {
+                    int maxIDUser = rs4.getInt(1);
+                    rs4.close();
                     return maxIDUser;
                 } else {
-                    rs3.close();
+                    rs4.close();
                     return 0;
                 }
             } else {

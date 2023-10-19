@@ -4,6 +4,7 @@
 package tables;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -98,7 +99,7 @@ public class Socio implements Comparable<Socio>, Serializable {
      * @return Lista de libros prestados
      */
     public List<Libro> getLibroList() {
-        return libroList;
+        return new ArrayList<>(libroList);
     }
 
     /**
