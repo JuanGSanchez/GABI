@@ -225,9 +225,13 @@ final class SocioMenu {
                 switch (opt) {
                     case 1:
                         System.out.println("Introduce " + searchVar[opt - 1] + " -");
-                        ID = scan.nextInt();
+                        try {
+                            ID = scan.nextInt();
+                            isValid = true;
+                        } catch (InputMismatchException ime) {
+                            System.err.println("  Entrada no válida");
+                        }
                         scan.nextLine();
-                        isValid = true;
                         break;
                     case 2:
                     case 3:
@@ -289,9 +293,13 @@ final class SocioMenu {
                 switch (opt) {
                     case 1:
                         System.out.println("Introduce " + searchVar[opt - 1] + " -");
-                        ID = scan.nextInt();
+                        try {
+                            ID = scan.nextInt();
+                            isValid = true;
+                        } catch (InputMismatchException ime) {
+                            System.err.println("  Entrada no válida");
+                        }
                         scan.nextLine();
-                        isValid = true;
                         break;
                     case 2:
                     case 3:
