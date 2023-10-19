@@ -162,7 +162,6 @@ final class UserMenu {
                     } else if (nombre.trim().length() > Integer.parseInt(configProps.getProperty("database-table-4-field-2-maxchar"))) {
                         System.err.printf("  El nombre no puede superar los %s caracteres\n", configProps.getProperty("database-table-4-field-2-maxchar"));
                     } else {
-                        nombre = nombre.trim();
                         nombre = nombre.substring(0, 1).toUpperCase() + nombre.substring(1).toLowerCase();
                         isValid = true;
                     }
@@ -186,8 +185,6 @@ final class UserMenu {
                     } else if (passwd.trim().length() > Integer.parseInt(configProps.getProperty("database-table-4-field-2-maxchar"))) {
                         System.err.printf("  La contraseña no puede superar los %s caracteres\n", configProps.getProperty("database-table-4-field-2-maxchar"));
                     } else {
-                        passwd = passwd.trim();
-                        passwd = passwd.substring(0, 1).toUpperCase() + passwd.substring(1).toLowerCase();
                         isValid = true;
                     }
                 } catch (InputMismatchException ime) {

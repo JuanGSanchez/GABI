@@ -118,7 +118,46 @@ public final class UserDerby implements UserDAO {
      */
     @Override
     public void addUser(String user, char[] password, Usuario newUser) {
+        String setProperty = "CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(";
+        String fullAccessUsers = "'derby.database.fullAccessUsers'";
+        String query1 = "SELECT COUNT(*) FROM " + tableName;
+        String query2 = "SELECT * FROM " + tableName + " WHERE LOWER(nombre) = LOWER(?)";
+        String query3 = "INSERT INTO " + tableName + " VALUES (?,?)";
 
+        try (Connection con = DriverManager.getConnection(url, user, String.valueOf(password));
+             Statement s1 = con.createStatement();
+             Statement s2 = con.createStatement();
+             PreparedStatement pStmt1 = con.prepareStatement(query2);
+             PreparedStatement pStmt2 = con.prepareStatement(query3)) {
+            ResultSet rs1 = s1.executeQuery(query1);
+            rs1.next();
+            if (rs1.getInt(1) >= Integer.parseInt(configProps.getProperty("database-user-maxusers"))) {
+                rs1.close();
+                throw new SQLException("Límite de usuarios registrados ya alcanzado");
+            } else {
+                rs1.close();
+            }
+
+            pStmt1.setString(1, newUser.getNombre());
+            ResultSet pRs1 = pStmt1.executeQuery();
+            if (pRs1.next()) {
+                pRs1.close();
+                throw new SQLException("Usuario ya registrado");
+            } else {
+                pRs1.close();
+            }
+
+            s2.executeUpdate(setProperty + "'derby.user." + newUser.getNombre() + "', '" + newUser.getPassword() + "')");
+            s2.executeUpdate(setProperty + fullAccessUsers + ", '" + newUser.getNombre() + "')");
+
+            pStmt2.setInt(1, newUser.getIdUser());
+            pStmt2.setString(2, newUser.getNombre());
+            if (pStmt2.executeUpdate() == 1) {
+                System.out.println("  nuevo usuario agregado con éxito.");
+            } else throw new SQLException("Ha habido un problema inesperado\nal intentar agregar el libro");
+        } catch (SQLException sqle) {
+            throw new RuntimeException(sqle.getMessage());
+        }
     }
 
     /**
@@ -147,11 +186,46 @@ public final class UserDerby implements UserDAO {
     }
 
     public List<Usuario> searchUser(String user, char[] password, String seed) {
+        String query = "SELECT * FROM " + tableName + " WHERE LOWER(nombre) LIKE LOWER(?)";
 
+        try (Connection con = DriverManager.getConnection(url, user, String.valueOf(password));
+             PreparedStatement pStmt = con.prepareStatement(query)) {
+            pStmt.setString(1, "%" + seed + "%");
+            List<Usuario> listUsuarios = new ArrayList<>();
+            ResultSet rs = pStmt.executeQuery();
+            while (rs.next()) {
+                listUsuarios.add(new Usuario(rs.getInt(1),
+                        rs.getString(2)));
+            }
+            rs.close();
+            if (listUsuarios.isEmpty()) {
+                throw new SQLException("No se encuentran usuarios con los parámetros de búsqueda indicados");
+            }
+            return listUsuarios;
+        } catch (SQLException sqle) {
+            throw new RuntimeException("  Error inesperado durante el contacto con la base de datos\n" + sqle.getMessage());
+        }
     }
 
     public Usuario searchUser(String user, char[] password, int ID) {
+        String query = "SELECT * FROM " + tableName + " WHERE iduser = ?";
 
+        try (Connection con = DriverManager.getConnection(url, user, String.valueOf(password));
+             PreparedStatement pStmt = con.prepareStatement(query)) {
+            pStmt.setInt(1, ID);
+            ResultSet rs = pStmt.executeQuery();
+            if (rs.next()) {
+                Usuario newUsuario = new Usuario(ID,
+                        rs.getString(2));
+                rs.close();
+                return newUsuario;
+            } else {
+                rs.close();
+                throw new SQLException("No se encuentra usuario con la ID indicada");
+            }
+        } catch (SQLException sqle) {
+            throw new RuntimeException("  Error inesperado durante el contacto con la base de datos\n" + sqle.getMessage());
+        }
     }
 
     /**
@@ -162,6 +236,44 @@ public final class UserDerby implements UserDAO {
      */
     @Override
     public int deleteUser(String user, char[] password, int ID) {
+        String setProperty = "CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(";
+        String query1 = "SELECT * FROM " + tableName + " WHERE iduser = ?";
+        String query2 = "DELETE FROM " + tableName + " WHERE iduser = ?";
+        String query3 = String.format("SELECT iduser FROM %s WHERE iduser = (SELECT max(iduser) FROM %s)", tableName, tableName);
+
+        try (Connection con = DriverManager.getConnection(url, user, String.valueOf(password));
+             Statement s1 = con.createStatement();
+             PreparedStatement pStmt1 = con.prepareStatement(query1);
+             PreparedStatement pStmt2 = con.prepareStatement(query2);
+             Statement stmt3 = con.createStatement()) {
+            pStmt1.setInt(1, ID);
+            ResultSet rs = pStmt1.executeQuery();
+            if (rs.next()) {
+                s1.executeUpdate(setProperty + "'derby.user." + rs.getInt(2) + "', null)");
+                rs.close();
+            } else {
+                rs.close();
+                throw new SQLException("No se encuentra usuario con la ID indicada");
+            }
+
+            pStmt2.setInt(1, ID);
+            if (pStmt2.executeUpdate() == 1) {
+                System.out.println("Usuario eliminado con éxito.");
+                ResultSet rs3 = stmt3.executeQuery(query3);
+                if (rs3.next()) {
+                    int maxIDUser = rs3.getInt(1);
+                    rs3.close();
+                    return maxIDUser;
+                } else {
+                    rs3.close();
+                    return 0;
+                }
+            } else {
+                throw new SQLException();
+            }
+        } catch (SQLException sqle) {
+            throw new RuntimeException("  Error inesperado durante el contacto con la base de datos\n" + sqle.getMessage());
+        }
 
     }
 }
