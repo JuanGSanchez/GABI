@@ -10,7 +10,7 @@ package tables;
  * @author JuanGS
  * @version 1.0
  */
-public class Usuario implements Comparable<Usuario> {
+public class User implements Comparable<User> {
     /**
      * ID de usuario en la tabla de datos
      */
@@ -18,7 +18,7 @@ public class Usuario implements Comparable<Usuario> {
     /**
      * Nombre de usuario
      */
-    private final String nombre;
+    private final String name;
     /**
      * Constraseña del usuario
      */
@@ -29,10 +29,10 @@ public class Usuario implements Comparable<Usuario> {
      * el objeto sin contraseña
      *
      * @param idUser ID de usuario en la tabla de datos
-     * @param nombre Nombre de usuario
+     * @param name   Nombre de usuario
      */
-    public Usuario(int idUser, String nombre) {
-        this(idUser, nombre, "");
+    public User(int idUser, String name) {
+        this(idUser, name, "");
     }
 
     /**
@@ -40,12 +40,12 @@ public class Usuario implements Comparable<Usuario> {
      * para la entrada de datos
      *
      * @param idUser   ID de usuario en la tabla de datos
-     * @param nombre   Nombre de usuario
+     * @param name     Nombre de usuario
      * @param password Constraseña del usuario
      */
-    public Usuario(int idUser, String nombre, String password) {
+    public User(int idUser, String name, String password) {
         this.idUser = idUser;
-        this.nombre = nombre;
+        this.name = name;
         this.password = password;
     }
 
@@ -63,8 +63,8 @@ public class Usuario implements Comparable<Usuario> {
      *
      * @return Nombre de usuario
      */
-    public final String getNombre() {
-        return nombre;
+    public final String getName() {
+        return name;
     }
 
     /**
@@ -90,9 +90,9 @@ public class Usuario implements Comparable<Usuario> {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        Usuario usuario = (Usuario) o;
+        User user = (User) o;
 
-        return nombre.equals(usuario.nombre);
+        return name.equals(user.name);
     }
 
     /**
@@ -102,7 +102,7 @@ public class Usuario implements Comparable<Usuario> {
      */
     @Override
     public int hashCode() {
-        return nombre.hashCode();
+        return name.hashCode();
     }
 
     /**
@@ -112,18 +112,18 @@ public class Usuario implements Comparable<Usuario> {
      */
     @Override
     public String toString() {
-        return String.format("Usuario %d: %-10s", this.idUser, this.nombre);
+        return String.format("Usuario %d: %-10s", this.idUser, this.name);
     }
 
     /**
      * Método de comparación entre objetos Usuario
      * para ordenación natural según el nombre
      *
-     * @param otherUsuario otro objeto Usuario con el que comparar
+     * @param otherUser otro objeto Usuario con el que comparar
      * @return Entero de referencia para el proceso de ordenación
      */
     @Override
-    public int compareTo(Usuario otherUsuario) {
-        return this.idUser - otherUsuario.getIdUser();
+    public int compareTo(User otherUser) {
+        return this.idUser - otherUser.getIdUser();
     }
 }

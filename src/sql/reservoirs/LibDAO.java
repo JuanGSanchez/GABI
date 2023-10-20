@@ -14,7 +14,7 @@ import java.util.List;
  * @version 1.0
  * @since 07-2023
  */
-public interface BiblioDAO<T> {
+public interface LibDAO<T> {
 
     /**
      * Método de conteo de entradas en la tabla de datos

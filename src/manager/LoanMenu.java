@@ -3,12 +3,12 @@
  */
 package manager;
 
-import sql.reservoirs.BiblioDBLibro;
-import sql.reservoirs.BiblioDBPrestamo;
-import sql.reservoirs.BiblioDBSocio;
-import tables.Libro;
-import tables.Prestamo;
-import tables.Socio;
+import sql.reservoirs.LibDBBook;
+import sql.reservoirs.LibDBLoan;
+import sql.reservoirs.LibDBMember;
+import tables.Book;
+import tables.Loan;
+import tables.Member;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -22,15 +22,15 @@ import java.util.stream.Collectors;
  * @version 1.0
  * @since 07-2023
  */
-final class PrestMenu {
+final class LoanMenu {
     /**
      * Lista con fragmentos de texto según el parámetro usado en la consulta para libros
      */
-    private static final String[] searchLibroVar = {"ID", "título o fragmento", "autor o fragmento"};
+    private static final String[] searchBookVar = {"ID", "título o fragmento", "autor o fragmento"};
     /**
      * Lista con fragmentos de texto según el parámetro usado en la consulta para socios
      */
-    private static final String[] searchSocioVar = {"ID", "nombre o fragmento", "apellido o fragmento"};
+    private static final String[] searchMemberVar = {"ID", "nombre o fragmento", "apellido o fragmento"};
     /**
      * Lista con fragmentos de texto según el parámetro usado en la consulta para préstamos
      */
@@ -49,7 +49,7 @@ final class PrestMenu {
     /**
      * Variable para almacenar las opciones de submenús para libros
      */
-    private static final String searchLibroMenu = """
+    private static final String searchBookMenu = """
             \t(1) Por ID
             \t(2) Por título
             \t(3) Por autor
@@ -57,7 +57,7 @@ final class PrestMenu {
     /**
      * Variable para almacenar las opciones de submenús para socios
      */
-    private static final String searchSocioMenu = """
+    private static final String searchMemberMenu = """
             \t(1) Por ID
             \t(2) Por nombre
             \t(3) Por apellidos
@@ -83,20 +83,85 @@ final class PrestMenu {
     /**
      * Constructor de la clase, restringido al paquete
      */
-    PrestMenu(String user, String password) {
+    LoanMenu(String user, String password) {
         this.user = user;
         this.password = password;
+    }
+
+    /**
+     * Método del menú principal del gestor de Préstamos, desde el cual
+     * se acceden a las acciones disponibles
+     *
+     * @param scan   Entrada de datos por teclado
+     * @param nLoan  Número de préstamos en activo dentro de la base de datos
+     * @param idLoan Máxima ID de préstamos dentro de la base de datos
+     * @return Valores actualizados de nLoan y idLoan
+     */
+    int[] selectionMenu(Scanner scan, int nLoan, int idLoan) {
+        boolean checkMenu = true;
+        int optionMenu;
+        int[] count;
+
+        System.out.println("\n\tGESTOR PRESTAMOS");
+        do {
+            System.out.println(mainMenu);
+            try {
+                optionMenu = scan.nextInt();
+            } catch (InputMismatchException ime) {
+                optionMenu = -1;
+            }
+            scan.nextLine();
+            switch (optionMenu) {
+                case 1:
+                    count = addLoan(scan, nLoan, idLoan);
+                    nLoan = count[0];
+                    idLoan = count[1];
+                    break;
+                case 2:
+                    if (nLoan == 0) {
+                        System.err.println("Error, no hay lista de préstamos disponible");
+                    } else {
+                        listLoans(scan);
+                        System.out.println("Total de préstamos activos: " + nLoan);
+                    }
+                    break;
+                case 3:
+                    if (nLoan == 0) {
+                        System.err.println("Error, no hay lista de préstamos disponible");
+                    } else {
+                        searchLoans(scan);
+                    }
+                    break;
+                case 4:
+                    if (nLoan == 0) {
+                        System.err.println("Error, no hay lista de préstamos disponible");
+                    } else {
+                        count = deleteLoan(scan, nLoan, idLoan);
+                        nLoan = count[0];
+                        idLoan = count[1];
+                    }
+                    break;
+                case 0:
+                    System.out.println("Volviendo al menú principal...");
+                    checkMenu = false;
+                    break;
+                default:
+                    System.err.println("Entrada no válida");
+            }
+        } while (checkMenu);
+
+        return new int[]{nLoan, idLoan};
     }
 
     /**
      * Método para registrar nuevos préstamos en la base de datos
      *
      * @param scan   Entrada de datos por teclado
-     * @param nPres  Número de préstamos en activo dentro de la base de datos
-     * @param idPres Máxima ID de préstamos dentro de la base de datos
-     * @return Valores actualizados de nPres y idPres
+     * @param nLoan  Número de préstamos en activo dentro de la base de datos
+     * @param idLoan Máxima ID de préstamos dentro de la base de datos
+     * @return Valores actualizados de nLoan y idLoan
      */
-    private int[] addPrestamo(Scanner scan, int nPres, int idPres) {
+    private int[] addLoan(Scanner scan, int nLoan, int idLoan) {
         boolean isValid;
         boolean isPossible;
         boolean repeat;
@@ -113,7 +178,7 @@ final class PrestMenu {
             do {
                 System.out.println("Introduce socio receptor del préstamo - ");
                 do {
-                    System.out.println("\n  Selecciona criterio de búsqueda:\n" + searchSocioMenu);
+                    System.out.println("\n  Selecciona criterio de búsqueda:\n" + searchMemberMenu);
                     try {
                         opt = scan.nextInt();
                     } catch (InputMismatchException ime) {
@@ -122,7 +187,7 @@ final class PrestMenu {
                     scan.nextLine();
                     switch (opt) {
                         case 1:
-                            System.out.println("Introduce " + searchSocioVar[opt - 1] + " -");
+                            System.out.println("Introduce " + searchMemberVar[opt - 1] + " -");
                             try {
                                 idSoc = scan.nextInt();
                                 isValid = true;
@@ -133,13 +198,13 @@ final class PrestMenu {
                             break;
                         case 2:
                         case 3:
-                            System.out.println("Introduce " + searchSocioVar[opt - 1] + " -");
+                            System.out.println("Introduce " + searchMemberVar[opt - 1] + " -");
                             fragString = scan.nextLine();
                             isValid = true;
                             break;
                         case 0:
                             System.out.println("  Volviendo al menú del gestor...");
-                            return new int[]{nPres, idPres};
+                            return new int[]{nLoan, idLoan};
                         default:
                             System.err.println("  Entrada no válida");
                     }
@@ -147,17 +212,17 @@ final class PrestMenu {
 
                 try {
                     if (opt != 1) {
-                        List<Socio> socios = BiblioDBSocio.getInstance().searchTB(user, password, opt, fragString);
-                        Set<Integer> idsocs = socios.stream().map(Socio::getIdSoc).collect(Collectors.toSet());
-                        socios.stream().sorted(Socio::compareTo).forEach(System.out::println);
+                        List<Member> members = LibDBMember.getInstance().searchTB(user, password, opt, fragString);
+                        Set<Integer> idsocs = members.stream().map(Member::getIdMember).collect(Collectors.toSet());
+                        members.stream().sorted(Member::compareTo).forEach(System.out::println);
                         do {
-                            System.out.println("Introduce ID del socio de la lista anterior\n" +
+                            System.out.println("Introduce ID del member de la lista anterior\n" +
                                                "(-1 para cancelar operación):");
                             try {
                                 ID = scan.nextInt();
                                 if (ID == -1) {
                                     System.out.println("  Operación cancelada, volviendo al menú del gestor...");
-                                    return new int[]{nPres, idPres};
+                                    return new int[]{nLoan, idLoan};
                                 } else if (!idsocs.add(ID)) {
                                     idSoc = ID;
                                     isValid = false;
@@ -170,7 +235,7 @@ final class PrestMenu {
                             scan.nextLine();
                         } while (isValid);
                     } else {
-                        BiblioDBSocio.getInstance().searchTB(user, password, idSoc);
+                        LibDBMember.getInstance().searchTB(user, password, idSoc);
                     }
                     isPossible = true;
                 } catch (RuntimeException re) {
@@ -182,7 +247,7 @@ final class PrestMenu {
             do {
                 System.out.println("Introduce libro a ser prestado - ");
                 do {
-                    System.out.println("\nSelecciona criterio de búsqueda:\n" + searchLibroMenu);
+                    System.out.println("\nSelecciona criterio de búsqueda:\n" + searchBookMenu);
                     try {
                         opt = scan.nextInt();
                     } catch (InputMismatchException ime) {
@@ -191,7 +256,7 @@ final class PrestMenu {
                     scan.nextLine();
                     switch (opt) {
                         case 1:
-                            System.out.println("Introduce " + searchLibroVar[opt - 1] + " -");
+                            System.out.println("Introduce " + searchBookVar[opt - 1] + " -");
                             try {
                                 idLib = scan.nextInt();
                                 isValid = true;
@@ -202,13 +267,13 @@ final class PrestMenu {
                             break;
                         case 2:
                         case 3:
-                            System.out.println("Introduce " + searchLibroVar[opt - 1] + " -");
+                            System.out.println("Introduce " + searchBookVar[opt - 1] + " -");
                             fragString = scan.nextLine();
                             isValid = true;
                             break;
                         case 0:
                             System.out.println("  Volviendo al menú del gestor...");
-                            return new int[]{nPres, idPres};
+                            return new int[]{nLoan, idLoan};
                         default:
                             System.err.println("  Entrada no válida");
                     }
@@ -216,17 +281,17 @@ final class PrestMenu {
 
                 try {
                     if (opt != 1) {
-                        List<Libro> libros = BiblioDBLibro.getInstance().searchTB(user, password, opt, fragString);
-                        Set<Integer> idlibs = libros.stream().map(Libro::getIdLib).collect(Collectors.toSet());
-                        libros.stream().sorted(Libro::compareTo).forEach(System.out::println);
+                        List<Book> books = LibDBBook.getInstance().searchTB(user, password, opt, fragString);
+                        Set<Integer> idlibs = books.stream().map(Book::getIdBook).collect(Collectors.toSet());
+                        books.stream().sorted(Book::compareTo).forEach(System.out::println);
                         do {
-                            System.out.println("Introduce ID del libro de la lista anterior\n" +
+                            System.out.println("Introduce ID del book de la lista anterior\n" +
                                                "(-1 para cancelar operación):");
                             try {
                                 ID = scan.nextInt();
                                 if (ID == -1) {
                                     System.out.println("  Operación cancelada, volviendo al menú del gestor...");
-                                    return new int[]{nPres, idPres};
+                                    return new int[]{nLoan, idLoan};
                                 } else if (!idlibs.add(ID)) {
                                     idLib = ID;
                                     isValid = false;
@@ -239,7 +304,7 @@ final class PrestMenu {
                             scan.nextLine();
                         } while (isValid);
                     } else {
-                        BiblioDBLibro.getInstance().searchTB(user, password, idLib);
+                        LibDBBook.getInstance().searchTB(user, password, idLib);
                     }
                     isPossible = true;
                 } catch (RuntimeException re) {
@@ -249,8 +314,8 @@ final class PrestMenu {
             } while (!isPossible);
 
             try {
-                BiblioDBPrestamo.getInstance().addTB(user, password, new Prestamo(nPres + 1, idSoc, idLib));
-                ++nPres;
+                LibDBLoan.getInstance().addTB(user, password, new Loan(nLoan + 1, idSoc, idLib));
+                ++nLoan;
             } catch (RuntimeException re) {
                 System.err.println("  Error durante el registro en la base de datos: " + re.getMessage());
             }
@@ -259,7 +324,7 @@ final class PrestMenu {
             repeat = scan.nextLine().equals("1");
         } while (repeat);
 
-        return new int[]{nPres, idPres};
+        return new int[]{nLoan, idLoan};
     }
 
     /**
@@ -268,10 +333,10 @@ final class PrestMenu {
      *
      * @param scan Entrada de datos por teclado
      */
-    private void listPrestamos(Scanner scan) {
+    private void listLoans(Scanner scan) {
         boolean isValid = false;
         int opt;
-        List<Prestamo> arrayPrestamos;
+        List<Loan> arrayLoans;
 
         System.out.println("    Listado de Préstamos");
         do {
@@ -286,45 +351,45 @@ final class PrestMenu {
                 case 1:
                     System.out.println("\nIntroduce 1 para desplegar más detalles");
                     if (scan.nextLine().equals("1")) {
-                        arrayPrestamos = BiblioDBPrestamo.getInstance().searchDetailTB(user, password);
+                        arrayLoans = LibDBLoan.getInstance().searchDetailTB(user, password);
                     } else {
-                        arrayPrestamos = BiblioDBPrestamo.getInstance().searchTB(user, password);
+                        arrayLoans = LibDBLoan.getInstance().searchTB(user, password);
                     }
                     System.out.println("Ordenación por ID del préstamo...");
-                    arrayPrestamos.stream().sorted(Prestamo::compareTo).forEach(System.out::println);
+                    arrayLoans.stream().sorted(Loan::compareTo).forEach(System.out::println);
                     isValid = true;
                     break;
                 case 2:
                     System.out.println("\nIntroduce 1 para desplegar más detalles");
                     if (scan.nextLine().equals("1")) {
-                        arrayPrestamos = BiblioDBPrestamo.getInstance().searchDetailTB(user, password);
+                        arrayLoans = LibDBLoan.getInstance().searchDetailTB(user, password);
                     } else {
-                        arrayPrestamos = BiblioDBPrestamo.getInstance().searchTB(user, password);
+                        arrayLoans = LibDBLoan.getInstance().searchTB(user, password);
                     }
-                    System.out.println("Ordenación por ID del socio...");
-                    arrayPrestamos.stream().sorted(Comparator.comparing(Prestamo::getIdSoc)).forEach(System.out::println);
+                    System.out.println("Ordenación por ID del member...");
+                    arrayLoans.stream().sorted(Comparator.comparing(Loan::getIdMember)).forEach(System.out::println);
                     isValid = true;
                     break;
                 case 3:
                     System.out.println("\nIntroduce 1 para desplegar más detalles");
                     if (scan.nextLine().equals("1")) {
-                        arrayPrestamos = BiblioDBPrestamo.getInstance().searchDetailTB(user, password);
+                        arrayLoans = LibDBLoan.getInstance().searchDetailTB(user, password);
                     } else {
-                        arrayPrestamos = BiblioDBPrestamo.getInstance().searchTB(user, password);
+                        arrayLoans = LibDBLoan.getInstance().searchTB(user, password);
                     }
-                    System.out.println("Ordenación por ID del libro...");
-                    arrayPrestamos.stream().sorted(Comparator.comparing(Prestamo::getIdLib)).forEach(System.out::println);
+                    System.out.println("Ordenación por ID del book...");
+                    arrayLoans.stream().sorted(Comparator.comparing(Loan::getIdBook)).forEach(System.out::println);
                     isValid = true;
                     break;
                 case 4:
                     System.out.println("\nIntroduce 1 para desplegar más detalles");
                     if (scan.nextLine().equals("1")) {
-                        arrayPrestamos = BiblioDBPrestamo.getInstance().searchDetailTB(user, password);
+                        arrayLoans = LibDBLoan.getInstance().searchDetailTB(user, password);
                     } else {
-                        arrayPrestamos = BiblioDBPrestamo.getInstance().searchTB(user, password);
+                        arrayLoans = LibDBLoan.getInstance().searchTB(user, password);
                     }
                     System.out.println("Ordenación por fecha...");
-                    arrayPrestamos.stream().sorted(Comparator.comparing(Prestamo::getFechaPres)).forEach(System.out::println);
+                    arrayLoans.stream().sorted(Comparator.comparing(Loan::getDateLoan)).forEach(System.out::println);
                     isValid = true;
                     break;
                 case 0:
@@ -342,7 +407,7 @@ final class PrestMenu {
      *
      * @param scan Entrada de datos por teclado
      */
-    private void searchPrestamos(Scanner scan) {
+    private void searchLoans(Scanner scan) {
         boolean isValid;
         boolean repeat;
         int opt;
@@ -397,13 +462,13 @@ final class PrestMenu {
             } while (!isValid);
 
             try {
-                List<Prestamo> prestamos;
+                List<Loan> loans;
                 if (opt < 4) {
-                    prestamos = BiblioDBPrestamo.getInstance().searchTB(user, password, opt, ID);
+                    loans = LibDBLoan.getInstance().searchTB(user, password, opt, ID);
                 } else {
-                    prestamos = BiblioDBPrestamo.getInstance().searchTB(user, password, date);
+                    loans = LibDBLoan.getInstance().searchTB(user, password, date);
                 }
-                prestamos.forEach(System.out::println);
+                loans.forEach(System.out::println);
             } catch (RuntimeException re) {
                 System.err.println(re.getMessage());
             }
@@ -417,11 +482,11 @@ final class PrestMenu {
      * Método para retirar préstamos resueltos de la base de datos
      *
      * @param scan   Entrada de datos por teclado
-     * @param nPres  Número de préstamos en activo dentro de la base de datos
-     * @param idPres Máxima ID de préstamos dentro de la base de datos
-     * @return Valores actualizados de nPres y idPres
+     * @param nLoan  Número de préstamos en activo dentro de la base de datos
+     * @param idLoan Máxima ID de préstamos dentro de la base de datos
+     * @return Valores actualizados de nLoan y idLoan
      */
-    private int[] deletePrestamo(Scanner scan, int nPres, int idPres) {
+    private int[] deleteLoan(Scanner scan, int nLoan, int idLoan) {
         boolean isValid;
         boolean repeat;
         int opt;
@@ -469,26 +534,26 @@ final class PrestMenu {
                         break;
                     case 0:
                         System.out.println("  Volviendo al menú del gestor...");
-                        return new int[]{nPres, idPres};
+                        return new int[]{nLoan, idLoan};
                     default:
                         System.err.println("  Entrada no válida");
                 }
             } while (!isValid);
 
             try {
-                List<Prestamo> prestamos;
-                Set<Integer> idpres;
+                List<Loan> loans;
+                Set<Integer> idloans;
                 if (opt == 1) {
-                    idPres = BiblioDBPrestamo.getInstance().deleteTB(user, password, ID);
-                    nPres--;
+                    idLoan = LibDBLoan.getInstance().deleteTB(user, password, ID);
+                    nLoan--;
                 } else {
                     if (opt == 2 || opt == 3) {
-                        prestamos = BiblioDBPrestamo.getInstance().searchTB(user, password, opt, ID);
+                        loans = LibDBLoan.getInstance().searchTB(user, password, opt, ID);
                     } else {
-                        prestamos = BiblioDBPrestamo.getInstance().searchTB(user, password, date);
+                        loans = LibDBLoan.getInstance().searchTB(user, password, date);
                     }
-                    idpres = prestamos.stream().map(Prestamo::getIdPres).collect(Collectors.toSet());
-                    prestamos.stream().sorted(Prestamo::compareTo).forEach(System.out::println);
+                    idloans = loans.stream().map(Loan::getIdLoan).collect(Collectors.toSet());
+                    loans.stream().sorted(Loan::compareTo).forEach(System.out::println);
                     do {
                         System.out.println("Introduce ID del préstamo a eliminar de la lista anterior\n" +
                                            "(-1 para cancelar operación) -");
@@ -496,10 +561,10 @@ final class PrestMenu {
                             ID = scan.nextInt();
                             if (ID == -1) {
                                 System.out.println("  Operación cancelada, volviendo al menú del gestor...");
-                                return new int[]{nPres, idPres};
-                            } else if (!idpres.add(ID)) {
-                                idPres = BiblioDBLibro.getInstance().deleteTB(user, password, ID);
-                                nPres--;
+                                return new int[]{nLoan, idLoan};
+                            } else if (!idloans.add(ID)) {
+                                idLoan = LibDBBook.getInstance().deleteTB(user, password, ID);
+                                nLoan--;
                                 isValid = false;
                             } else {
                                 System.err.println("El ID proporcionado no se encuentra en la lista");
@@ -518,72 +583,7 @@ final class PrestMenu {
             repeat = scan.nextLine().equals("1");
         } while (repeat);
 
-        return new int[]{nPres, idPres};
-    }
-
-    /**
-     * Método del menú principal del gestor de Préstamos, desde el cual
-     * se acceden a las acciones disponibles
-     *
-     * @param scan   Entrada de datos por teclado
-     * @param nPres  Número de préstamos en activo dentro de la base de datos
-     * @param idPres Máxima ID de préstamos dentro de la base de datos
-     * @return Valores actualizados de nPres y idPres
-     */
-    int[] seleccionMenu(Scanner scan, int nPres, int idPres) {
-        boolean checkMenu = true;
-        int optionMenu;
-        int[] count;
-
-        System.out.println("\n\tGESTOR PRESTAMOS");
-        do {
-            System.out.println(mainMenu);
-            try {
-                optionMenu = scan.nextInt();
-            } catch (InputMismatchException ime) {
-                optionMenu = -1;
-            }
-            scan.nextLine();
-            switch (optionMenu) {
-                case 1:
-                    count = addPrestamo(scan, nPres, idPres);
-                    nPres = count[0];
-                    idPres = count[1];
-                    break;
-                case 2:
-                    if (nPres == 0) {
-                        System.err.println("Error, no hay lista de préstamos disponible");
-                    } else {
-                        listPrestamos(scan);
-                        System.out.println("Total de préstamos activos: " + nPres);
-                    }
-                    break;
-                case 3:
-                    if (nPres == 0) {
-                        System.err.println("Error, no hay lista de préstamos disponible");
-                    } else {
-                        searchPrestamos(scan);
-                    }
-                    break;
-                case 4:
-                    if (nPres == 0) {
-                        System.err.println("Error, no hay lista de préstamos disponible");
-                    } else {
-                        count = deletePrestamo(scan, nPres, idPres);
-                        nPres = count[0];
-                        idPres = count[1];
-                    }
-                    break;
-                case 0:
-                    System.out.println("Volviendo al menú principal...");
-                    checkMenu = false;
-                    break;
-                default:
-                    System.err.println("Entrada no válida");
-            }
-        } while (checkMenu);
-
-        return new int[]{nPres, idPres};
+        return new int[]{nLoan, idLoan};
     }
 
 }

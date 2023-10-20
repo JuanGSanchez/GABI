@@ -4,7 +4,7 @@
  */
 package sql.users;
 
-import tables.Usuario;
+import tables.User;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -117,7 +117,7 @@ public final class UserDerby implements UserDAO {
      * @param password Contraseña asociada al usuario
      */
     @Override
-    public void addUser(String user, char[] password, Usuario newUser) {
+    public void addUser(String user, char[] password, User newUser) {
         String setProperty = "CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(";
         String fullAccessUsers = "'derby.database.fullAccessUsers'";
         String query1 = "SELECT COUNT(*) FROM " + tableName;
@@ -141,7 +141,7 @@ public final class UserDerby implements UserDAO {
                 rs1.close();
             }
 
-            pStmt1.setString(1, newUser.getNombre());
+            pStmt1.setString(1, newUser.getName());
             ResultSet pRs1 = pStmt1.executeQuery();
             if (pRs1.next()) {
                 pRs1.close();
@@ -150,15 +150,15 @@ public final class UserDerby implements UserDAO {
                 pRs1.close();
             }
 
-            s2.executeUpdate(setProperty + "'derby.user." + newUser.getNombre() + "', '" + newUser.getPassword() + "')");
-            StringBuilder listUsers = new StringBuilder("admin,");
+            s2.executeUpdate(setProperty + "'derby.user." + newUser.getName() + "', '" + newUser.getPassword() + "')");
+            StringBuilder listUsers = new StringBuilder(configProps.getProperty("database-name") + ",");
             while (rs3.next()) {
                 listUsers.append(rs3.getString(1)).append(",");
             }
-            s2.executeUpdate(setProperty + fullAccessUsers + ", '" + listUsers + newUser.getNombre() + "')");
+            s2.executeUpdate(setProperty + fullAccessUsers + ", '" + listUsers + newUser.getName() + "')");
 
             pStmt2.setInt(1, newUser.getIdUser());
-            pStmt2.setString(2, newUser.getNombre());
+            pStmt2.setString(2, newUser.getName());
             if (pStmt2.executeUpdate() == 1) {
                 System.out.println("  nuevo usuario agregado con éxito.");
             } else throw new SQLException("Ha habido un problema inesperado\nal intentar agregar el libro");
@@ -174,47 +174,47 @@ public final class UserDerby implements UserDAO {
      * @param password Contraseña asociada al usuario
      */
     @Override
-    public List<Usuario> searchUser(String user, char[] password) {
+    public List<User> searchUser(String user, char[] password) {
         String query = "SELECT * FROM " + tableName;
-        List<Usuario> listUsuario = new ArrayList<>();
+        List<User> listUser = new ArrayList<>();
 
         try (Connection con = DriverManager.getConnection(url, user, String.valueOf(password));
              Statement stmt = con.createStatement();
              ResultSet rs = stmt.executeQuery(query)) {
             while (rs.next()) {
-                listUsuario.add(new Usuario(rs.getInt(1),
+                listUser.add(new User(rs.getInt(1),
                         rs.getString(2)));
             }
         } catch (SQLException sqle) {
             System.err.println("  Error inesperado durante el contacto con la base de datos\n" + sqle.getMessage());
         }
 
-        return listUsuario;
+        return listUser;
     }
 
-    public List<Usuario> searchUser(String user, char[] password, String seed) {
+    public List<User> searchUser(String user, char[] password, String seed) {
         String query = "SELECT * FROM " + tableName + " WHERE LOWER(nombre) LIKE LOWER(?)";
 
         try (Connection con = DriverManager.getConnection(url, user, String.valueOf(password));
              PreparedStatement pStmt = con.prepareStatement(query)) {
             pStmt.setString(1, "%" + seed + "%");
-            List<Usuario> listUsuarios = new ArrayList<>();
+            List<User> listUsers = new ArrayList<>();
             ResultSet rs = pStmt.executeQuery();
             while (rs.next()) {
-                listUsuarios.add(new Usuario(rs.getInt(1),
+                listUsers.add(new User(rs.getInt(1),
                         rs.getString(2)));
             }
             rs.close();
-            if (listUsuarios.isEmpty()) {
+            if (listUsers.isEmpty()) {
                 throw new SQLException("No se encuentran usuarios con los parámetros de búsqueda indicados");
             }
-            return listUsuarios;
+            return listUsers;
         } catch (SQLException sqle) {
             throw new RuntimeException("  Error inesperado durante el contacto con la base de datos\n" + sqle.getMessage());
         }
     }
 
-    public Usuario searchUser(String user, char[] password, int ID) {
+    public User searchUser(String user, char[] password, int ID) {
         String query = "SELECT * FROM " + tableName + " WHERE iduser = ?";
 
         try (Connection con = DriverManager.getConnection(url, user, String.valueOf(password));
@@ -222,10 +222,10 @@ public final class UserDerby implements UserDAO {
             pStmt.setInt(1, ID);
             ResultSet rs = pStmt.executeQuery();
             if (rs.next()) {
-                Usuario newUsuario = new Usuario(ID,
+                User newUser = new User(ID,
                         rs.getString(2));
                 rs.close();
-                return newUsuario;
+                return newUser;
             } else {
                 rs.close();
                 throw new SQLException("No se encuentra usuario con la ID indicada");
@@ -268,7 +268,7 @@ public final class UserDerby implements UserDAO {
 
             pStmt3.setInt(1, ID);
             if (pStmt3.executeUpdate() == 1) {
-                StringBuilder listUsers = new StringBuilder("admin,");
+                StringBuilder listUsers = new StringBuilder(configProps.getProperty("database-name") + ",");
                 ResultSet rs2 = s2.executeQuery(query2);
                 while (rs2.next()) {
                     listUsers.append(rs2.getString(1)).append(",");

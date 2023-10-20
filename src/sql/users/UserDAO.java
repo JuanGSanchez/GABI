@@ -4,7 +4,7 @@
  */
 package sql.users;
 
-import tables.Usuario;
+import tables.User;
 
 import java.util.List;
 
@@ -41,7 +41,7 @@ public interface UserDAO {
      * @param user     Nombre del usuario
      * @param password Contraseña asociada al usuario
      */
-    void addUser(String user, char[] password, Usuario newUser);
+    void addUser(String user, char[] password, User newUser);
 
     /**
      * Método para buscar usuarios de la base de datos
@@ -49,7 +49,7 @@ public interface UserDAO {
      * @param user     Nombre del usuario
      * @param password Contraseña asociada al usuario
      */
-    List<Usuario> searchUser(String user, char[] password);
+    List<User> searchUser(String user, char[] password);
 
     /**
      * Método para eliminar un usuario de la base de datos

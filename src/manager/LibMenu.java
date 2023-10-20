@@ -3,9 +3,9 @@
  */
 package manager;
 
-import sql.reservoirs.BiblioDBLibro;
-import sql.reservoirs.BiblioDBPrestamo;
-import sql.reservoirs.BiblioDBSocio;
+import sql.reservoirs.LibDBBook;
+import sql.reservoirs.LibDBLoan;
+import sql.reservoirs.LibDBMember;
 import sql.users.UserDerby;
 
 import java.io.FileInputStream;
@@ -22,7 +22,7 @@ import java.util.Scanner;
  * @version 1.0
  * @since 07-2023
  */
-public final class BiblioMenu {
+public final class LibMenu {
     /**
      * Variable de entrada de datos por teclado
      */
@@ -33,7 +33,7 @@ public final class BiblioMenu {
     private static final Properties configProps = new Properties();
     /**
      * Variable para almacenar aparte el texto del menú principal,
-     * versión para usuarios
+     * versión para users
      */
     private static final String mainMenu1 = """
                             
@@ -55,34 +55,34 @@ public final class BiblioMenu {
               (4) Gestor de Usuarios
               (0) Salir del sistema""";
     /**
-     * Número de libros guardados dentro de la base de datos
+     * Número de books guardados dentro de la base de datos
      */
-    private static int nLibros;
+    private static int nBooks;
     /**
-     * Máxima ID de libros dentro de la base de datos
+     * Máxima ID de books dentro de la base de datos
      */
-    private static int idLibros;
+    private static int idBooks;
     /**
-     * Número de socios registrados dentro de la base de datos
+     * Número de members registrados dentro de la base de datos
      */
-    private static int nSocios;
+    private static int nMembers;
     /**
-     * Máxima ID de socios dentro de la base de datos
+     * Máxima ID de members dentro de la base de datos
      */
-    private static int idSocios;
+    private static int idMembers;
     /**
      * Número de préstamos en activo dentro de la base de datos
      */
-    private static int nPrestamos;
+    private static int nLoans;
     /**
      * Máxima ID de préstamos dentro de la base de datos
      */
-    private static int idPrestamos;
+    private static int idLoans;
 
     /**
      * Constructor privado de la clase para evitar instancias
      */
-    private BiblioMenu() {
+    private LibMenu() {
         try (FileInputStream fis = new FileInputStream("src/configuration.properties")) {
             configProps.load(fis);
         } catch (FileNotFoundException ffe) {
@@ -102,7 +102,7 @@ public final class BiblioMenu {
         String name = null;
         String password = null;
 
-        new BiblioMenu();
+        new LibMenu();
 
         do {
             System.out.println("\t\t|- G.A.B.I -|\n(Gestor Autónomo de Biblioteca Interactivo)");
@@ -136,7 +136,7 @@ public final class BiblioMenu {
             selectionBlock(name, password);
 
             System.out.print("\nIntroduce 1 para cambiar de usuario: ");
-            if (!scanMenu.nextLine().equals("1")){
+            if (!scanMenu.nextLine().equals("1")) {
                 System.out.println("\nSaliendo...");
                 repeat = false;
             } else {
@@ -196,27 +196,27 @@ public final class BiblioMenu {
         int optionMenu;
         int[] count;
 
-        LibroMenu lMenu = new LibroMenu(name, password);
-        SocioMenu sMenu = new SocioMenu(name, password);
-        PrestMenu pMenu = new PrestMenu(name, password);
+        BookMenu lMenu = new BookMenu(name, password);
+        MemberMenu sMenu = new MemberMenu(name, password);
+        LoanMenu pMenu = new LoanMenu(name, password);
 
         do {
-            count = BiblioDBLibro.getInstance().countTB(name, password);
+            count = LibDBBook.getInstance().countTB(name, password);
             if (count != null) {
-                nLibros = count[0];
-                idLibros = count[1];
+                nBooks = count[0];
+                idBooks = count[1];
             }
-            count = BiblioDBSocio.getInstance().countTB(name, password);
+            count = LibDBMember.getInstance().countTB(name, password);
             if (count != null) {
-                nSocios = count[0];
-                idSocios = count[1];
+                nMembers = count[0];
+                idMembers = count[1];
             }
-            count = BiblioDBPrestamo.getInstance().countTB(name, password);
+            count = LibDBLoan.getInstance().countTB(name, password);
             if (count != null) {
-                nPrestamos = count[0];
-                idPrestamos = count[1];
+                nLoans = count[0];
+                idLoans = count[1];
             }
-            System.out.printf("\nHay %d libros, %d socios y %d préstamos registrados actualmente\n", nLibros, nSocios, nPrestamos);
+            System.out.printf("\nHay %d libros, %d socios y %d préstamos registrados actualmente\n", nBooks, nMembers, nLoans);
 
             System.out.println(name.equals(configProps.getProperty("database-name")) ? mainMenu2 : mainMenu1);
 
@@ -228,19 +228,19 @@ public final class BiblioMenu {
             scanMenu.nextLine();
             switch (optionMenu) {
                 case 1:
-                    count = lMenu.seleccionMenu(scanMenu, nLibros, idLibros);
-                    nLibros = count[0];
-                    idLibros = count[1];
+                    count = lMenu.selectionMenu(scanMenu, nBooks, idBooks);
+                    nBooks = count[0];
+                    idBooks = count[1];
                     break;
                 case 2:
-                    count = sMenu.seleccionMenu(scanMenu, nSocios, idSocios);
-                    nSocios = count[0];
-                    idSocios = count[1];
+                    count = sMenu.selectionMenu(scanMenu, nMembers, idMembers);
+                    nMembers = count[0];
+                    idMembers = count[1];
                     break;
                 case 3:
-                    count = pMenu.seleccionMenu(scanMenu, nPrestamos, idPrestamos);
-                    nPrestamos = count[0];
-                    idPrestamos = count[1];
+                    count = pMenu.selectionMenu(scanMenu, nLoans, idLoans);
+                    nLoans = count[0];
+                    idLoans = count[1];
                     break;
                 case 4:
                     if (name.equals(configProps.getProperty("database-name"))) {

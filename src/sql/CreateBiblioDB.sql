@@ -1,40 +1,40 @@
 # JavaDB Database setup
 
-DROP TABLE prestamos;
-DROP TABLE libros;
-DROP TABLE socios;
-DROP TABLE usuarios;
+DROP TABLE loans;
+DROP TABLE books;
+DROP TABLE members;
+DROP TABLE users;
 DROP SCHEMA admin RESTRICT;
 
 CREATE SCHEMA admin;
 
-CREATE TABLE admin.usuarios(
+CREATE TABLE admin.users(
     iduser INTEGER NOT NULL,
-    nombre VARCHAR(20),
+    name VARCHAR(20),
     PRIMARY KEY (iduser)
 );
 
-CREATE TABLE admin.libros (
-    idlib INTEGER NOT NULL,
-    titulo VARCHAR(120),
-    autor VARCHAR(60),
-    prestado BOOLEAN,
-    PRIMARY KEY (idlib)
+CREATE TABLE admin.books (
+    idbook INTEGER NOT NULL,
+    title VARCHAR(120),
+    author VARCHAR(60),
+    lent BOOLEAN,
+    PRIMARY KEY (idbook)
 );
 
-CREATE TABLE admin.socios (
-    idsoc INTEGER NOT NULL,
-    nombre VARCHAR(20),
-    apellidos VARCHAR(40),
-    PRIMARY KEY (idsoc)
+CREATE TABLE admin.members (
+    idmember INTEGER NOT NULL,
+    name VARCHAR(20),
+    surname VARCHAR(40),
+    PRIMARY KEY (idmember)
 );
 
-CREATE TABLE admin.prestamos (
-    idpres INTEGER NOT NULL,
-    idsoc INTEGER NOT NULL,
-    idlib INTEGER NOT NULL,
-    fechapres DATE,
-    PRIMARY KEY (idpres),
-    FOREIGN KEY (idsoc) REFERENCES socios(idsoc),
-    FOREIGN KEY (idlib) REFERENCES libros(idlib)
+CREATE TABLE admin.loans (
+    idloan INTEGER NOT NULL,
+    idmember INTEGER NOT NULL,
+    idbook INTEGER NOT NULL,
+    dateloan DATE,
+    PRIMARY KEY (idloan),
+    FOREIGN KEY (idmember) REFERENCES members(idmember),
+    FOREIGN KEY (idbook) REFERENCES books(idbook)
 );

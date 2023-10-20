@@ -12,50 +12,50 @@ import java.io.Serializable;
  * @author JuanGS
  * @version 1.0
  */
-public class Libro implements Comparable<Libro>, Serializable {
+public class Book implements Comparable<Book>, Serializable {
     /**
      * ID del libro
      */
-    private final int idLib;
+    private final int idBook;
     /**
      * Título del libro
      */
-    private final String titulo;
+    private final String title;
     /**
      * Autor (principal) del libro
      */
-    private final String autor;
+    private final String author;
     /**
      * Estado de disponibilidad del libro
      */
-    private final boolean prestado;
+    private final boolean lent;
 
     /**
      * Constructor completo de la clase,
      * designado para creación de entrada
      *
-     * @param idLib  ID del libro
-     * @param titulo Título del libro
-     * @param autor  Autor (principal) del libro
+     * @param idBook ID del libro
+     * @param title  Título del libro
+     * @param author Autor (principal) del libro
      */
-    public Libro(int idLib, String titulo, String autor) {
-        this(idLib, titulo, autor, false);
+    public Book(int idBook, String title, String author) {
+        this(idBook, title, author, false);
     }
 
     /**
      * Constructor completo de la clase,
      * designado para recolección de entrada
      *
-     * @param idLib    ID del libro
-     * @param titulo   Título del libro
-     * @param autor    Autor (principal) del libro
-     * @param prestado Estado de disponibilidad del libro
+     * @param idBook ID del libro
+     * @param title  Título del libro
+     * @param author Autor (principal) del libro
+     * @param lent   Estado de disponibilidad del libro
      */
-    public Libro(int idLib, String titulo, String autor, boolean prestado) {
-        this.idLib = idLib;
-        this.titulo = titulo;
-        this.autor = autor;
-        this.prestado = prestado;
+    public Book(int idBook, String title, String author, boolean lent) {
+        this.idBook = idBook;
+        this.title = title;
+        this.author = author;
+        this.lent = lent;
     }
 
     /**
@@ -63,8 +63,8 @@ public class Libro implements Comparable<Libro>, Serializable {
      *
      * @return ID del libro
      */
-    public final int getIdLib() {
-        return idLib;
+    public final int getIdBook() {
+        return idBook;
     }
 
     /**
@@ -72,8 +72,8 @@ public class Libro implements Comparable<Libro>, Serializable {
      *
      * @return Título del libro
      */
-    public final String getTitulo() {
-        return titulo;
+    public final String getTitle() {
+        return title;
     }
 
     /**
@@ -81,8 +81,8 @@ public class Libro implements Comparable<Libro>, Serializable {
      *
      * @return Autor (principal) del libro
      */
-    public final String getAutor() {
-        return autor;
+    public final String getAuthor() {
+        return author;
     }
 
     /**
@@ -90,8 +90,8 @@ public class Libro implements Comparable<Libro>, Serializable {
      *
      * @return estado "prestado" del libro
      */
-    public final boolean isPrestado() {
-        return prestado;
+    public final boolean isLent() {
+        return lent;
     }
 
     /**
@@ -106,10 +106,10 @@ public class Libro implements Comparable<Libro>, Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        Libro libro = (Libro) o;
+        Book book = (Book) o;
 
-        if (!titulo.equalsIgnoreCase(libro.titulo)) return false;
-        return autor.equalsIgnoreCase(libro.autor);
+        if (!title.equalsIgnoreCase(book.title)) return false;
+        return author.equalsIgnoreCase(book.author);
     }
 
     /**
@@ -120,8 +120,8 @@ public class Libro implements Comparable<Libro>, Serializable {
      */
     @Override
     public int hashCode() {
-        int result = titulo.hashCode();
-        result = 31 * result + autor.hashCode();
+        int result = title.hashCode();
+        result = 31 * result + author.hashCode();
         return result;
     }
 
@@ -132,19 +132,19 @@ public class Libro implements Comparable<Libro>, Serializable {
      */
     @Override
     public String toString() {
-        return this.getClass().getSimpleName() + " " + idLib + ":   " + String.format("%-120s", titulo)
-               + "   ;   " + String.format("%-60s", autor) + String.format(" (%s)", prestado ? "prestado" : "disponible");
+        return this.getClass().getSimpleName() + " " + idBook + ":   " + String.format("%-120s", title)
+               + "   ;   " + String.format("%-60s", author) + String.format(" (%s)", lent ? "prestado" : "disponible");
     }
 
     /**
      * Método sobreescrito de ordenación de objetos Libro según
      * su identificación numérica ID
      *
-     * @param otherLibro El otro objeto Libro al que ser comparado
+     * @param otherBook El otro objeto Libro al que ser comparado
      * @return Entero de referencia para el proceso de ordenación
      */
     @Override
-    public int compareTo(Libro otherLibro) {
-        return this.idLib - otherLibro.getIdLib();
+    public int compareTo(Book otherBook) {
+        return this.idBook - otherBook.getIdBook();
     }
 }

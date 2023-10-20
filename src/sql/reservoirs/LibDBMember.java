@@ -4,8 +4,8 @@
  */
 package sql.reservoirs;
 
-import tables.Libro;
-import tables.Socio;
+import tables.Book;
+import tables.Member;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -23,11 +23,11 @@ import java.util.Properties;
  * @version 1.0
  * @since 07-2023
  */
-public final class BiblioDBSocio implements BiblioDAO<Socio> {
+public final class LibDBMember implements LibDAO<Member> {
     /**
      * Instancia única de la clase
      */
-    private static final BiblioDBSocio instance = new BiblioDBSocio();
+    private static final LibDBMember instance = new LibDBMember();
     /**
      * URL de la base de datos utilizada por este código
      */
@@ -44,7 +44,7 @@ public final class BiblioDBSocio implements BiblioDAO<Socio> {
     /**
      * Constructor privado de la clase
      */
-    private BiblioDBSocio() {
+    private LibDBMember() {
         configProps = new Properties();
         try (FileInputStream fis = new FileInputStream("src/configuration.properties")) {
             configProps.load(fis);
@@ -62,7 +62,7 @@ public final class BiblioDBSocio implements BiblioDAO<Socio> {
      *
      * @return Instancia de clase
      */
-    public static BiblioDBSocio getInstance() {
+    public static LibDBMember getInstance() {
         return instance;
     }
 
@@ -96,18 +96,18 @@ public final class BiblioDBSocio implements BiblioDAO<Socio> {
     /**
      * Método para introducir una nueva entrada en la tabla de datos Socios
      *
-     * @param socio Objeto Socio que registrar en la base de datos
+     * @param member Objeto Socio que registrar en la base de datos
      */
     @Override
-    public void addTB(String user, String password, Socio socio) {
+    public void addTB(String user, String password, Member member) {
         String query1 = "SELECT * FROM " + tableName + " WHERE LOWER(nombre) = LOWER(?) AND LOWER(apellidos) = LOWER(?)";
         String query2 = "INSERT INTO " + tableName + " VALUES (?,?,?)";
 
         try (Connection con = DriverManager.getConnection(url, user, password);
              PreparedStatement pStmt1 = con.prepareStatement(query1);
              PreparedStatement pStmt2 = con.prepareStatement(query2)) {
-            pStmt1.setString(1, socio.getNombre());
-            pStmt1.setString(2, socio.getApellidos());
+            pStmt1.setString(1, member.getName());
+            pStmt1.setString(2, member.getSurname());
             ResultSet rs = pStmt1.executeQuery();
             if (rs.next()) {
                 rs.close();
@@ -116,9 +116,9 @@ public final class BiblioDBSocio implements BiblioDAO<Socio> {
                 rs.close();
             }
 
-            pStmt2.setInt(1, socio.getIdSoc());
-            pStmt2.setString(2, socio.getNombre());
-            pStmt2.setString(3, socio.getApellidos());
+            pStmt2.setInt(1, member.getIdMember());
+            pStmt2.setString(2, member.getName());
+            pStmt2.setString(3, member.getSurname());
             if (pStmt2.executeUpdate() == 1) {
                 System.out.println("  nuevo socio agregado con éxito.");
             } else throw new SQLException("Ha habido un problema inesperado\nal intentar agregar el socio");
@@ -133,15 +133,15 @@ public final class BiblioDBSocio implements BiblioDAO<Socio> {
      * @return Lista de objetos Socio por cada entrada de la tabla de datos
      */
     @Override
-    public List<Socio> searchTB(String user, String password) {
+    public List<Member> searchTB(String user, String password) {
         String query = "SELECT * FROM " + tableName;
-        List<Socio> listSocio = new ArrayList<>();
+        List<Member> listMember = new ArrayList<>();
 
         try (Connection con = DriverManager.getConnection(url, user, password);
              Statement stmt = con.createStatement();
              ResultSet rs = stmt.executeQuery(query)) {
             while (rs.next()) {
-                listSocio.add(new Socio(rs.getInt(1),
+                listMember.add(new Member(rs.getInt(1),
                         rs.getString(2),
                         rs.getString(3)));
             }
@@ -149,7 +149,7 @@ public final class BiblioDBSocio implements BiblioDAO<Socio> {
             System.err.println("  Error inesperado durante el contacto con la base de datos\n" + sqle.getMessage());
         }
 
-        return listSocio;
+        return listMember;
     }
 
     /**
@@ -159,45 +159,45 @@ public final class BiblioDBSocio implements BiblioDAO<Socio> {
      * @return Lista de objetos Socio por cada entrada de la tabla de datos
      */
     @Override
-    public List<Socio> searchDetailTB(String user, String password) {
+    public List<Member> searchDetailTB(String user, String password) {
         String query1 = "SELECT * FROM " + tableName;
         String query2 = "SELECT idlib FROM " + configProps.getProperty("database-name") + "." + configProps.getProperty("database-table-3") + " WHERE idsoc = ?";
         String query3 = "SELECT * FROM " + configProps.getProperty("database-name") + "." + configProps.getProperty("database-table-1") + " WHERE idlib = ?";
-        List<Socio> listSocio = new ArrayList<>();
+        List<Member> listMember = new ArrayList<>();
 
         try (Connection con = DriverManager.getConnection(url, user, password);
              Statement stmt1 = con.createStatement();
              PreparedStatement pStmt2 = con.prepareStatement(query2);
              PreparedStatement pStmt3 = con.prepareStatement(query3);
              ResultSet rs1 = stmt1.executeQuery(query1)) {
-            List<Libro> libroList;
+            List<Book> bookList;
             ResultSet rs2 = pStmt2.getResultSet();
             ResultSet rs3;
             while (rs1.next()) {
-                libroList = new ArrayList<>();
+                bookList = new ArrayList<>();
                 pStmt2.setInt(1, rs1.getInt(1));
                 rs2 = pStmt2.executeQuery();
                 while (rs2.next()) {
                     pStmt3.setInt(1, rs2.getInt(1));
                     rs3 = pStmt3.executeQuery();
                     rs3.next();
-                    libroList.add(new Libro(rs3.getInt(1),
+                    bookList.add(new Book(rs3.getInt(1),
                             rs3.getString(2),
                             rs3.getString(3),
                             rs3.getBoolean(4)));
                     rs3.close();
                 }
-                listSocio.add(new Socio(rs1.getInt(1),
+                listMember.add(new Member(rs1.getInt(1),
                         rs1.getString(2),
                         rs1.getString(3),
-                        libroList));
+                        bookList));
             }
             rs2.close();
         } catch (SQLException sqle) {
             System.err.println("  Error inesperado durante el contacto con la base de datos\n" + sqle.getMessage());
         }
 
-        return listSocio;
+        return listMember;
     }
 
     /**
@@ -209,24 +209,24 @@ public final class BiblioDBSocio implements BiblioDAO<Socio> {
      * @param seed Fragmento de texto que buscar en las entradas de la tabla
      * @return Lista de objetos Socio que hayan salido de la búsqueda
      */
-    public List<Socio> searchTB(String user, String password, int opt, String seed) {
+    public List<Member> searchTB(String user, String password, int opt, String seed) {
         String query = "SELECT * FROM " + tableName + " WHERE LOWER(" + (opt == 2 ? "nombre" : "apellidos") + ") LIKE LOWER(?)";
 
         try (Connection con = DriverManager.getConnection(url, user, password);
              PreparedStatement pStmt = con.prepareStatement(query)) {
             pStmt.setString(1, "%" + seed + "%");
-            List<Socio> listSocio = new ArrayList<>();
+            List<Member> listMember = new ArrayList<>();
             ResultSet rs = pStmt.executeQuery();
             while (rs.next()) {
-                listSocio.add(new Socio(rs.getInt(1),
+                listMember.add(new Member(rs.getInt(1),
                         rs.getString(2),
                         rs.getString(3)));
             }
             rs.close();
-            if (listSocio.isEmpty()) {
+            if (listMember.isEmpty()) {
                 throw new SQLException("No se encuentran socios con los parámetros de búsqueda indicados");
             }
-            return listSocio;
+            return listMember;
         } catch (SQLException sqle) {
             throw new RuntimeException("  Error inesperado durante el contacto con la base de datos\n" + sqle.getMessage());
         }
@@ -239,7 +239,7 @@ public final class BiblioDBSocio implements BiblioDAO<Socio> {
      * @param ID Identificación numérica de la entrada en la tabla
      * @return Objeto Socio con los datos de la entrada encontrada
      */
-    public Socio searchTB(String user, String password, int ID) {
+    public Member searchTB(String user, String password, int ID) {
         String query = "SELECT * FROM " + tableName + " WHERE idsoc = ?";
 
         try (Connection con = DriverManager.getConnection(url, user, password);
@@ -247,9 +247,9 @@ public final class BiblioDBSocio implements BiblioDAO<Socio> {
             pStmt.setInt(1, ID);
             ResultSet rs = pStmt.executeQuery();
             if (rs.next()) {
-                Socio newSocio = new Socio(ID, rs.getString(2), rs.getString(3));
+                Member newMember = new Member(ID, rs.getString(2), rs.getString(3));
                 rs.close();
-                return newSocio;
+                return newMember;
             } else {
                 rs.close();
                 throw new SQLException("No se encuentra socio con la ID indicada");

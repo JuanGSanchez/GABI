@@ -16,54 +16,50 @@ import java.util.stream.Collectors;
  * @author JuanGS
  * @version 1.0
  */
-public class Socio implements Comparable<Socio>, Serializable {
-    /**
-     * Límite de préstamos de un socio
-     */
-    public static final int MAX_PREST = 10;
+public class Member implements Comparable<Member>, Serializable {
     /**
      * ID del socio
      */
-    private final int idSoc;
+    private final int idMember;
     /**
      * Nombre del socio
      */
-    private final String nombre;
+    private final String name;
     /**
      * Apellidos del socio
      */
-    private final String apellidos;
+    private final String surname;
     /**
      * Lista de libros prestados
      */
-    private final List<Libro> libroList;
+    private final List<Book> listBook;
 
     /**
      * Constructor completo de la clase
      * designado para creación de entrada
      *
-     * @param idSoc     ID del socio
-     * @param nombre    Nombre del socio
-     * @param apellidos Apellidos del socio
+     * @param idMember     ID del socio
+     * @param name    Nombre del socio
+     * @param surname Apellidos del socio
      */
-    public Socio(int idSoc, String nombre, String apellidos) {
-        this(idSoc, nombre, apellidos, null);
+    public Member(int idMember, String name, String surname) {
+        this(idMember, name, surname, null);
     }
 
     /**
      * Constructor completo de la clase
      * designado para recolección de entrada
      *
-     * @param idSoc     ID del socio
-     * @param nombre    Nombre del socio
-     * @param apellidos Apellidos del socio
-     * @param libroList Lista de libros prestados
+     * @param idMember     ID del socio
+     * @param name    Nombre del socio
+     * @param surname Apellidos del socio
+     * @param listBook  Lista de libros prestados
      */
-    public Socio(int idSoc, String nombre, String apellidos, List<Libro> libroList) {
-        this.idSoc = idSoc;
-        this.nombre = nombre;
-        this.apellidos = apellidos;
-        this.libroList = libroList;
+    public Member(int idMember, String name, String surname, List<Book> listBook) {
+        this.idMember = idMember;
+        this.name = name;
+        this.surname = surname;
+        this.listBook = listBook;
     }
 
     /**
@@ -71,8 +67,8 @@ public class Socio implements Comparable<Socio>, Serializable {
      *
      * @return ID del socio
      */
-    public final int getIdSoc() {
-        return idSoc;
+    public final int getIdMember() {
+        return idMember;
     }
 
     /**
@@ -80,8 +76,8 @@ public class Socio implements Comparable<Socio>, Serializable {
      *
      * @return Nombre del socio
      */
-    public final String getNombre() {
-        return nombre;
+    public final String getName() {
+        return name;
     }
 
     /**
@@ -89,8 +85,8 @@ public class Socio implements Comparable<Socio>, Serializable {
      *
      * @return Apellidos del socio
      */
-    public final String getApellidos() {
-        return apellidos;
+    public final String getSurname() {
+        return surname;
     }
 
     /**
@@ -98,8 +94,8 @@ public class Socio implements Comparable<Socio>, Serializable {
      *
      * @return Lista de libros prestados
      */
-    public List<Libro> getLibroList() {
-        return new ArrayList<>(libroList);
+    public List<Book> getListBook() {
+        return new ArrayList<>(listBook);
     }
 
     /**
@@ -114,10 +110,10 @@ public class Socio implements Comparable<Socio>, Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        Socio socio = (Socio) o;
+        Member member = (Member) o;
 
-        if (!nombre.equalsIgnoreCase(socio.nombre)) return false;
-        return apellidos.equalsIgnoreCase(socio.apellidos);
+        if (!name.equalsIgnoreCase(member.name)) return false;
+        return surname.equalsIgnoreCase(member.surname);
     }
 
     /**
@@ -128,8 +124,8 @@ public class Socio implements Comparable<Socio>, Serializable {
      */
     @Override
     public int hashCode() {
-        int result = nombre.hashCode();
-        result = 31 * result + apellidos.hashCode();
+        int result = name.hashCode();
+        result = 31 * result + surname.hashCode();
         return result;
     }
 
@@ -140,12 +136,12 @@ public class Socio implements Comparable<Socio>, Serializable {
      */
     @Override
     public String toString() {
-        String desc = this.getClass().getSimpleName() + " " + idSoc + ":   " + String.format("%-20s", nombre)
-                      + "   " + String.format("%-40s", apellidos);
-        if (libroList != null) {
-            if (!libroList.isEmpty()) desc += "\n\t";
-            desc += libroList.stream().sorted(Comparator.comparing(Libro::getIdLib)).map(Libro::toString).collect(Collectors.joining("\n\t"));
-            desc += "\n\t " + libroList.size() + " " + (libroList.size() == 1 ? "libro prestado" : "libros prestados") + " en total";
+        String desc = this.getClass().getSimpleName() + " " + idMember + ":   " + String.format("%-20s", name)
+                      + "   " + String.format("%-40s", surname);
+        if (listBook != null) {
+            if (!listBook.isEmpty()) desc += "\n\t";
+            desc += listBook.stream().sorted(Comparator.comparing(Book::getIdBook)).map(Book::toString).collect(Collectors.joining("\n\t"));
+            desc += "\n\t " + listBook.size() + " " + (listBook.size() == 1 ? "libro prestado" : "libros prestados") + " en total";
         }
 
         return desc;
@@ -155,11 +151,11 @@ public class Socio implements Comparable<Socio>, Serializable {
      * Método sobreescrito de ordenación de objetos Socio según
      * su identificación numérica ID
      *
-     * @param otherSocio El otro objeto Libro al que ser comparado
+     * @param otherMember El otro objeto Libro al que ser comparado
      * @return Entero de referencia para el proceso de ordenación
      */
     @Override
-    public int compareTo(Socio otherSocio) {
-        return this.idSoc - otherSocio.getIdSoc();
+    public int compareTo(Member otherMember) {
+        return this.idMember - otherMember.getIdMember();
     }
 }

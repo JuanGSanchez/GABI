@@ -4,9 +4,9 @@
  */
 package sql.reservoirs;
 
-import tables.Libro;
-import tables.Prestamo;
-import tables.Socio;
+import tables.Book;
+import tables.Loan;
+import tables.Member;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -25,11 +25,11 @@ import java.util.Properties;
  * @version 1.0
  * @since 07-2023
  */
-public class BiblioDBPrestamo implements BiblioDAO<Prestamo> {
+public class LibDBLoan implements LibDAO<Loan> {
     /**
      * Instancia única de la clase
      */
-    private static final BiblioDBPrestamo instance = new BiblioDBPrestamo();
+    private static final LibDBLoan instance = new LibDBLoan();
     /**
      * URL de la base de datos utilizada por este código
      */
@@ -46,7 +46,7 @@ public class BiblioDBPrestamo implements BiblioDAO<Prestamo> {
     /**
      * Constructor privado de la clase
      */
-    private BiblioDBPrestamo() {
+    private LibDBLoan() {
         configProps = new Properties();
         try (FileInputStream fis = new FileInputStream("src/configuration.properties")) {
             configProps.load(fis);
@@ -64,7 +64,7 @@ public class BiblioDBPrestamo implements BiblioDAO<Prestamo> {
      *
      * @return Instancia de clase
      */
-    public static BiblioDBPrestamo getInstance() {
+    public static LibDBLoan getInstance() {
         return instance;
     }
 
@@ -98,10 +98,10 @@ public class BiblioDBPrestamo implements BiblioDAO<Prestamo> {
     /**
      * Método para introducir una nueva entrada en la tabla de datos Préstamos
      *
-     * @param prestamo Objeto Préstamo que registrar en la base de datos
+     * @param loan Objeto Préstamo que registrar en la base de datos
      */
     @Override
-    public void addTB(String user, String password, Prestamo prestamo) {
+    public void addTB(String user, String password, Loan loan) {
         String query1 = "SELECT COUNT(*) FROM " + tableName + " WHERE idsoc = ?";
         String query2 = "SELECT prestado FROM " + configProps.getProperty("database-name") + "." + configProps.getProperty("database-table-1") + " WHERE idlib = ?";
         String query3 = "UPDATE " + configProps.getProperty("database-name") + "." + configProps.getProperty("database-table-1") + " SET prestado = ? WHERE idlib = ?";
@@ -112,7 +112,7 @@ public class BiblioDBPrestamo implements BiblioDAO<Prestamo> {
              PreparedStatement pStmt2 = con.prepareStatement(query2);
              PreparedStatement pStmt3 = con.prepareStatement(query3);
              PreparedStatement pStmt4 = con.prepareStatement(query4)) {
-            pStmt1.setInt(1, prestamo.getIdSoc());
+            pStmt1.setInt(1, loan.getIdMember());
             ResultSet rs = pStmt1.executeQuery();
             rs.next();
             if (rs.getInt(1) >= 10) {
@@ -121,7 +121,7 @@ public class BiblioDBPrestamo implements BiblioDAO<Prestamo> {
             }
             rs.close();
 
-            pStmt2.setInt(1, prestamo.getIdLib());
+            pStmt2.setInt(1, loan.getIdBook());
             ResultSet rs2 = pStmt2.executeQuery();
             if (rs2.next()) {
                 if (rs2.getBoolean(1)) {
@@ -135,17 +135,17 @@ public class BiblioDBPrestamo implements BiblioDAO<Prestamo> {
             rs2.close();
 
             pStmt3.setBoolean(1, true);
-            pStmt3.setInt(2, prestamo.getIdLib());
+            pStmt3.setInt(2, loan.getIdBook());
             if (pStmt3.executeUpdate() > 1) {
                 pStmt3.setBoolean(1, false);
                 pStmt3.executeUpdate();
                 throw new SQLException("Error inesperado en la localización del libro");
             }
 
-            pStmt4.setInt(1, prestamo.getIdPres());
-            pStmt4.setInt(2, prestamo.getIdSoc());
-            pStmt4.setInt(3, prestamo.getIdLib());
-            pStmt4.setDate(4, Date.valueOf(prestamo.getFechaPres()));
+            pStmt4.setInt(1, loan.getIdLoan());
+            pStmt4.setInt(2, loan.getIdMember());
+            pStmt4.setInt(3, loan.getIdBook());
+            pStmt4.setDate(4, Date.valueOf(loan.getDateLoan()));
             if (pStmt4.executeUpdate() == 1) {
                 System.out.println("  nuevo préstamo registrado con éxito.");
             } else throw new SQLException("Ha habido un problema inesperado\nal intentar registrar el préstamo");
@@ -161,15 +161,15 @@ public class BiblioDBPrestamo implements BiblioDAO<Prestamo> {
      * @return Lista de objetos Préstamo por cada entrada de la tabla de datos
      */
     @Override
-    public List<Prestamo> searchTB(String user, String password) {
+    public List<Loan> searchTB(String user, String password) {
         String query = "SELECT * FROM " + tableName;
-        List<Prestamo> listPrestamo = new ArrayList<>();
+        List<Loan> listLoan = new ArrayList<>();
 
         try (Connection con = DriverManager.getConnection(url, user, password);
              Statement stmt = con.createStatement();
              ResultSet rs = stmt.executeQuery(query)) {
             while (rs.next()) {
-                listPrestamo.add(new Prestamo(rs.getInt(1),
+                listLoan.add(new Loan(rs.getInt(1),
                         rs.getInt(2),
                         rs.getInt(3),
                         rs.getDate(4).toLocalDate()));
@@ -178,7 +178,7 @@ public class BiblioDBPrestamo implements BiblioDAO<Prestamo> {
             System.err.println("  Error inesperado durante el contacto con la base de datos\n" + sqle.getMessage());
         }
 
-        return listPrestamo;
+        return listLoan;
     }
 
     /**
@@ -188,11 +188,11 @@ public class BiblioDBPrestamo implements BiblioDAO<Prestamo> {
      * @return Lista de objetos Préstamo por cada entrada de la tabla de datos
      */
     @Override
-    public List<Prestamo> searchDetailTB(String user, String password) {
+    public List<Loan> searchDetailTB(String user, String password) {
         String query1 = "SELECT * FROM " + tableName;
         String query2 = "SELECT * FROM " + configProps.getProperty("database-name") + "." + configProps.getProperty("database-table-2") + " WHERE idsoc = ?";
         String query3 = "SELECT * FROM " + configProps.getProperty("database-name") + "." + configProps.getProperty("database-table-1") + " WHERE idlib = ?";
-        List<Prestamo> listPrestamo = new ArrayList<>();
+        List<Loan> listLoan = new ArrayList<>();
 
         try (Connection con = DriverManager.getConnection(url, user, password);
              Statement stmt1 = con.createStatement();
@@ -208,12 +208,12 @@ public class BiblioDBPrestamo implements BiblioDAO<Prestamo> {
                 rs3 = pStmt3.executeQuery();
                 rs2.next();
                 rs3.next();
-                listPrestamo.add(new Prestamo(rs1.getInt(1),
+                listLoan.add(new Loan(rs1.getInt(1),
                         rs1.getInt(2),
                         rs1.getInt(3),
                         rs1.getDate(4).toLocalDate(),
-                        new Socio(rs2.getInt(1), rs2.getString(2), rs2.getString(3)),
-                        new Libro(rs3.getInt(1), rs3.getString(2), rs3.getString(3), rs3.getBoolean(4))));
+                        new Member(rs2.getInt(1), rs2.getString(2), rs2.getString(3)),
+                        new Book(rs3.getInt(1), rs3.getString(2), rs3.getString(3), rs3.getBoolean(4))));
             }
             rs2.close();
             rs3.close();
@@ -221,7 +221,7 @@ public class BiblioDBPrestamo implements BiblioDAO<Prestamo> {
             System.err.println("  Error inesperado durante el contacto con la base de datos\n" + sqle.getMessage());
         }
 
-        return listPrestamo;
+        return listLoan;
     }
 
     /**
@@ -232,25 +232,25 @@ public class BiblioDBPrestamo implements BiblioDAO<Prestamo> {
      * @param ID  ID que buscar en las entradas de la tabla
      * @return Objeto Préstamo con la entrada que haya salido de la búsqueda
      */
-    public List<Prestamo> searchTB(String user, String password, int opt, int ID) {
+    public List<Loan> searchTB(String user, String password, int opt, int ID) {
         String query = "SELECT * FROM " + tableName + " WHERE " + (opt == 1 ? "idpres" : opt == 2 ? "idsoc" : "idlib") + " = ?";
 
         try (Connection con = DriverManager.getConnection(url, user, password);
              PreparedStatement pStmt = con.prepareStatement(query)) {
             pStmt.setInt(1, ID);
-            List<Prestamo> listPrestamos = new ArrayList<>();
+            List<Loan> listLoans = new ArrayList<>();
             ResultSet rs = pStmt.executeQuery();
             while (rs.next()) {
-                listPrestamos.add(new Prestamo(rs.getInt(1),
+                listLoans.add(new Loan(rs.getInt(1),
                         rs.getInt(2),
                         rs.getInt(3),
                         rs.getDate(4).toLocalDate()));
             }
             rs.close();
-            if (listPrestamos.isEmpty()) {
+            if (listLoans.isEmpty()) {
                 throw new SQLException("No se encuentran préstamos con los parámetros de búsqueda indicados");
             }
-            return listPrestamos;
+            return listLoans;
         } catch (SQLException sqle) {
             throw new RuntimeException("  Error inesperado durante el contacto con la base de datos\n" + sqle.getMessage());
         }
@@ -263,25 +263,25 @@ public class BiblioDBPrestamo implements BiblioDAO<Prestamo> {
      * @param date Fecha de realización del préstamo
      * @return Lista de objetos Préstamo de las entradas resultantes de la búsqueda
      */
-    public List<Prestamo> searchTB(String user, String password, LocalDate date) {
+    public List<Loan> searchTB(String user, String password, LocalDate date) {
         String query = "SELECT * FROM " + tableName + " WHERE fechapres = ?";
 
         try (Connection con = DriverManager.getConnection(url, user, password);
              PreparedStatement pStmt = con.prepareStatement(query)) {
             pStmt.setDate(1, Date.valueOf(date));
-            List<Prestamo> listPrestamos = new ArrayList<>();
+            List<Loan> listLoans = new ArrayList<>();
             ResultSet rs = pStmt.executeQuery();
             while (rs.next()) {
-                listPrestamos.add(new Prestamo(rs.getInt(1),
+                listLoans.add(new Loan(rs.getInt(1),
                         rs.getInt(2),
                         rs.getInt(3),
                         rs.getDate(4).toLocalDate()));
             }
             rs.close();
-            if (listPrestamos.isEmpty()) {
+            if (listLoans.isEmpty()) {
                 throw new SQLException("No se encuentran préstamos con los parámetros de búsqueda indicados");
             }
-            return listPrestamos;
+            return listLoans;
         } catch (SQLException sqle) {
             throw new RuntimeException("  Error inesperado durante el contacto con la base de datos\n" + sqle.getMessage());
         }

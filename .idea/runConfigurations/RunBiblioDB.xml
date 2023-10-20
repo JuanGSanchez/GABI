@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="RunBiblioDB" type="Application" factoryName="Application">
-    <option name="MAIN_CLASS_NAME" value="manager.BiblioMenu" />
+    <option name="MAIN_CLASS_NAME" value="manager.LibMenu" />
     <module name="GABI" />
     <option name="PROGRAM_PARAMETERS" value="admin 1234" />
     <method v="2">

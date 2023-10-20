@@ -14,75 +14,75 @@ import java.time.format.DateTimeFormatter;
  * @author JuanGS
  * @version 1.0
  */
-public class Prestamo implements Comparable<Prestamo>, Serializable {
+public class Loan implements Comparable<Loan>, Serializable {
     /**
      * ID del préstamo
      */
-    private final int idPres;
+    private final int idLoan;
     /**
      * ID del socio
      */
-    private final int idSoc;
+    private final int idMember;
     /**
      * ID del libro
      */
-    private final int idLib;
+    private final int idBook;
     /**
      * Fecha del préstamo
      */
-    private final LocalDate fechaPres;
+    private final LocalDate dateLoan;
     /**
      * Libro asociado al préstamo
      */
-    private final Libro libro;
+    private final Book book;
     /**
      * Socio asociado al préstamo
      */
-    private final Socio socio;
+    private final Member member;
 
     /**
      * Constructor completo de la clase,
      * designado para creación de entrada
      *
-     * @param idPres ID del préstamo
-     * @param idSoc  ID del socio
-     * @param idLib  ID del libro
+     * @param idLoan   ID del préstamo
+     * @param idMember ID del socio
+     * @param idBook   ID del libro
      */
-    public Prestamo(int idPres, int idSoc, int idLib) {
-        this(idPres, idSoc, idLib, LocalDate.now());
+    public Loan(int idLoan, int idMember, int idBook) {
+        this(idLoan, idMember, idBook, LocalDate.now());
     }
 
     /**
      * Constructor completo de la clase,
      * designado para recolección de entrada
      *
-     * @param idPres    ID del préstamo
-     * @param idSoc     ID del socio
-     * @param idLib     ID del libro
-     * @param fechaPres fecha del préstamo
+     * @param idLoan   ID del préstamo
+     * @param idMember ID del socio
+     * @param idBook   ID del libro
+     * @param dateLoan fecha del préstamo
      */
-    public Prestamo(int idPres, int idSoc, int idLib, LocalDate fechaPres) {
-        this(idPres, idSoc, idLib, fechaPres, null, null);
+    public Loan(int idLoan, int idMember, int idBook, LocalDate dateLoan) {
+        this(idLoan, idMember, idBook, dateLoan, null, null);
     }
 
     /**
      * Constructor completo de la clase,
      * designado para recolección de entrada con más detalle
      *
-     * @param idPres    ID del préstamo
-     * @param idSoc     ID del socio
-     * @param idLib     ID del libro
-     * @param fechaPres fecha del préstamo
-     * @param socio     Socio asociado al préstamo
-     * @param libro     Libro asociado al préstamo
+     * @param idLoan   ID del préstamo
+     * @param idMember ID del socio
+     * @param idBook   ID del libro
+     * @param dateLoan fecha del préstamo
+     * @param member   Socio asociado al préstamo
+     * @param book     Libro asociado al préstamo
      */
-    public Prestamo(int idPres, int idSoc, int idLib, LocalDate fechaPres, Socio socio, Libro libro) {
-        this.idPres = idPres;
-        this.idSoc = idSoc;
-        this.idLib = idLib;
-        this.fechaPres = fechaPres;
-        this.socio = socio;
-        this.libro = libro;
+    public Loan(int idLoan, int idMember, int idBook, LocalDate dateLoan, Member member, Book book) {
+        this.idLoan = idLoan;
+        this.idMember = idMember;
+        this.idBook = idBook;
+        this.dateLoan = dateLoan;
+        this.member = member;
+        this.book = book;
     }
 
     /**
@@ -90,8 +90,8 @@ public class Prestamo implements Comparable<Prestamo>, Serializable {
      *
      * @return ID del préstamo
      */
-    public final int getIdPres() {
-        return idPres;
+    public final int getIdLoan() {
+        return idLoan;
     }
 
     /**
@@ -99,8 +99,8 @@ public class Prestamo implements Comparable<Prestamo>, Serializable {
      *
      * @return ID del socio
      */
-    public final int getIdSoc() {
-        return idSoc;
+    public final int getIdMember() {
+        return idMember;
     }
 
     /**
@@ -108,8 +108,8 @@ public class Prestamo implements Comparable<Prestamo>, Serializable {
      *
      * @return ID del libro
      */
-    public final int getIdLib() {
-        return idLib;
+    public final int getIdBook() {
+        return idBook;
     }
 
     /**
@@ -117,8 +117,8 @@ public class Prestamo implements Comparable<Prestamo>, Serializable {
      *
      * @return Fecha del préstamo
      */
-    public final LocalDate getFechaPres() {
-        return fechaPres;
+    public final LocalDate getDateLoan() {
+        return dateLoan;
     }
 
     /**
@@ -126,8 +126,8 @@ public class Prestamo implements Comparable<Prestamo>, Serializable {
      *
      * @return Socio asociado al préstamo
      */
-    public Socio getSocio() {
-        return socio;
+    public Member getMember() {
+        return member;
     }
 
     /**
@@ -135,8 +135,8 @@ public class Prestamo implements Comparable<Prestamo>, Serializable {
      *
      * @return Libro asociado al préstamo
      */
-    public Libro getLibro() {
-        return libro;
+    public Book getBook() {
+        return book;
     }
 
     /**
@@ -151,11 +151,11 @@ public class Prestamo implements Comparable<Prestamo>, Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        Prestamo prestamo = (Prestamo) o;
+        Loan loan = (Loan) o;
 
-        if (idSoc != prestamo.idSoc) return false;
-        if (idLib != prestamo.idLib) return false;
-        return fechaPres.equals(prestamo.fechaPres);
+        if (idMember != loan.idMember) return false;
+        if (idBook != loan.idBook) return false;
+        return dateLoan.equals(loan.dateLoan);
     }
 
     /**
@@ -166,9 +166,9 @@ public class Prestamo implements Comparable<Prestamo>, Serializable {
      */
     @Override
     public int hashCode() {
-        int result = idSoc;
-        result = 31 * result + idLib;
-        result = 31 * result + fechaPres.hashCode();
+        int result = idMember;
+        result = 31 * result + idBook;
+        result = 31 * result + dateLoan.hashCode();
         return result;
     }
 
@@ -179,10 +179,10 @@ public class Prestamo implements Comparable<Prestamo>, Serializable {
      */
     @Override
     public String toString() {
-        String desc = this.getClass().getSimpleName() + " " + idPres + ": Libro " + idLib + " a Socio " + idSoc + " el "
-                      + fechaPres.format(DateTimeFormatter.ISO_LOCAL_DATE);
-        if (libro != null) {
-            desc += "\n\t" + socio + "\n\t" + libro;
+        String desc = this.getClass().getSimpleName() + " " + idLoan + ": Libro " + idBook + " a Socio " + idMember + " el "
+                      + dateLoan.format(DateTimeFormatter.ISO_LOCAL_DATE);
+        if (book != null) {
+            desc += "\n\t" + member + "\n\t" + book;
         }
         return desc;
     }
@@ -191,11 +191,11 @@ public class Prestamo implements Comparable<Prestamo>, Serializable {
      * Método sobreescrito de ordenación de objetos Prestamo según
      * su identificación numérica ID
      *
-     * @param otherPrestamo El otro objeto Prestamo al que ser comparado
+     * @param otherLoan El otro objeto Prestamo al que ser comparado
      * @return Entero de referencia para el proceso de ordenación
      */
     @Override
-    public int compareTo(Prestamo otherPrestamo) {
-        return this.idPres - otherPrestamo.getIdPres();
+    public int compareTo(Loan otherLoan) {
+        return this.idLoan - otherLoan.getIdLoan();
     }
 }

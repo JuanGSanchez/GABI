@@ -4,7 +4,7 @@
  */
 package sql.reservoirs;
 
-import tables.Libro;
+import tables.Book;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -22,11 +22,11 @@ import java.util.Properties;
  * @version 1.0
  * @since 07-2023
  */
-public final class BiblioDBLibro implements BiblioDAO<Libro> {
+public final class LibDBBook implements LibDAO<Book> {
     /**
      * Instancia única de la clase
      */
-    private static final BiblioDBLibro instance = new BiblioDBLibro();
+    private static final LibDBBook instance = new LibDBBook();
     /**
      * URL de la base de datos utilizada por este código
      */
@@ -43,7 +43,7 @@ public final class BiblioDBLibro implements BiblioDAO<Libro> {
     /**
      * Constructor privado de la clase
      */
-    private BiblioDBLibro() {
+    private LibDBBook() {
         configProps = new Properties();
         try (FileInputStream fis = new FileInputStream("src/configuration.properties")) {
             configProps.load(fis);
@@ -61,7 +61,7 @@ public final class BiblioDBLibro implements BiblioDAO<Libro> {
      *
      * @return Instancia de clase
      */
-    public static BiblioDBLibro getInstance() {
+    public static LibDBBook getInstance() {
         return instance;
     }
 
@@ -95,18 +95,18 @@ public final class BiblioDBLibro implements BiblioDAO<Libro> {
     /**
      * Método para introducir una nueva entrada en la tabla de datos Libros
      *
-     * @param libro Objeto Libro que registrar en la base de datos
+     * @param book Objeto Libro que registrar en la base de datos
      */
     @Override
-    public void addTB(String user, String password, Libro libro) {
+    public void addTB(String user, String password, Book book) {
         String query1 = "SELECT * FROM " + tableName + " WHERE LOWER(titulo) = LOWER(?) AND LOWER(autor) = LOWER(?)";
         String query2 = "INSERT INTO " + tableName + " VALUES (?,?,?,FALSE)";
 
         try (Connection con = DriverManager.getConnection(url, user, password);
              PreparedStatement pStmt1 = con.prepareStatement(query1);
              PreparedStatement pStmt2 = con.prepareStatement(query2)) {
-            pStmt1.setString(1, libro.getTitulo());
-            pStmt1.setString(2, libro.getAutor());
+            pStmt1.setString(1, book.getTitle());
+            pStmt1.setString(2, book.getAuthor());
             ResultSet rs = pStmt1.executeQuery();
             if (rs.next()) {
                 rs.close();
@@ -115,9 +115,9 @@ public final class BiblioDBLibro implements BiblioDAO<Libro> {
                 rs.close();
             }
 
-            pStmt2.setInt(1, libro.getIdLib());
-            pStmt2.setString(2, libro.getTitulo());
-            pStmt2.setString(3, libro.getAutor());
+            pStmt2.setInt(1, book.getIdBook());
+            pStmt2.setString(2, book.getTitle());
+            pStmt2.setString(3, book.getAuthor());
             if (pStmt2.executeUpdate() == 1) {
                 System.out.println("  nuevo libro agregado con éxito.");
             } else throw new SQLException("Ha habido un problema inesperado\nal intentar agregar el libro");
@@ -132,15 +132,15 @@ public final class BiblioDBLibro implements BiblioDAO<Libro> {
      * @return Lista de objetos Libro por cada entrada de la tabla de datos
      */
     @Override
-    public List<Libro> searchTB(String user, String password) {
+    public List<Book> searchTB(String user, String password) {
         String query = "SELECT * FROM " + tableName;
-        List<Libro> listLibro = new ArrayList<>();
+        List<Book> listBook = new ArrayList<>();
 
         try (Connection con = DriverManager.getConnection(url, user, password);
              Statement stmt = con.createStatement();
              ResultSet rs = stmt.executeQuery(query)) {
             while (rs.next()) {
-                listLibro.add(new Libro(rs.getInt(1),
+                listBook.add(new Book(rs.getInt(1),
                         rs.getString(2),
                         rs.getString(3),
                         rs.getBoolean(4)));
@@ -149,7 +149,7 @@ public final class BiblioDBLibro implements BiblioDAO<Libro> {
             System.err.println("  Error inesperado durante el contacto con la base de datos\n" + sqle.getMessage());
         }
 
-        return listLibro;
+        return listBook;
     }
 
     /**
@@ -159,7 +159,7 @@ public final class BiblioDBLibro implements BiblioDAO<Libro> {
      * @return Lista de objetos Libro por cada entrada de la tabla de datos
      */
     @Override
-    public List<Libro> searchDetailTB(String user, String password) {
+    public List<Book> searchDetailTB(String user, String password) {
         return null;
     }
 
@@ -172,25 +172,25 @@ public final class BiblioDBLibro implements BiblioDAO<Libro> {
      * @param seed Fragmento de texto que buscar en las entradas de la tabla
      * @return Lista de objetos Libro que hayan salido de la búsqueda
      */
-    public List<Libro> searchTB(String user, String password, int opt, String seed) {
+    public List<Book> searchTB(String user, String password, int opt, String seed) {
         String query = "SELECT * FROM " + tableName + " WHERE LOWER(" + (opt == 2 ? "titulo" : "autor") + ") LIKE LOWER(?)";
 
         try (Connection con = DriverManager.getConnection(url, user, password);
              PreparedStatement pStmt = con.prepareStatement(query)) {
             pStmt.setString(1, "%" + seed + "%");
-            List<Libro> listLibros = new ArrayList<>();
+            List<Book> listBooks = new ArrayList<>();
             ResultSet rs = pStmt.executeQuery();
             while (rs.next()) {
-                listLibros.add(new Libro(rs.getInt(1),
+                listBooks.add(new Book(rs.getInt(1),
                         rs.getString(2),
                         rs.getString(3),
                         rs.getBoolean(4)));
             }
             rs.close();
-            if (listLibros.isEmpty()) {
+            if (listBooks.isEmpty()) {
                 throw new SQLException("No se encuentran libros con los parámetros de búsqueda indicados");
             }
-            return listLibros;
+            return listBooks;
         } catch (SQLException sqle) {
             throw new RuntimeException("  Error inesperado durante el contacto con la base de datos\n" + sqle.getMessage());
         }
@@ -203,7 +203,7 @@ public final class BiblioDBLibro implements BiblioDAO<Libro> {
      * @param ID Identificación numérica de la entrada en la tabla
      * @return Objeto Libro con los datos de la entrada encontrada
      */
-    public Libro searchTB(String user, String password, int ID) {
+    public Book searchTB(String user, String password, int ID) {
         String query = "SELECT * FROM " + tableName + " WHERE idlib = ?";
 
         try (Connection con = DriverManager.getConnection(url, user, password);
@@ -211,12 +211,12 @@ public final class BiblioDBLibro implements BiblioDAO<Libro> {
             pStmt.setInt(1, ID);
             ResultSet rs = pStmt.executeQuery();
             if (rs.next()) {
-                Libro newLibro = new Libro(ID,
+                Book newBook = new Book(ID,
                         rs.getString(2),
                         rs.getString(3),
                         rs.getBoolean(4));
                 rs.close();
-                return newLibro;
+                return newBook;
             } else {
                 rs.close();
                 throw new SQLException("No se encuentra libro con la ID indicada");

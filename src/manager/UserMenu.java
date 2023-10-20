@@ -4,13 +4,13 @@
 package manager;
 
 import sql.users.UserDerby;
-import tables.Usuario;
+import tables.User;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * Clase del menú del gestor de usuarios en el programa
+ * Clase del menú del gestor de users en el programa
  *
  * @author JuanGS
  * @version 1.0
@@ -27,10 +27,10 @@ final class UserMenu {
     private static final String mainMenu = """
                           
               Seleccione una acción:
-            \t(1) Nuevo usuario
-            \t(2) Listar usuarios
-            \t(3) Buscar usuarios
-            \t(4) Eliminar usuarios
+            \t(1) Nuevo user
+            \t(2) Listar users
+            \t(3) Buscar users
+            \t(4) Eliminar users
             \t(0) Volver al menú principal""";
     /**
      * Variable para almacenar las opciones de submenús para libros
@@ -40,11 +40,11 @@ final class UserMenu {
             \t(2) Por nombre
             \t(0) Salir""";
     /**
-     * Nombre de usuario pasado para la base de datos
+     * Nombre de user pasado para la base de datos
      */
     private final String user;
     /**
-     * Contraseña de usuario para la base de datos
+     * Contraseña de user para la base de datos
      */
     private final String password;
     /**
@@ -62,7 +62,7 @@ final class UserMenu {
     }
 
     /**
-     * Método del menú principal del gestor de usuarios, desde el cual se acceden
+     * Método del menú principal del gestor de users, desde el cual se acceden
      * a las acciones disponibles
      *
      * @param scan Entrada de datos por teclado
@@ -70,18 +70,18 @@ final class UserMenu {
     void selectionMenu(Scanner scan) {
         boolean checkMenu = true;
         int optionMenu;
-        int nUsers = 0;
-        int idUsers = 0;
+        int nUser = 0;
+        int idUser = 0;
         int[] count;
 
         System.out.println("\n\tGESTOR USUARIOS");
 
         count = UserDerby.getInstance().countUser(user, password.toCharArray());
         if (count != null) {
-            nUsers = count[0];
-            idUsers = count[1];
+            nUser = count[0];
+            idUser = count[1];
         }
-        System.out.printf("\nHay %d usuarios registrados actualmente\n", nUsers);
+        System.out.printf("\nHay %d usuarios registrados actualmente\n", nUser);
 
         do {
             System.out.println(mainMenu);
@@ -93,32 +93,32 @@ final class UserMenu {
             scan.nextLine();
             switch (optionMenu) {
                 case 1:
-                    count = addUsuario(scan, nUsers, idUsers);
-                    nUsers = count[0];
-                    idUsers = count[1];
+                    count = addUsuario(scan, nUser, idUser);
+                    nUser = count[0];
+                    idUser = count[1];
                     break;
                 case 2:
-                    if (nUsers == 0) {
+                    if (nUser == 0) {
                         System.err.println("Error, no hay lista de usuarios disponible");
                     } else {
-                        System.out.println("Total de usuarios: " + nUsers);
+                        System.out.println("Total de users: " + nUser);
                         listUsuarios(scan);
                     }
                     break;
                 case 3:
-                    if (nUsers == 0) {
+                    if (nUser == 0) {
                         System.err.println("Error, no hay lista de usuarios disponible");
                     } else {
                         searchUsuarios(scan);
                     }
                     break;
                 case 4:
-                    if (nUsers == 0) {
+                    if (nUser == 0) {
                         System.err.println("Error, no hay lista de usuarios disponible");
                     } else {
-                        count = deleteUsuarios(scan, nUsers, idUsers);
-                        nUsers = count[0];
-                        idUsers = count[1];
+                        count = deleteUsuarios(scan, nUser, idUser);
+                        nUser = count[0];
+                        idUser = count[1];
                     }
                     break;
                 case 0:
@@ -133,14 +133,14 @@ final class UserMenu {
     }
 
     /**
-     * Método para añadir usuarios a la base de datos
+     * Método para añadir users a la base de datos
      *
      * @param scan    Entrada de datos por teclado
-     * @param nUsers  Número de usuarios registrados en la base de datos
-     * @param idUsers Máxima ID de usuario dentro de la base de datos
-     * @return Valores actualizados de nUsers y idUsers
+     * @param nUser  Número de users registrados en la base de datos
+     * @param idUser Máxima ID de user dentro de la base de datos
+     * @return Valores actualizados de nUser y idUser
      */
-    int[] addUsuario(Scanner scan, int nUsers, int idUsers) {
+    int[] addUsuario(Scanner scan, int nUser, int idUser) {
         boolean isValid;
         boolean repeat;
         String nombre = null;
@@ -157,7 +157,7 @@ final class UserMenu {
                         System.err.println("  Entrada vacía");
                     } else if (nombre.equals("-1")) {
                         System.out.println("  Operación cancelada, volviendo al menú del gestor...");
-                        return new int[]{nUsers, idUsers};
+                        return new int[]{nUser, idUser};
                     } else if (nombre.matches(".*[\\d¡!@#$%&ºª'`* .,:;()_+=|/<>¿?{}\\[\\]~].*")) {
                         System.err.println("  El nombre no puede contener números o caracteres especiales");
                     } else if (nombre.trim().length() > Integer.parseInt(configProps.getProperty("database-table-4-field-2-maxchar"))) {
@@ -180,7 +180,7 @@ final class UserMenu {
                         System.err.println("  Entrada vacía");
                     } else if (passwd.equals("-1")) {
                         System.out.println("  Operación cancelada, volviendo al menú del gestor...");
-                        return new int[]{nUsers, idUsers};
+                        return new int[]{nUser, idUser};
                     } else if (passwd.matches(".*[\\d¡!@#$%&ºª'`* .,:;()_+=|/<>¿?{}\\[\\]~].*")) {
                         System.err.println("  La contraseña no puede contener números o caracteres especiales");
                     } else if (passwd.trim().length() > Integer.parseInt(configProps.getProperty("database-table-4-field-2-maxchar"))) {
@@ -194,9 +194,9 @@ final class UserMenu {
             } while (!isValid);
 
             try {
-                UserDerby.getInstance().addUser(user, password.toCharArray(), new Usuario(idUsers + 1, nombre, passwd));
-                nUsers++;
-                idUsers++;
+                UserDerby.getInstance().addUser(user, password.toCharArray(), new User(idUser + 1, nombre, passwd));
+                nUser++;
+                idUser++;
             } catch (RuntimeException re) {
                 System.err.println("  Error durante el registro en la base de datos: " + re.getMessage());
             }
@@ -205,12 +205,12 @@ final class UserMenu {
             repeat = scan.nextLine().equals("1");
         } while (repeat);
 
-        return new int[]{nUsers, idUsers};
+        return new int[]{nUser, idUser};
 
     }
 
     /**
-     * Método para imprimir en pantalla los usuarios registrados en la base de
+     * Método para imprimir en pantalla los users registrados en la base de
      * datos
      *
      * @param scan Entrada de datos por teclado
@@ -218,14 +218,14 @@ final class UserMenu {
     void listUsuarios(Scanner scan) {
         boolean isValid = false;
         int opt;
-        List<Usuario> arrayUsuarios = new ArrayList<>();
+        List<User> arrayUsers = new ArrayList<>();
 
         System.out.println("    Listado de Usuarios");
         do {
             System.out.println("\nSelecciona ordenación de listado -\n" + searchMenu);
             try {
                 opt = scan.nextInt();
-                arrayUsuarios = UserDerby.getInstance().searchUser(user, password.toCharArray());
+                arrayUsers = UserDerby.getInstance().searchUser(user, password.toCharArray());
             } catch (InputMismatchException ime) {
                 opt = -1;
             }
@@ -233,12 +233,12 @@ final class UserMenu {
             switch (opt) {
                 case 1:
                     System.out.println("Ordenación por ID...");
-                    arrayUsuarios.stream().sorted(Usuario::compareTo).forEach(System.out::println);
+                    arrayUsers.stream().sorted(User::compareTo).forEach(System.out::println);
                     isValid = true;
                     break;
                 case 2:
                     System.out.println("Ordenación por nombre...");
-                    arrayUsuarios.stream().sorted(Comparator.comparing(Usuario::getNombre).thenComparing(Usuario::getIdUser)).forEach(System.out::println);
+                    arrayUsers.stream().sorted(Comparator.comparing(User::getName).thenComparing(User::getIdUser)).forEach(System.out::println);
                     isValid = true;
                     break;
                 case 0:
@@ -252,7 +252,7 @@ final class UserMenu {
     }
 
     /**
-     * Método para buscar usuarios en la base de datos según ciertos criterios
+     * Método para buscar users en la base de datos según ciertos criterios
      *
      * @param scan Entrada de datos por teclado
      */
@@ -300,11 +300,11 @@ final class UserMenu {
 
             try {
                 if (opt == 1) {
-                    Usuario usuario = UserDerby.getInstance().searchUser(user, password.toCharArray(), ID);
-                    System.out.println(usuario);
+                    User user = UserDerby.getInstance().searchUser(this.user, password.toCharArray(), ID);
+                    System.out.println(user);
                 } else {
-                    List<Usuario> usuarios = UserDerby.getInstance().searchUser(user, password.toCharArray(), fragString);
-                    usuarios.forEach(System.out::println);
+                    List<User> users = UserDerby.getInstance().searchUser(user, password.toCharArray(), fragString);
+                    users.forEach(System.out::println);
                 }
             } catch (RuntimeException re) {
                 System.err.println(re.getMessage());
@@ -316,14 +316,14 @@ final class UserMenu {
     }
 
     /**
-     * Método para eliminar usuarios de la base de datos
+     * Método para eliminar users de la base de datos
      *
      * @param scan    Entrada de datos por teclado
-     * @param nUsers  Número de usuarios registrados en la base de datos
-     * @param idUsers Máxima ID de usuario dentro de la base de datos
-     * @return Valores actualizados de nUsers y idUsers
+     * @param nUser  Número de users registrados en la base de datos
+     * @param idUser Máxima ID de user dentro de la base de datos
+     * @return Valores actualizados de nUser y idUser
      */
-    int[] deleteUsuarios(Scanner scan, int nUsers, int idUsers) {
+    int[] deleteUsuarios(Scanner scan, int nUser, int idUser) {
         boolean isValid;
         boolean repeat;
         int opt;
@@ -359,7 +359,7 @@ final class UserMenu {
                         break;
                     case 0:
                         System.out.println("  Volviendo al menú del gestor...");
-                        return new int[]{nUsers, idUsers};
+                        return new int[]{nUser, idUser};
                     default:
                         System.err.println("  Entrada no válida");
                 }
@@ -367,12 +367,12 @@ final class UserMenu {
 
             try {
                 if (opt == 1) {
-                    idUsers = UserDerby.getInstance().deleteUser(user, password.toCharArray(), ID);
-                    nUsers--;
+                    idUser = UserDerby.getInstance().deleteUser(user, password.toCharArray(), ID);
+                    nUser--;
                 } else {
-                    List<Usuario> usuarios = UserDerby.getInstance().searchUser(user, password.toCharArray(), fragString);
-                    Set<Integer> idusers = usuarios.stream().map(Usuario::getIdUser).collect(Collectors.toSet());
-                    usuarios.stream().sorted(Usuario::compareTo).forEach(System.out::println);
+                    List<User> users = UserDerby.getInstance().searchUser(user, password.toCharArray(), fragString);
+                    Set<Integer> idusers = users.stream().map(User::getIdUser).collect(Collectors.toSet());
+                    users.stream().sorted(User::compareTo).forEach(System.out::println);
                     do {
                         System.out.println("Introduce ID del usuario a eliminar de la lista anterior\n" +
                                            "(-1 para cancelar operación) -");
@@ -380,10 +380,10 @@ final class UserMenu {
                             ID = scan.nextInt();
                             if (ID == -1) {
                                 System.out.println("  Operación cancelada, volviendo al menú del gestor...");
-                                return new int[]{nUsers, idUsers};
+                                return new int[]{nUser, idUser};
                             } else if (!idusers.add(ID)) {
-                                idUsers = UserDerby.getInstance().deleteUser(user, password.toCharArray(), ID);
-                                nUsers--;
+                                idUser = UserDerby.getInstance().deleteUser(user, password.toCharArray(), ID);
+                                nUser--;
                                 isValid = false;
                             } else {
                                 System.err.println("El ID proporcionado no se encuentra en la lista");
@@ -402,7 +402,7 @@ final class UserMenu {
             repeat = scan.nextLine().equals("1");
         } while (repeat);
 
-        return new int[]{nUsers, idUsers};
+        return new int[]{nUser, idUser};
 
     }
 }
