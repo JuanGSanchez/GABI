@@ -7,6 +7,7 @@ package sql.reservoirs;
 import tables.Book;
 import tables.Loan;
 import tables.Member;
+import tables.User;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -71,14 +72,16 @@ public class LibDBLoan implements LibDAO<Loan> {
     /**
      * Método para contabilizar las entradas de la tabla de datos Préstamos
      *
+     * @param currentUser Objeto de usuario con sus datos
+     *                    de acceso a la base de datos
      * @return Número de filas de la tabla de datos
      */
     @Override
-    public int[] countTB(String user, String password) {
+    public int[] countTB(User currentUser) {
         String query1 = "SELECT COUNT(*) FROM " + tableName;
         String query2 = String.format("SELECT idpres FROM %s WHERE idpres = (SELECT max(idpres) FROM %s)", tableName, tableName);
 
-        try (Connection con = DriverManager.getConnection(url, user, password);
+        try (Connection con = DriverManager.getConnection(url, currentUser.getName(), currentUser.getPassword());
              Statement stmt1 = con.createStatement();
              Statement stmt2 = con.createStatement();
              ResultSet rs1 = stmt1.executeQuery(query1);
@@ -98,16 +101,18 @@ public class LibDBLoan implements LibDAO<Loan> {
     /**
      * Método para introducir una nueva entrada en la tabla de datos Préstamos
      *
-     * @param loan Objeto Préstamo que registrar en la base de datos
+     * @param currentUser Objeto de usuario con sus datos
+     *                    de acceso a la base de datos
+     * @param loan        Objeto Préstamo que registrar en la base de datos
      */
     @Override
-    public void addTB(String user, String password, Loan loan) {
+    public void addTB(User currentUser, Loan loan) {
         String query1 = "SELECT COUNT(*) FROM " + tableName + " WHERE idsoc = ?";
         String query2 = "SELECT prestado FROM " + configProps.getProperty("database-name") + "." + configProps.getProperty("database-table-1") + " WHERE idlib = ?";
         String query3 = "UPDATE " + configProps.getProperty("database-name") + "." + configProps.getProperty("database-table-1") + " SET prestado = ? WHERE idlib = ?";
         String query4 = "INSERT INTO " + tableName + " VALUES (?,?,?,?)";
 
-        try (Connection con = DriverManager.getConnection(url, user, password);
+        try (Connection con = DriverManager.getConnection(url, currentUser.getName(), currentUser.getPassword());
              PreparedStatement pStmt1 = con.prepareStatement(query1);
              PreparedStatement pStmt2 = con.prepareStatement(query2);
              PreparedStatement pStmt3 = con.prepareStatement(query3);
@@ -158,14 +163,16 @@ public class LibDBLoan implements LibDAO<Loan> {
     /**
      * Método para extraer todas las entradas de la tabla de datos Préstamos
      *
+     * @param currentUser Objeto de usuario con sus datos
+     *                    de acceso a la base de datos
      * @return Lista de objetos Préstamo por cada entrada de la tabla de datos
      */
     @Override
-    public List<Loan> searchTB(String user, String password) {
+    public List<Loan> searchTB(User currentUser) {
         String query = "SELECT * FROM " + tableName;
         List<Loan> listLoan = new ArrayList<>();
 
-        try (Connection con = DriverManager.getConnection(url, user, password);
+        try (Connection con = DriverManager.getConnection(url, currentUser.getName(), currentUser.getPassword());
              Statement stmt = con.createStatement();
              ResultSet rs = stmt.executeQuery(query)) {
             while (rs.next()) {
@@ -185,16 +192,18 @@ public class LibDBLoan implements LibDAO<Loan> {
      * Método para extraer todas las entradas de la tabla de datos Préstamos,
      * junto a detalles de libro y socio asociados
      *
+     * @param currentUser Objeto de usuario con sus datos
+     *                    de acceso a la base de datos
      * @return Lista de objetos Préstamo por cada entrada de la tabla de datos
      */
     @Override
-    public List<Loan> searchDetailTB(String user, String password) {
+    public List<Loan> searchDetailTB(User currentUser) {
         String query1 = "SELECT * FROM " + tableName;
         String query2 = "SELECT * FROM " + configProps.getProperty("database-name") + "." + configProps.getProperty("database-table-2") + " WHERE idsoc = ?";
         String query3 = "SELECT * FROM " + configProps.getProperty("database-name") + "." + configProps.getProperty("database-table-1") + " WHERE idlib = ?";
         List<Loan> listLoan = new ArrayList<>();
 
-        try (Connection con = DriverManager.getConnection(url, user, password);
+        try (Connection con = DriverManager.getConnection(url, currentUser.getName(), currentUser.getPassword());
              Statement stmt1 = con.createStatement();
              PreparedStatement pStmt2 = con.prepareStatement(query2);
              PreparedStatement pStmt3 = con.prepareStatement(query3);
@@ -228,14 +237,16 @@ public class LibDBLoan implements LibDAO<Loan> {
      * Método para extraer entradas de la tabla de datos Préstamos
      * según un ID concreto a buscar entre columnas de la tabla
      *
-     * @param opt Número para indicar la columna de la tabla donde buscar
-     * @param ID  ID que buscar en las entradas de la tabla
+     * @param currentUser Objeto de usuario con sus datos
+     *                    de acceso a la base de datos
+     * @param opt         Número para indicar la columna de la tabla donde buscar
+     * @param ID          ID que buscar en las entradas de la tabla
      * @return Objeto Préstamo con la entrada que haya salido de la búsqueda
      */
-    public List<Loan> searchTB(String user, String password, int opt, int ID) {
+    public List<Loan> searchTB(User currentUser, int opt, int ID) {
         String query = "SELECT * FROM " + tableName + " WHERE " + (opt == 1 ? "idpres" : opt == 2 ? "idsoc" : "idlib") + " = ?";
 
-        try (Connection con = DriverManager.getConnection(url, user, password);
+        try (Connection con = DriverManager.getConnection(url, currentUser.getName(), currentUser.getPassword());
              PreparedStatement pStmt = con.prepareStatement(query)) {
             pStmt.setInt(1, ID);
             List<Loan> listLoans = new ArrayList<>();
@@ -260,13 +271,15 @@ public class LibDBLoan implements LibDAO<Loan> {
      * Método para extraer entradas de la tabla de datos Préstamos
      * según fecha de realización
      *
-     * @param date Fecha de realización del préstamo
+     * @param currentUser Objeto de usuario con sus datos
+     *                    de acceso a la base de datos
+     * @param date        Fecha de realización del préstamo
      * @return Lista de objetos Préstamo de las entradas resultantes de la búsqueda
      */
-    public List<Loan> searchTB(String user, String password, LocalDate date) {
+    public List<Loan> searchTB(User currentUser, LocalDate date) {
         String query = "SELECT * FROM " + tableName + " WHERE fechapres = ?";
 
-        try (Connection con = DriverManager.getConnection(url, user, password);
+        try (Connection con = DriverManager.getConnection(url, currentUser.getName(), currentUser.getPassword());
              PreparedStatement pStmt = con.prepareStatement(query)) {
             pStmt.setDate(1, Date.valueOf(date));
             List<Loan> listLoans = new ArrayList<>();
@@ -291,17 +304,19 @@ public class LibDBLoan implements LibDAO<Loan> {
      * Método para eliminar una entrada de la tabla de datos Préstamos
      * según su identificación numérica ID
      *
-     * @param ID Identificación numérica de la entrada a eliminar
+     * @param currentUser Objeto de usuario con sus datos
+     *                    de acceso a la base de datos
+     * @param ID          Identificación numérica de la entrada a eliminar
      * @return ID máxima tras la eliminación de la entrada
      */
     @Override
-    public int deleteTB(String user, String password, int ID) {
+    public int deleteTB(User currentUser, int ID) {
         String query1 = "SELECT idlib FROM " + tableName + " WHERE idpres = ?";
         String query2 = "UPDATE " + configProps.getProperty("database-name") + "." + configProps.getProperty("database-table-1") + " SET prestado = ? WHERE idlib = ?";
         String query3 = "DELETE FROM " + tableName + " WHERE idpres = ?";
         String query4 = String.format("SELECT idpres FROM %s WHERE idpres = (SELECT max(idpres) FROM %s)", tableName, tableName);
 
-        try (Connection con = DriverManager.getConnection(url, user, password);
+        try (Connection con = DriverManager.getConnection(url, currentUser.getName(), currentUser.getPassword());
              PreparedStatement pStmt1 = con.prepareStatement(query1);
              PreparedStatement pStmt2 = con.prepareStatement(query2);
              PreparedStatement pStmt3 = con.prepareStatement(query3);

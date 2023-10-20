@@ -5,6 +5,7 @@ package manager;
 
 import sql.reservoirs.LibDBMember;
 import tables.Member;
+import tables.User;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -41,20 +42,21 @@ final class MemberMenu {
             \t(3) Por apellidos
             \t(0) Salir""";
     /**
-     * Nombre de usuario pasado para la base de datos
+     * Objeto usuario para almacenar sus datos
+     * de acceso a la base de datos
      */
-    private final String user;
+    private final User currentUser;
     /**
-     * Contraseña de usuario para la base de datos
+     * Lista de propiedades comunes del programa
      */
-    private final String password;
+    private final Properties configProps;
 
     /**
      * Constructor de la clase, restringido al paquete
      */
-    MemberMenu(String user, String password) {
-        this.user = user;
-        this.password = password;
+    MemberMenu(User currentUser, Properties configProps) {
+        this.currentUser = currentUser;
+        this.configProps = configProps;
     }
 
     /**
@@ -150,8 +152,8 @@ final class MemberMenu {
                         return new int[]{nMember, idMember};
                     } else if (name.matches(".*[\\d¡!@#$%&ºª'`*.,:;()_+=|/<>¿?{}\\[\\]~].*")) {
                         System.err.println("  El nombre no puede contener números o caracteres especiales");
-                    } else if (name.trim().length() > 20) {
-                        System.err.println("  El nombre no puede superar los 20 caracteres");
+                    } else if (name.trim().length() > Integer.parseInt(configProps.getProperty("database-table-2-field-2-maxchar"))) {
+                        System.err.printf("  El nombre no puede superar los %s caracteres\n", configProps.getProperty("database-table-2-field-2-maxchar"));
                     } else {
                         name = name.trim();
                         name = name.substring(0, 1).toUpperCase() + name.substring(1).toLowerCase();
@@ -174,8 +176,8 @@ final class MemberMenu {
                         return new int[]{nMember, idMember};
                     } else if (surname.matches(".*[\\d¡!@#$%&ºª'`*.,:;()_+=|/<>¿?{}\\[\\]~].*")) {
                         System.err.println("  Los apellidos no pueden contener números o caracteres especiales");
-                    } else if (surname.trim().length() > 40) {
-                        System.err.println("  El título no puede superar los 40 caracteres");
+                    } else if (surname.trim().length() > Integer.parseInt(configProps.getProperty("database-table-2-field-3-maxchar"))) {
+                        System.err.printf("  El nombre no puede superar los %s caracteres\n", configProps.getProperty("database-table-2-field-3-maxchar"));
                     } else {
                         surname = surname.trim();
                         surname = surname.substring(0, 1).toUpperCase() + surname.substring(1).toLowerCase();
@@ -187,7 +189,7 @@ final class MemberMenu {
             } while (!isValid);
 
             try {
-                LibDBMember.getInstance().addTB(user, password, new Member(nMember + 1, name, surname));
+                LibDBMember.getInstance().addTB(currentUser, new Member(nMember + 1, name, surname));
                 ++nMember;
             } catch (RuntimeException re) {
                 System.err.println("  Error durante el registro en la base de datos: " + re.getMessage());
@@ -224,9 +226,9 @@ final class MemberMenu {
                 case 1:
                     System.out.println("\nIntroduce 1 para desplegar más detalles");
                     if (scan.nextLine().equals("1")) {
-                        arrayMembers = LibDBMember.getInstance().searchDetailTB(user, password);
+                        arrayMembers = LibDBMember.getInstance().searchDetailTB(currentUser);
                     } else {
-                        arrayMembers = LibDBMember.getInstance().searchTB(user, password);
+                        arrayMembers = LibDBMember.getInstance().searchTB(currentUser);
                     }
                     System.out.println("Ordenación por ID...");
                     arrayMembers.stream().sorted(Member::compareTo).forEach(System.out::println);
@@ -235,9 +237,9 @@ final class MemberMenu {
                 case 2:
                     System.out.println("\nIntroduce 1 para desplegar más detalles");
                     if (scan.nextLine().equals("1")) {
-                        arrayMembers = LibDBMember.getInstance().searchDetailTB(user, password);
+                        arrayMembers = LibDBMember.getInstance().searchDetailTB(currentUser);
                     } else {
-                        arrayMembers = LibDBMember.getInstance().searchTB(user, password);
+                        arrayMembers = LibDBMember.getInstance().searchTB(currentUser);
                     }
                     System.out.println("Ordenación por nombre...");
                     arrayMembers.stream().sorted(Comparator.comparing(Member::getName).thenComparing(Member::getSurname)).forEach(System.out::println);
@@ -246,9 +248,9 @@ final class MemberMenu {
                 case 3:
                     System.out.println("\nIntroduce 1 para desplegar más detalles");
                     if (scan.nextLine().equals("1")) {
-                        arrayMembers = LibDBMember.getInstance().searchDetailTB(user, password);
+                        arrayMembers = LibDBMember.getInstance().searchDetailTB(currentUser);
                     } else {
-                        arrayMembers = LibDBMember.getInstance().searchTB(user, password);
+                        arrayMembers = LibDBMember.getInstance().searchTB(currentUser);
                     }
                     System.out.println("Ordenación por apellidos...");
                     arrayMembers.stream().sorted(Comparator.comparing(Member::getSurname).thenComparing(Member::getName)).forEach(System.out::println);
@@ -314,10 +316,10 @@ final class MemberMenu {
 
             try {
                 if (opt == 1) {
-                    Member member = LibDBMember.getInstance().searchTB(user, password, ID);
+                    Member member = LibDBMember.getInstance().searchTB(currentUser, ID);
                     System.out.println(member);
                 } else {
-                    List<Member> members = LibDBMember.getInstance().searchTB(user, password, opt, fragString);
+                    List<Member> members = LibDBMember.getInstance().searchTB(currentUser, opt, fragString);
                     members.forEach(System.out::println);
                 }
             } catch (RuntimeException re) {
@@ -382,10 +384,10 @@ final class MemberMenu {
 
             try {
                 if (opt == 1) {
-                    idMember = LibDBMember.getInstance().deleteTB(user, password, ID);
+                    idMember = LibDBMember.getInstance().deleteTB(currentUser, ID);
                     nMember--;
                 } else {
-                    List<Member> members = LibDBMember.getInstance().searchTB(user, password, opt, fragString);
+                    List<Member> members = LibDBMember.getInstance().searchTB(currentUser, opt, fragString);
                     Set<Integer> idmembers = members.stream().map(Member::getIdMember).collect(Collectors.toSet());
                     members.stream().sorted(Member::compareTo).forEach(System.out::println);
                     do {
@@ -397,7 +399,7 @@ final class MemberMenu {
                                 System.out.println("  Operación cancelada, volviendo al menú del gestor...");
                                 return new int[]{nMember, idMember};
                             } else if (!idmembers.add(ID)) {
-                                idMember = LibDBMember.getInstance().deleteTB(user, password, ID);
+                                idMember = LibDBMember.getInstance().deleteTB(currentUser, ID);
                                 nMember--;
                                 isValid = false;
                             } else {

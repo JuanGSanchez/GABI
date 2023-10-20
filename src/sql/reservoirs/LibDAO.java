@@ -4,6 +4,8 @@
  */
 package sql.reservoirs;
 
+import tables.User;
+
 import java.util.List;
 
 /**
@@ -20,42 +22,53 @@ public interface LibDAO<T> {
      * Método de conteo de entradas en la tabla de datos
      * asociada a la clase T
      *
+     * @param currentUser Objeto de usuario con sus datos
+     *                    de acceso a la base de datos
      * @return Número de entradas en la base de datos
      */
-    int[] countTB(String user, String password);
+    int[] countTB(User currentUser);
 
     /**
      * Método de introducción de una nueva entrada en la
      * tabla de datos asociada a la clase T
      *
-     * @param t Objeto de la clase T, cuyos datos se introducen
-     *          en la tabla de datos
+     * @param currentUser Objeto de usuario con sus datos
+     *                    de acceso a la base de datos
+     * @param t           Objeto de la clase T, cuyos datos se introducen
+     *                    en la tabla de datos
      */
-    void addTB(String user, String password, T t);
+    void addTB(User currentUser, T t);
 
     /**
      * Método de búsqueda de entradas en la tabla de datos
      * asociada a la clase T
      *
+     * @param currentUser Objeto de usuario con sus datos
+     *                    de acceso a la base de datos
      * @return Lista de objetos de la clase T, construidos
      * desde los datos recuperados de la tabla
      */
-    List<T> searchTB(String user, String password);
+    List<T> searchTB(User currentUser);
 
     /**
      * Método de búsqueda de entradas en la tabla de datos
      * asociada a la clase T, añadiendo más detalles
      *
+     * @param currentUser Objeto de usuario con sus datos
+     *                    de acceso a la base de datos
      * @return Lista de objetos de la clase T, construidos
      * desde los datos recuperados de la tabla
      */
-    List<T> searchDetailTB(String user, String password);
+    List<T> searchDetailTB(User currentUser);
 
     /**
      * Método para eliminar una entrada en la tabla de datos
      * asociada a la clase T
      *
-     * @param ID Identificación numérica de la entrada a eliminar
+     * @param currentUser Objeto de usuario con sus datos
+     *                    de acceso a la base de datos
+     * @param ID          Identificación numérica de la entrada a eliminar
+     * @return ID máxima actualizada de la tabla de datos
      */
-    int deleteTB(String user, String password, int ID);
+    int deleteTB(User currentUser, int ID);
 }

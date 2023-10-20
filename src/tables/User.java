@@ -37,6 +37,18 @@ public class User implements Comparable<User> {
 
     /**
      * Constructor completo de la clase
+     * para la transmisión de datos del usuario
+     * por el programa
+     *
+     * @param name     Nombre de usuario
+     * @param password Constraseña del usuario
+     */
+    public User(String name, String password) {
+        this(0, name, password);
+    }
+
+    /**
+     * Constructor completo de la clase
      * para la entrada de datos
      *
      * @param idUser   ID de usuario en la tabla de datos

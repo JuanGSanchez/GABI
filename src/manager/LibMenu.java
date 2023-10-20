@@ -7,6 +7,7 @@ import sql.reservoirs.LibDBBook;
 import sql.reservoirs.LibDBLoan;
 import sql.reservoirs.LibDBMember;
 import sql.users.UserDerby;
+import tables.User;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -99,8 +100,7 @@ public final class LibMenu {
      */
     public static void main(String[] args) {
         boolean repeat = true;
-        String name = null;
-        String password = null;
+        User currentUser = null;
 
         new LibMenu();
 
@@ -111,8 +111,7 @@ public final class LibMenu {
                 if (args.length == 2) {
                     try {
                         UserDerby.getInstance().tryUser(args[0], args[1].toCharArray());
-                        name = args[0];
-                        password = args[1];
+                        currentUser = new User(args[0], args[1]);
                     } catch (RuntimeException re) {
                         System.err.println("\nError en el acceso a la base de datos: " + re.getMessage() + "\n");
                     }
@@ -122,25 +121,22 @@ public final class LibMenu {
                 args = new String[]{};
             }
 
-            if (name == null) {
-                String[] accessData = acessBlock();
-                name = accessData[0];
-                password = accessData[1];
-                accessData = null;
-                if (name.isEmpty()) {
+            if (currentUser == null) {
+                currentUser = acessBlock();
+                if (currentUser == null) {
                     System.out.println("\nSaliendo...");
                     System.exit(0);
                 }
             }
 
-            selectionBlock(name, password);
+            selectionBlock(currentUser);
 
             System.out.print("\nIntroduce 1 para cambiar de usuario: ");
             if (!scanMenu.nextLine().equals("1")) {
                 System.out.println("\nSaliendo...");
                 repeat = false;
             } else {
-                name = null;
+                currentUser = null;
                 System.out.println();
             }
         } while (repeat);
@@ -150,9 +146,9 @@ public final class LibMenu {
     /**
      * Método que encierra la identificación de usuario del programa
      *
-     * @return Datos de acceso del usuario verificado
+     * @return Objeto de usuario verificado
      */
-    private static String[] acessBlock() {
+    private static User acessBlock() {
         boolean isUser = false;
         String name = "";
         String password = "";
@@ -162,7 +158,7 @@ public final class LibMenu {
                 System.out.print("\nIntroduce nombre de usuario (-1 para salir): ");
                 name = scanMenu.nextLine();
                 if (name.equals("-1")) {
-                    return new String[]{"", ""};
+                    return null;
                 }
 //                Console console = System.console();
 //                char[] password = console.readPassword("\nIntroduce contraseña: ");
@@ -170,7 +166,7 @@ public final class LibMenu {
                 System.out.print("\nIntroduce contraseña (-1 para salir): ");
                 password = scanMenu.nextLine();
                 if (password.equals("-1")) {
-                    return new String[]{"", ""};
+                    return null;
                 }
                 UserDerby.getInstance().tryUser(name, password.toCharArray());
                 isUser = true;
@@ -181,44 +177,43 @@ public final class LibMenu {
             }
         } while (!isUser);
 
-        return new String[]{name, password};
+        return new User(name, password);
     }
 
     /**
      * Método que encierra la selección del gestor en el que introducirse
      * el usuario verificado
      *
-     * @param name     Nombre del usuario para el acceso a la base de datos
-     * @param password Contraseña del usuario para el acceso a la base de datos
+     * @param currentUser Objeto User con sus datos para el acceso a la base de datos
      */
-    private static void selectionBlock(String name, String password) {
+    private static void selectionBlock(User currentUser) {
         boolean checkMenu = true;
         int optionMenu;
         int[] count;
 
-        BookMenu lMenu = new BookMenu(name, password);
-        MemberMenu sMenu = new MemberMenu(name, password);
-        LoanMenu pMenu = new LoanMenu(name, password);
+        BookMenu lMenu = new BookMenu(currentUser, configProps);
+        MemberMenu sMenu = new MemberMenu(currentUser, configProps);
+        LoanMenu pMenu = new LoanMenu(currentUser, configProps);
 
         do {
-            count = LibDBBook.getInstance().countTB(name, password);
+            count = LibDBBook.getInstance().countTB(currentUser);
             if (count != null) {
                 nBooks = count[0];
                 idBooks = count[1];
             }
-            count = LibDBMember.getInstance().countTB(name, password);
+            count = LibDBMember.getInstance().countTB(currentUser);
             if (count != null) {
                 nMembers = count[0];
                 idMembers = count[1];
             }
-            count = LibDBLoan.getInstance().countTB(name, password);
+            count = LibDBLoan.getInstance().countTB(currentUser);
             if (count != null) {
                 nLoans = count[0];
                 idLoans = count[1];
             }
             System.out.printf("\nHay %d libros, %d socios y %d préstamos registrados actualmente\n", nBooks, nMembers, nLoans);
 
-            System.out.println(name.equals(configProps.getProperty("database-name")) ? mainMenu2 : mainMenu1);
+            System.out.println(currentUser.getName().equals(configProps.getProperty("database-name")) ? mainMenu2 : mainMenu1);
 
             try {
                 optionMenu = scanMenu.nextInt();
@@ -243,8 +238,8 @@ public final class LibMenu {
                     idLoans = count[1];
                     break;
                 case 4:
-                    if (name.equals(configProps.getProperty("database-name"))) {
-                        UserMenu uMenu = new UserMenu(name, password, configProps);
+                    if (currentUser.getName().equals(configProps.getProperty("database-name"))) {
+                        UserMenu uMenu = new UserMenu(currentUser, configProps);
                         uMenu.selectionMenu(scanMenu);
                     } else {
                         System.err.println("Entrada no válida");

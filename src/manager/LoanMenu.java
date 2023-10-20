@@ -9,6 +9,7 @@ import sql.reservoirs.LibDBMember;
 import tables.Book;
 import tables.Loan;
 import tables.Member;
+import tables.User;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -72,20 +73,21 @@ final class LoanMenu {
             \t(4) Por fecha de realización
             \t(0) Salir""";
     /**
-     * Nombre de usuario pasado para la base de datos
+     * Objeto usuario para almacenar sus datos
+     * de acceso a la base de datos
      */
-    private final String user;
+    private final User currentUser;
     /**
-     * Contraseña de usuario para la base de datos
+     * Lista de propiedades comunes del programa
      */
-    private final String password;
+    private final Properties configProps;
 
     /**
      * Constructor de la clase, restringido al paquete
      */
-    LoanMenu(String user, String password) {
-        this.user = user;
-        this.password = password;
+    LoanMenu(User currentUser, Properties configProps) {
+        this.currentUser = currentUser;
+        this.configProps = configProps;
     }
 
     /**
@@ -212,7 +214,7 @@ final class LoanMenu {
 
                 try {
                     if (opt != 1) {
-                        List<Member> members = LibDBMember.getInstance().searchTB(user, password, opt, fragString);
+                        List<Member> members = LibDBMember.getInstance().searchTB(currentUser, opt, fragString);
                         Set<Integer> idsocs = members.stream().map(Member::getIdMember).collect(Collectors.toSet());
                         members.stream().sorted(Member::compareTo).forEach(System.out::println);
                         do {
@@ -235,7 +237,7 @@ final class LoanMenu {
                             scan.nextLine();
                         } while (isValid);
                     } else {
-                        LibDBMember.getInstance().searchTB(user, password, idSoc);
+                        LibDBMember.getInstance().searchTB(currentUser, idSoc);
                     }
                     isPossible = true;
                 } catch (RuntimeException re) {
@@ -281,7 +283,7 @@ final class LoanMenu {
 
                 try {
                     if (opt != 1) {
-                        List<Book> books = LibDBBook.getInstance().searchTB(user, password, opt, fragString);
+                        List<Book> books = LibDBBook.getInstance().searchTB(currentUser, opt, fragString);
                         Set<Integer> idlibs = books.stream().map(Book::getIdBook).collect(Collectors.toSet());
                         books.stream().sorted(Book::compareTo).forEach(System.out::println);
                         do {
@@ -304,7 +306,7 @@ final class LoanMenu {
                             scan.nextLine();
                         } while (isValid);
                     } else {
-                        LibDBBook.getInstance().searchTB(user, password, idLib);
+                        LibDBBook.getInstance().searchTB(currentUser, idLib);
                     }
                     isPossible = true;
                 } catch (RuntimeException re) {
@@ -314,7 +316,7 @@ final class LoanMenu {
             } while (!isPossible);
 
             try {
-                LibDBLoan.getInstance().addTB(user, password, new Loan(nLoan + 1, idSoc, idLib));
+                LibDBLoan.getInstance().addTB(currentUser, new Loan(nLoan + 1, idSoc, idLib));
                 ++nLoan;
             } catch (RuntimeException re) {
                 System.err.println("  Error durante el registro en la base de datos: " + re.getMessage());
@@ -351,9 +353,9 @@ final class LoanMenu {
                 case 1:
                     System.out.println("\nIntroduce 1 para desplegar más detalles");
                     if (scan.nextLine().equals("1")) {
-                        arrayLoans = LibDBLoan.getInstance().searchDetailTB(user, password);
+                        arrayLoans = LibDBLoan.getInstance().searchDetailTB(currentUser);
                     } else {
-                        arrayLoans = LibDBLoan.getInstance().searchTB(user, password);
+                        arrayLoans = LibDBLoan.getInstance().searchTB(currentUser);
                     }
                     System.out.println("Ordenación por ID del préstamo...");
                     arrayLoans.stream().sorted(Loan::compareTo).forEach(System.out::println);
@@ -362,9 +364,9 @@ final class LoanMenu {
                 case 2:
                     System.out.println("\nIntroduce 1 para desplegar más detalles");
                     if (scan.nextLine().equals("1")) {
-                        arrayLoans = LibDBLoan.getInstance().searchDetailTB(user, password);
+                        arrayLoans = LibDBLoan.getInstance().searchDetailTB(currentUser);
                     } else {
-                        arrayLoans = LibDBLoan.getInstance().searchTB(user, password);
+                        arrayLoans = LibDBLoan.getInstance().searchTB(currentUser);
                     }
                     System.out.println("Ordenación por ID del member...");
                     arrayLoans.stream().sorted(Comparator.comparing(Loan::getIdMember)).forEach(System.out::println);
@@ -373,9 +375,9 @@ final class LoanMenu {
                 case 3:
                     System.out.println("\nIntroduce 1 para desplegar más detalles");
                     if (scan.nextLine().equals("1")) {
-                        arrayLoans = LibDBLoan.getInstance().searchDetailTB(user, password);
+                        arrayLoans = LibDBLoan.getInstance().searchDetailTB(currentUser);
                     } else {
-                        arrayLoans = LibDBLoan.getInstance().searchTB(user, password);
+                        arrayLoans = LibDBLoan.getInstance().searchTB(currentUser);
                     }
                     System.out.println("Ordenación por ID del book...");
                     arrayLoans.stream().sorted(Comparator.comparing(Loan::getIdBook)).forEach(System.out::println);
@@ -384,9 +386,9 @@ final class LoanMenu {
                 case 4:
                     System.out.println("\nIntroduce 1 para desplegar más detalles");
                     if (scan.nextLine().equals("1")) {
-                        arrayLoans = LibDBLoan.getInstance().searchDetailTB(user, password);
+                        arrayLoans = LibDBLoan.getInstance().searchDetailTB(currentUser);
                     } else {
-                        arrayLoans = LibDBLoan.getInstance().searchTB(user, password);
+                        arrayLoans = LibDBLoan.getInstance().searchTB(currentUser);
                     }
                     System.out.println("Ordenación por fecha...");
                     arrayLoans.stream().sorted(Comparator.comparing(Loan::getDateLoan)).forEach(System.out::println);
@@ -464,9 +466,9 @@ final class LoanMenu {
             try {
                 List<Loan> loans;
                 if (opt < 4) {
-                    loans = LibDBLoan.getInstance().searchTB(user, password, opt, ID);
+                    loans = LibDBLoan.getInstance().searchTB(currentUser, opt, ID);
                 } else {
-                    loans = LibDBLoan.getInstance().searchTB(user, password, date);
+                    loans = LibDBLoan.getInstance().searchTB(currentUser, date);
                 }
                 loans.forEach(System.out::println);
             } catch (RuntimeException re) {
@@ -521,10 +523,10 @@ final class LoanMenu {
                     case 4:
                         boolean isDone = false;
                         do {
-                            System.out.println("Introduce " + searchVar[opt - 1] + " (dd-mm-aaaa) -");
+                            System.out.println("Introduce " + searchVar[opt - 1] + " (" + configProps.getProperty("database-table-3-field-4-format-text") + ") -");
                             fragString = scan.nextLine();
                             try {
-                                date = LocalDate.parse(fragString, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+                                date = LocalDate.parse(fragString, DateTimeFormatter.ofPattern(configProps.getProperty("database-table-3-field-4-format-code")));
                                 isDone = true;
                             } catch (RuntimeException re) {
                                 System.err.println("  Formato de fecha no válido");
@@ -544,13 +546,13 @@ final class LoanMenu {
                 List<Loan> loans;
                 Set<Integer> idloans;
                 if (opt == 1) {
-                    idLoan = LibDBLoan.getInstance().deleteTB(user, password, ID);
+                    idLoan = LibDBLoan.getInstance().deleteTB(currentUser, ID);
                     nLoan--;
                 } else {
                     if (opt == 2 || opt == 3) {
-                        loans = LibDBLoan.getInstance().searchTB(user, password, opt, ID);
+                        loans = LibDBLoan.getInstance().searchTB(currentUser, opt, ID);
                     } else {
-                        loans = LibDBLoan.getInstance().searchTB(user, password, date);
+                        loans = LibDBLoan.getInstance().searchTB(currentUser, date);
                     }
                     idloans = loans.stream().map(Loan::getIdLoan).collect(Collectors.toSet());
                     loans.stream().sorted(Loan::compareTo).forEach(System.out::println);
@@ -563,7 +565,7 @@ final class LoanMenu {
                                 System.out.println("  Operación cancelada, volviendo al menú del gestor...");
                                 return new int[]{nLoan, idLoan};
                             } else if (!idloans.add(ID)) {
-                                idLoan = LibDBBook.getInstance().deleteTB(user, password, ID);
+                                idLoan = LibDBBook.getInstance().deleteTB(currentUser, ID);
                                 nLoan--;
                                 isValid = false;
                             } else {

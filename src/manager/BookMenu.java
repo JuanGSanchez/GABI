@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import sql.reservoirs.LibDBBook;
 import tables.Book;
+import tables.User;
 
 /**
  * Clase del menú del gestor de books en el programa
@@ -41,20 +42,21 @@ final class BookMenu {
             \t(3) Por autor
             \t(0) Salir""";
     /**
-     * Nombre de usuario pasado para la base de datos
+     * Objeto usuario para almacenar sus datos
+     * de acceso a la base de datos
      */
-    private final String user;
+    private final User currentUser;
     /**
-     * Contraseña de usuario para la base de datos
+     * Lista de propiedades comunes del programa
      */
-    private final String password;
+    private final Properties configProps;
 
     /**
      * Constructor de la clase, restringido al paquete
      */
-    BookMenu(String user, String password) {
-        this.user = user;
-        this.password = password;
+    BookMenu(User currentUser, Properties configProps) {
+        this.currentUser = currentUser;
+        this.configProps = configProps;
     }
 
     /**
@@ -150,8 +152,8 @@ final class BookMenu {
                         return new int[]{nBook, idBook};
                     } else if (title.matches(".*[@#$%&ºª'`*_+=|/<>{}\\[\\]~].*")) {
                         System.err.println("  El título no puede contener caracteres especiales");
-                    } else if (title.trim().length() > 120) {
-                        System.err.println("  El título no puede superar los 120 caracteres");
+                    } else if (title.trim().length() > Integer.parseInt(configProps.getProperty("database-table-1-field-2-maxchar"))) {
+                        System.err.printf("  El título no puede superar los %s caracteres\n", configProps.getProperty("database-table-1-field-2-maxchar"));
                     } else {
                         title = title.trim();
                         title = title.substring(0, 1).toUpperCase() + title.substring(1).toLowerCase();
@@ -174,8 +176,8 @@ final class BookMenu {
                         return new int[]{nBook, idBook};
                     } else if (author.matches(".*[\\d¡!@#$%&ºª'`*.:;()_+=|/<>¿?{}\\[\\]~].*")) {
                         System.err.println("  El nombre no puede contener números o caracteres especiales");
-                    } else if (author.trim().length() > 60) {
-                        System.err.println("  El nombre no puede superar los 60 caracteres");
+                    } else if (author.trim().length() > Integer.parseInt(configProps.getProperty("database-table-1-field-3-maxchar"))) {
+                        System.err.printf("  El nombre no puede superar los %s caracteres\n", configProps.getProperty("database-table-1-field-3-maxchar"));
                     } else if (author.matches(".*,.*")) {
                         author = author.trim();
                         String[] autorArray = author.split(",");
@@ -200,7 +202,7 @@ final class BookMenu {
             } while (!isValid);
 
             try {
-                LibDBBook.getInstance().addTB(user, password, new Book(idBook + 1, title, author));
+                LibDBBook.getInstance().addTB(currentUser, new Book(idBook + 1, title, author));
                 nBook++;
                 idBook++;
             } catch (RuntimeException re) {
@@ -231,7 +233,7 @@ final class BookMenu {
             System.out.println("\nSelecciona ordenación de listado -\n" + searchMenu);
             try {
                 opt = scan.nextInt();
-                arrayBooks = LibDBBook.getInstance().searchTB(user, password);
+                arrayBooks = LibDBBook.getInstance().searchTB(currentUser);
             } catch (InputMismatchException ime) {
                 opt = -1;
             }
@@ -311,10 +313,10 @@ final class BookMenu {
 
             try {
                 if (opt == 1) {
-                    Book book = LibDBBook.getInstance().searchTB(user, password, ID);
+                    Book book = LibDBBook.getInstance().searchTB(currentUser, ID);
                     System.out.println(book);
                 } else {
-                    List<Book> books = LibDBBook.getInstance().searchTB(user, password, opt, fragString);
+                    List<Book> books = LibDBBook.getInstance().searchTB(currentUser, opt, fragString);
                     books.forEach(System.out::println);
                 }
             } catch (RuntimeException re) {
@@ -379,10 +381,10 @@ final class BookMenu {
 
             try {
                 if (opt == 1) {
-                    idBook = LibDBBook.getInstance().deleteTB(user, password, ID);
+                    idBook = LibDBBook.getInstance().deleteTB(currentUser, ID);
                     nBook--;
                 } else {
-                    List<Book> books = LibDBBook.getInstance().searchTB(user, password, opt, fragString);
+                    List<Book> books = LibDBBook.getInstance().searchTB(currentUser, opt, fragString);
                     Set<Integer> idbooks = books.stream().map(Book::getIdBook).collect(Collectors.toSet());
                     books.stream().sorted(Book::compareTo).forEach(System.out::println);
                     do {
@@ -394,7 +396,7 @@ final class BookMenu {
                                 System.out.println("  Operación cancelada, volviendo al menú del gestor...");
                                 return new int[]{nBook, idBook};
                             } else if (!idbooks.add(ID)) {
-                                idBook = LibDBBook.getInstance().deleteTB(user, password, ID);
+                                idBook = LibDBBook.getInstance().deleteTB(currentUser, ID);
                                 nBook--;
                                 isValid = false;
                             } else {

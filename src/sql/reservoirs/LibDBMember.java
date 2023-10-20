@@ -6,6 +6,7 @@ package sql.reservoirs;
 
 import tables.Book;
 import tables.Member;
+import tables.User;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -69,14 +70,16 @@ public final class LibDBMember implements LibDAO<Member> {
     /**
      * Método para contabilizar las entradas de la tabla de datos Socios
      *
+     * @param currentUser Objeto de usuario con sus datos
+     *                    de acceso a la base de datos
      * @return Número de filas de la tabla de datos
      */
     @Override
-    public int[] countTB(String user, String password) {
+    public int[] countTB(User currentUser) {
         String query1 = "SELECT COUNT(*) FROM " + tableName;
         String query2 = String.format("SELECT idsoc FROM %s WHERE idsoc = (SELECT max(idsoc) FROM %s)", tableName, tableName);
 
-        try (Connection con = DriverManager.getConnection(url, user, password);
+        try (Connection con = DriverManager.getConnection(url, currentUser.getName(), currentUser.getPassword());
              Statement stmt1 = con.createStatement();
              Statement stmt2 = con.createStatement();
              ResultSet rs1 = stmt1.executeQuery(query1);
@@ -96,14 +99,16 @@ public final class LibDBMember implements LibDAO<Member> {
     /**
      * Método para introducir una nueva entrada en la tabla de datos Socios
      *
-     * @param member Objeto Socio que registrar en la base de datos
+     * @param currentUser Objeto de usuario con sus datos
+     *                    de acceso a la base de datos
+     * @param member      Objeto Socio que registrar en la base de datos
      */
     @Override
-    public void addTB(String user, String password, Member member) {
+    public void addTB(User currentUser, Member member) {
         String query1 = "SELECT * FROM " + tableName + " WHERE LOWER(nombre) = LOWER(?) AND LOWER(apellidos) = LOWER(?)";
         String query2 = "INSERT INTO " + tableName + " VALUES (?,?,?)";
 
-        try (Connection con = DriverManager.getConnection(url, user, password);
+        try (Connection con = DriverManager.getConnection(url, currentUser.getName(), currentUser.getPassword());
              PreparedStatement pStmt1 = con.prepareStatement(query1);
              PreparedStatement pStmt2 = con.prepareStatement(query2)) {
             pStmt1.setString(1, member.getName());
@@ -130,14 +135,16 @@ public final class LibDBMember implements LibDAO<Member> {
     /**
      * Método para extraer todas las entradas de la tabla de datos Socios
      *
+     * @param currentUser Objeto de usuario con sus datos
+     *                    de acceso a la base de datos
      * @return Lista de objetos Socio por cada entrada de la tabla de datos
      */
     @Override
-    public List<Member> searchTB(String user, String password) {
+    public List<Member> searchTB(User currentUser) {
         String query = "SELECT * FROM " + tableName;
         List<Member> listMember = new ArrayList<>();
 
-        try (Connection con = DriverManager.getConnection(url, user, password);
+        try (Connection con = DriverManager.getConnection(url, currentUser.getName(), currentUser.getPassword());
              Statement stmt = con.createStatement();
              ResultSet rs = stmt.executeQuery(query)) {
             while (rs.next()) {
@@ -156,16 +163,18 @@ public final class LibDBMember implements LibDAO<Member> {
      * Método para extraer todas las entradas de la tabla de datos Socios,
      * junto a detalles de sus préstamos
      *
+     * @param currentUser Objeto de usuario con sus datos
+     *                    de acceso a la base de datos
      * @return Lista de objetos Socio por cada entrada de la tabla de datos
      */
     @Override
-    public List<Member> searchDetailTB(String user, String password) {
+    public List<Member> searchDetailTB(User currentUser) {
         String query1 = "SELECT * FROM " + tableName;
         String query2 = "SELECT idlib FROM " + configProps.getProperty("database-name") + "." + configProps.getProperty("database-table-3") + " WHERE idsoc = ?";
         String query3 = "SELECT * FROM " + configProps.getProperty("database-name") + "." + configProps.getProperty("database-table-1") + " WHERE idlib = ?";
         List<Member> listMember = new ArrayList<>();
 
-        try (Connection con = DriverManager.getConnection(url, user, password);
+        try (Connection con = DriverManager.getConnection(url, currentUser.getName(), currentUser.getPassword());
              Statement stmt1 = con.createStatement();
              PreparedStatement pStmt2 = con.prepareStatement(query2);
              PreparedStatement pStmt3 = con.prepareStatement(query3);
@@ -205,14 +214,16 @@ public final class LibDBMember implements LibDAO<Member> {
      * según un fragmento de texto dado para buscar en una de las
      * columnas de texto de la tabla
      *
-     * @param opt  Número para indicar la columna de la tabla donde buscar
-     * @param seed Fragmento de texto que buscar en las entradas de la tabla
+     * @param currentUser Objeto de usuario con sus datos
+     *                    de acceso a la base de datos
+     * @param opt         Número para indicar la columna de la tabla donde buscar
+     * @param seed        Fragmento de texto que buscar en las entradas de la tabla
      * @return Lista de objetos Socio que hayan salido de la búsqueda
      */
-    public List<Member> searchTB(String user, String password, int opt, String seed) {
+    public List<Member> searchTB(User currentUser, int opt, String seed) {
         String query = "SELECT * FROM " + tableName + " WHERE LOWER(" + (opt == 2 ? "nombre" : "apellidos") + ") LIKE LOWER(?)";
 
-        try (Connection con = DriverManager.getConnection(url, user, password);
+        try (Connection con = DriverManager.getConnection(url, currentUser.getName(), currentUser.getPassword());
              PreparedStatement pStmt = con.prepareStatement(query)) {
             pStmt.setString(1, "%" + seed + "%");
             List<Member> listMember = new ArrayList<>();
@@ -236,13 +247,15 @@ public final class LibDBMember implements LibDAO<Member> {
      * Método para extraer entradas de la tabla de datos Socios
      * según su identificación numérica ID
      *
-     * @param ID Identificación numérica de la entrada en la tabla
+     * @param currentUser Objeto de usuario con sus datos
+     *                    de acceso a la base de datos
+     * @param ID          Identificación numérica de la entrada en la tabla
      * @return Objeto Socio con los datos de la entrada encontrada
      */
-    public Member searchTB(String user, String password, int ID) {
+    public Member searchTB(User currentUser, int ID) {
         String query = "SELECT * FROM " + tableName + " WHERE idsoc = ?";
 
-        try (Connection con = DriverManager.getConnection(url, user, password);
+        try (Connection con = DriverManager.getConnection(url, currentUser.getName(), currentUser.getPassword());
              PreparedStatement pStmt = con.prepareStatement(query)) {
             pStmt.setInt(1, ID);
             ResultSet rs = pStmt.executeQuery();
@@ -263,16 +276,18 @@ public final class LibDBMember implements LibDAO<Member> {
      * Método para eliminar una entrada de la tabla de datos Socios
      * según su identificación numérica ID
      *
-     * @param ID Identificación numérica de la entrada a eliminar
+     * @param currentUser Objeto de usuario con sus datos
+     *                    de acceso a la base de datos
+     * @param ID          Identificación numérica de la entrada a eliminar
      * @return ID máxima tras la eliminación de la entrada
      */
     @Override
-    public int deleteTB(String user, String password, int ID) {
+    public int deleteTB(User currentUser, int ID) {
         String query1 = "SELECT * FROM " + configProps.getProperty("database-name") + "." + configProps.getProperty("database-table-3") + " WHERE idsoc = ?";
         String query2 = "DELETE FROM " + tableName + " WHERE idsoc = ?";
         String query3 = String.format("SELECT idsoc FROM %s WHERE idsoc = (SELECT max(idsoc) FROM %s)", tableName, tableName);
 
-        try (Connection con = DriverManager.getConnection(url, user, password);
+        try (Connection con = DriverManager.getConnection(url, currentUser.getName(), currentUser.getPassword());
              PreparedStatement pStmt1 = con.prepareStatement(query1);
              PreparedStatement pStmt2 = con.prepareStatement(query2);
              Statement stmt3 = con.createStatement()) {

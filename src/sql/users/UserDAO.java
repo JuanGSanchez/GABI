@@ -21,42 +21,42 @@ public interface UserDAO {
      * Método para probar la conexión de un usuario y contraseña
      * suministrados, comprobando su validez de conexión
      *
-     * @param user     Nombre del usuario
-     * @param password Contraseña asociada al usuario
+     * @param name     Nombre del usuario
+     * @param password Contraseña del usuario
      */
-    void tryUser(String user, char[] password);
+    void tryUser(String name, char[] password);
 
     /**
      * Método para contar el número de usuarios registrados
      * en la base de datos
      *
-     * @param user     Nombre del usuario
-     * @param password Contraseña asociada al usuario
+     * @param currentUser Objeto de usuario con sus datos
+     *                    de acceso a la base de datos
      */
-    int[] countUser(String user, char[] password);
+    int[] countUser(User currentUser);
 
     /**
      * Método para añadir un nuevo usuario a la base de datos
      *
-     * @param user     Nombre del usuario
-     * @param password Contraseña asociada al usuario
+     * @param currentUser Objeto de usuario con sus datos
+     *                    de acceso a la base de datos
      */
-    void addUser(String user, char[] password, User newUser);
+    void addUser(User currentUser, User newUser);
 
     /**
      * Método para buscar usuarios de la base de datos
      *
-     * @param user     Nombre del usuario
-     * @param password Contraseña asociada al usuario
+     * @param currentUser Objeto de usuario con sus datos
+     *                    de acceso a la base de datos
      */
-    List<User> searchUser(String user, char[] password);
+    List<User> searchUser(User currentUser);
 
     /**
      * Método para eliminar un usuario de la base de datos
      *
-     * @param user     Nombre del usuario
-     * @param password Contraseña asociada al usuario
+     * @param currentUser Objeto de usuario con sus datos
+     *                    de acceso a la base de datos
      */
-    int deleteUser(String user, char[] password, int ID);
+    int deleteUser(User currentUser, int ID);
 
 }

@@ -43,7 +43,7 @@ public class UserAuthentication {
             System.out.println("Turning on authentication and SQL authorization.");
 
 // Set requireAuthentication
-            s.executeUpdate(setProperty + requireAuth + ", 'false')");
+            s.executeUpdate(setProperty + requireAuth + ", 'true')");
 
 //CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.connection.requireAuthentication','true'
 // Set sqlAuthorization

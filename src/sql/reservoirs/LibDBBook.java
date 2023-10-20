@@ -5,6 +5,7 @@
 package sql.reservoirs;
 
 import tables.Book;
+import tables.User;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -68,14 +69,16 @@ public final class LibDBBook implements LibDAO<Book> {
     /**
      * Método para contabilizar las entradas de la tabla de datos Libros
      *
+     * @param currentUser Objeto de usuario con sus datos
+     *                    de acceso a la base de datos
      * @return Número de filas de la tabla de datos
      */
     @Override
-    public int[] countTB(String user, String password) {
+    public int[] countTB(User currentUser) {
         String query1 = "SELECT COUNT(*) FROM " + tableName;
         String query2 = String.format("SELECT idlib FROM %s WHERE idlib = (SELECT max(idlib) FROM %s)", tableName, tableName);
 
-        try (Connection con = DriverManager.getConnection(url, user, password);
+        try (Connection con = DriverManager.getConnection(url, currentUser.getName(), currentUser.getPassword());
              Statement stmt1 = con.createStatement();
              Statement stmt2 = con.createStatement();
              ResultSet rs1 = stmt1.executeQuery(query1);
@@ -95,14 +98,16 @@ public final class LibDBBook implements LibDAO<Book> {
     /**
      * Método para introducir una nueva entrada en la tabla de datos Libros
      *
-     * @param book Objeto Libro que registrar en la base de datos
+     * @param currentUser Objeto de usuario con sus datos
+     *                    de acceso a la base de datos
+     * @param book        Objeto Libro que registrar en la base de datos
      */
     @Override
-    public void addTB(String user, String password, Book book) {
+    public void addTB(User currentUser, Book book) {
         String query1 = "SELECT * FROM " + tableName + " WHERE LOWER(titulo) = LOWER(?) AND LOWER(autor) = LOWER(?)";
         String query2 = "INSERT INTO " + tableName + " VALUES (?,?,?,FALSE)";
 
-        try (Connection con = DriverManager.getConnection(url, user, password);
+        try (Connection con = DriverManager.getConnection(url, currentUser.getName(), currentUser.getPassword());
              PreparedStatement pStmt1 = con.prepareStatement(query1);
              PreparedStatement pStmt2 = con.prepareStatement(query2)) {
             pStmt1.setString(1, book.getTitle());
@@ -129,14 +134,16 @@ public final class LibDBBook implements LibDAO<Book> {
     /**
      * Método para extraer todas las entradas de la tabla de datos Libros
      *
+     * @param currentUser Objeto de usuario con sus datos
+     *                    de acceso a la base de datos
      * @return Lista de objetos Libro por cada entrada de la tabla de datos
      */
     @Override
-    public List<Book> searchTB(String user, String password) {
+    public List<Book> searchTB(User currentUser) {
         String query = "SELECT * FROM " + tableName;
         List<Book> listBook = new ArrayList<>();
 
-        try (Connection con = DriverManager.getConnection(url, user, password);
+        try (Connection con = DriverManager.getConnection(url, currentUser.getName(), currentUser.getPassword());
              Statement stmt = con.createStatement();
              ResultSet rs = stmt.executeQuery(query)) {
             while (rs.next()) {
@@ -156,10 +163,12 @@ public final class LibDBBook implements LibDAO<Book> {
      * Método para extraer todas las entradas de la tabla de datos Libros;
      * implementación invisible al no poseer estos objetos mayores detalles
      *
+     * @param currentUser Objeto de usuario con sus datos
+     *                    de acceso a la base de datos
      * @return Lista de objetos Libro por cada entrada de la tabla de datos
      */
     @Override
-    public List<Book> searchDetailTB(String user, String password) {
+    public List<Book> searchDetailTB(User currentUser) {
         return null;
     }
 
@@ -168,14 +177,16 @@ public final class LibDBBook implements LibDAO<Book> {
      * según un fragmento de texto dado para buscar en una de las
      * columnas de texto de la tabla
      *
-     * @param opt  Número para indicar la columna de la tabla donde buscar
-     * @param seed Fragmento de texto que buscar en las entradas de la tabla
+     * @param currentUser Objeto de usuario con sus datos
+     *                    de acceso a la base de datos
+     * @param opt         Número para indicar la columna de la tabla donde buscar
+     * @param seed        Fragmento de texto que buscar en las entradas de la tabla
      * @return Lista de objetos Libro que hayan salido de la búsqueda
      */
-    public List<Book> searchTB(String user, String password, int opt, String seed) {
+    public List<Book> searchTB(User currentUser, int opt, String seed) {
         String query = "SELECT * FROM " + tableName + " WHERE LOWER(" + (opt == 2 ? "titulo" : "autor") + ") LIKE LOWER(?)";
 
-        try (Connection con = DriverManager.getConnection(url, user, password);
+        try (Connection con = DriverManager.getConnection(url, currentUser.getName(), currentUser.getPassword());
              PreparedStatement pStmt = con.prepareStatement(query)) {
             pStmt.setString(1, "%" + seed + "%");
             List<Book> listBooks = new ArrayList<>();
@@ -200,13 +211,15 @@ public final class LibDBBook implements LibDAO<Book> {
      * Método para extraer entradas de la tabla de datos Libros
      * según su identificación numérica ID
      *
-     * @param ID Identificación numérica de la entrada en la tabla
+     * @param currentUser Objeto de usuario con sus datos
+     *                    de acceso a la base de datos
+     * @param ID          Identificación numérica de la entrada en la tabla
      * @return Objeto Libro con los datos de la entrada encontrada
      */
-    public Book searchTB(String user, String password, int ID) {
+    public Book searchTB(User currentUser, int ID) {
         String query = "SELECT * FROM " + tableName + " WHERE idlib = ?";
 
-        try (Connection con = DriverManager.getConnection(url, user, password);
+        try (Connection con = DriverManager.getConnection(url, currentUser.getName(), currentUser.getPassword());
              PreparedStatement pStmt = con.prepareStatement(query)) {
             pStmt.setInt(1, ID);
             ResultSet rs = pStmt.executeQuery();
@@ -230,16 +243,18 @@ public final class LibDBBook implements LibDAO<Book> {
      * Método para eliminar una entrada de la tabla de datos Libros
      * según su identificación numérica ID
      *
-     * @param ID Identificación numérica de la entrada a eliminar
+     * @param currentUser Objeto de usuario con sus datos
+     *                    de acceso a la base de datos
+     * @param ID          Identificación numérica de la entrada a eliminar
      * @return ID máxima tras la eliminación de la entrada
      */
     @Override
-    public int deleteTB(String user, String password, int ID) {
+    public int deleteTB(User currentUser, int ID) {
         String query1 = "SELECT prestado FROM " + tableName + " WHERE idlib = ?";
         String query2 = "DELETE FROM " + tableName + " WHERE idlib = ?";
         String query3 = String.format("SELECT idlib FROM %s WHERE idlib = (SELECT max(idlib) FROM %s)", tableName, tableName);
 
-        try (Connection con = DriverManager.getConnection(url, user, password);
+        try (Connection con = DriverManager.getConnection(url, currentUser.getName(), currentUser.getPassword());
              PreparedStatement pStmt1 = con.prepareStatement(query1);
              PreparedStatement pStmt2 = con.prepareStatement(query2);
              Statement stmt3 = con.createStatement()) {
