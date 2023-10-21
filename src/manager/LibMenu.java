@@ -3,6 +3,7 @@
  */
 package manager;
 
+import sql.DatabaseBuilder;
 import sql.reservoirs.LibDBBook;
 import sql.reservoirs.LibDBLoan;
 import sql.reservoirs.LibDBMember;
@@ -11,6 +12,7 @@ import tables.User;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.InputMismatchException;
 import java.util.Properties;
@@ -103,6 +105,15 @@ public final class LibMenu {
         User currentUser = null;
 
         new LibMenu();
+        if (configProps.getProperty("database-isbuilt").equals("false")) {
+            DatabaseBuilder.sqlExecuter(configProps);
+            configProps.setProperty("database-isbuilt", "true");
+            try (FileOutputStream fos = new FileOutputStream("src/configuration.properties")) {
+                configProps.store(fos, "Propiedades del programa GABI");
+            } catch (IOException ioe) {
+                System.err.println("  Error guardando las propiedades actualizadas: " + ioe.getMessage());
+            }
+        }
 
         do {
             System.out.println("\t\t|- G.A.B.I -|\n(Gestor Autónomo de Biblioteca Interactivo)");

@@ -75,6 +75,7 @@ public final class UserDerby implements UserDAO {
     @Override
     public void tryUser(String user, char[] password) {
         try (Connection con = DriverManager.getConnection(url, user, String.valueOf(password))) {
+            con.isReadOnly();
             System.out.println("  Identidad verificada, acceso concedido: bienvenido, " + user);
         } catch (SQLException sqle) {
             throw new RuntimeException(sqle.getMessage());
