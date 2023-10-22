@@ -68,6 +68,49 @@ public class DatabaseBuilder {
             System.out.println("  El administrador de la base de datos es " + rs.getString(1));
             rs.close();
 
+            System.out.println("  (re)construyendo tablas...");
+//            Delete tables and schema if they already exists
+            try {
+                s.executeUpdate(String.format("DROP TABLE %s.%s", configProps.getProperty("database-name"), configProps.getProperty("database-table-3")));
+                s.executeUpdate(String.format("DROP TABLE %s.%s", configProps.getProperty("database-name"), configProps.getProperty("database-table-1")));
+                s.executeUpdate(String.format("DROP TABLE %s.%s", configProps.getProperty("database-name"), configProps.getProperty("database-table-2")));
+                s.executeUpdate(String.format("DROP TABLE %s.%s", configProps.getProperty("database-name"), configProps.getProperty("database-table-4")));
+                s.executeUpdate(String.format("DROP SCHEMA %s RESTRICT", configProps.getProperty("database-name")));
+                System.out.println("  limpieza de la base de datos completada");
+            } catch (SQLException sqle) {
+                System.out.println("  base de datos ya vacía");
+            }
+//            Create schema and tables from scratch
+            s.executeUpdate(String.format("CREATE SCHEMA %s", configProps.getProperty("database-name")));
+
+            s.executeUpdate(String.format("CREATE TABLE %s.%s(%s INTEGER NOT NULL,%s VARCHAR(%s),PRIMARY KEY (%s))",
+                    configProps.getProperty("database-name"), configProps.getProperty("database-table-4"),
+                    configProps.getProperty("database-table-4-field-1"), configProps.getProperty("database-table-4-field-2"),
+                    configProps.getProperty("database-table-4-field-2-maxchar"), configProps.getProperty("database-table-4-field-1")));
+
+            s.executeUpdate(String.format("CREATE TABLE %s.%s (%s INTEGER NOT NULL,%s VARCHAR(%s),%s VARCHAR(%s),%s BOOLEAN,PRIMARY KEY (%s))",
+                    configProps.getProperty("database-name"), configProps.getProperty("database-table-1"),
+                    configProps.getProperty("database-table-1-field-1"),
+                    configProps.getProperty("database-table-1-field-2"), configProps.getProperty("database-table-1-field-2-maxchar"),
+                    configProps.getProperty("database-table-1-field-3"), configProps.getProperty("database-table-1-field-3-maxchar"),
+                    configProps.getProperty("database-table-1-field-4"), configProps.getProperty("database-table-1-field-1")));
+
+            s.executeUpdate(String.format("CREATE TABLE %s.%s (%s INTEGER NOT NULL,%s VARCHAR(%s),%s VARCHAR(%s),PRIMARY KEY (%s))",
+                    configProps.getProperty("database-name"), configProps.getProperty("database-table-2"),
+                    configProps.getProperty("database-table-2-field-1"),
+                    configProps.getProperty("database-table-2-field-2"), configProps.getProperty("database-table-2-field-2-maxchar"),
+                    configProps.getProperty("database-table-2-field-3"), configProps.getProperty("database-table-2-field-3-maxchar"),
+                    configProps.getProperty("database-table-2-field-1")));
+
+            s.executeUpdate(String.format("CREATE TABLE %s.%s (%s INTEGER NOT NULL,%s INTEGER NOT NULL,%s INTEGER NOT NULL,%s DATE," +
+                                          "PRIMARY KEY (%s),FOREIGN KEY (%s) REFERENCES %s(%s),FOREIGN KEY (%s) REFERENCES %s(%s))",
+                    configProps.getProperty("database-name"), configProps.getProperty("database-table-3"),
+                    configProps.getProperty("database-table-3-field-1"), configProps.getProperty("database-table-2-field-1"),
+                    configProps.getProperty("database-table-1-field-1"), configProps.getProperty("database-table-3-field-4"),
+                    configProps.getProperty("database-table-3-field-1"),
+                    configProps.getProperty("database-table-2-field-1"), configProps.getProperty("database-table-2"), configProps.getProperty("database-table-2-field-1"),
+                    configProps.getProperty("database-table-1-field-1"), configProps.getProperty("database-table-1"), configProps.getProperty("database-table-1-field-1")));
+
 // We would set the following property to TRUE only when we were ready to deploy.
 // Setting it to FALSE means that we can always override using system properties
 // if we accidentally paint ourselves into a corner.

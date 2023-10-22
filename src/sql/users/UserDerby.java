@@ -39,6 +39,14 @@ public final class UserDerby implements UserDAO {
      * Ruta completa de la tabla de datos manejada en esta clase
      */
     private final String tableName;
+    /**
+     * Campo 1 de la tabla de datos;
+     */
+    private final String field1;
+    /**
+     * Campo 2 de la tabla de datos;
+     */
+    private final String field2;
 
     /**
      * Constructor privado de la clase
@@ -54,6 +62,8 @@ public final class UserDerby implements UserDAO {
         }
         url = configProps.getProperty("database-url") + "/" + configProps.getProperty("database");
         tableName = configProps.getProperty("database-name") + "." + configProps.getProperty("database-table-4");
+        field1 = configProps.getProperty("database-table-4-field-1");
+        field2 = configProps.getProperty("database-table-4-field-2");
     }
 
     /**
@@ -91,8 +101,9 @@ public final class UserDerby implements UserDAO {
      */
     @Override
     public int[] countUser(User currentUser) {
-        String query1 = "SELECT COUNT(*) FROM " + tableName;
-        String query2 = String.format("SELECT iduser FROM %s WHERE iduser = (SELECT max(iduser) FROM %s)", tableName, tableName);
+        String query1 = String.format("SELECT COUNT(*) FROM %s", tableName);
+        String query2 = String.format("SELECT %s FROM %s WHERE %s = (SELECT max(%s) FROM %s)",
+                field1, tableName, field1, field1, tableName);
 
         try (Connection con = DriverManager.getConnection(url, currentUser.getName(), currentUser.getPassword());
              Statement stmt1 = con.createStatement();
@@ -121,10 +132,10 @@ public final class UserDerby implements UserDAO {
     public void addUser(User currentUser, User newUser) {
         String setProperty = "CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(";
         String fullAccessUsers = "'derby.database.fullAccessUsers'";
-        String query1 = "SELECT COUNT(*) FROM " + tableName;
-        String query2 = "SELECT nombre FROM " + tableName;
-        String query3 = "SELECT * FROM " + tableName + " WHERE LOWER(nombre) = LOWER(?)";
-        String query4 = "INSERT INTO " + tableName + " VALUES (?,?)";
+        String query1 = String.format("SELECT COUNT(*) FROM %s", tableName);
+        String query2 = String.format("SELECT %s FROM %s", field2, tableName);
+        String query3 = String.format("SELECT * FROM %s WHERE LOWER(%s) = LOWER(?)", tableName, field2);
+        String query4 = String.format("INSERT INTO %s VALUES (?,?)", tableName);
 
         try (Connection con = DriverManager.getConnection(url, currentUser.getName(), currentUser.getPassword());
              Statement s1 = con.createStatement();
@@ -179,7 +190,7 @@ public final class UserDerby implements UserDAO {
      */
     @Override
     public List<User> searchUser(User currentUser) {
-        String query = "SELECT * FROM " + tableName;
+        String query = String.format("SELECT * FROM %s", tableName);
         List<User> listUser = new ArrayList<>();
 
         try (Connection con = DriverManager.getConnection(url, currentUser.getName(), currentUser.getPassword());
@@ -205,7 +216,7 @@ public final class UserDerby implements UserDAO {
      * @param seed        Fragmento de texto a buscar entre los nombres
      */
     public List<User> searchUser(User currentUser, String seed) {
-        String query = "SELECT * FROM " + tableName + " WHERE LOWER(nombre) LIKE LOWER(?)";
+        String query = String.format("SELECT * FROM %s WHERE LOWER(%s) LIKE LOWER(?)", tableName, field2);
 
         try (Connection con = DriverManager.getConnection(url, currentUser.getName(), currentUser.getPassword());
              PreparedStatement pStmt = con.prepareStatement(query)) {
@@ -235,7 +246,7 @@ public final class UserDerby implements UserDAO {
      * @param ID          Identificación numérica del usuario
      */
     public User searchUser(User currentUser, int ID) {
-        String query = "SELECT * FROM " + tableName + " WHERE iduser = ?";
+        String query = String.format("SELECT * FROM %s WHERE %s = ?", tableName, field1);
 
         try (Connection con = DriverManager.getConnection(url, currentUser.getName(), currentUser.getPassword());
              PreparedStatement pStmt = con.prepareStatement(query)) {
@@ -265,10 +276,11 @@ public final class UserDerby implements UserDAO {
     public int deleteUser(User currentUser, int ID) {
         String setProperty = "CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(";
         String fullAccessUsers = "'derby.database.fullAccessUsers'";
-        String query1 = "SELECT * FROM " + tableName + " WHERE iduser = ?";
-        String query2 = "SELECT nombre FROM " + tableName;
-        String query3 = "DELETE FROM " + tableName + " WHERE iduser = ?";
-        String query4 = String.format("SELECT iduser FROM %s WHERE iduser = (SELECT max(iduser) FROM %s)", tableName, tableName);
+        String query1 = String.format("SELECT %s FROM %s WHERE %s = ?", field2, tableName, field1);
+        String query2 = String.format("SELECT %s FROM %s", field2, tableName);
+        String query3 = String.format("DELETE FROM %s WHERE %s = ?", tableName, field1);
+        String query4 = String.format("SELECT %s FROM %s WHERE %s = (SELECT max(%s) FROM %s)",
+                field1, tableName, field1, field1, tableName);
 
         try (Connection con = DriverManager.getConnection(url, currentUser.getName(), currentUser.getPassword());
              Statement s1 = con.createStatement();
@@ -279,7 +291,7 @@ public final class UserDerby implements UserDAO {
             pStmt1.setInt(1, ID);
             ResultSet rs1 = pStmt1.executeQuery();
             if (rs1.next()) {
-                s1.executeUpdate(setProperty + "'derby.user." + rs1.getString(2) + "', null)");
+                s1.executeUpdate(setProperty + "'derby.user." + rs1.getString(1) + "', null)");
                 rs1.close();
             } else {
                 rs1.close();

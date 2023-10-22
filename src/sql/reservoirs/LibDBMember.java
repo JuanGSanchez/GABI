@@ -41,6 +41,18 @@ public final class LibDBMember implements LibDAO<Member> {
      * Ruta completa de la tabla de datos manejada en esta clase
      */
     private final String tableName;
+    /**
+     * Campo 1 de la tabla de datos;
+     */
+    private final String field1;
+    /**
+     * Campo 2 de la tabla de datos;
+     */
+    private final String field2;
+    /**
+     * Campo 3 de la tabla de datos;
+     */
+    private final String field3;
 
     /**
      * Constructor privado de la clase
@@ -56,6 +68,9 @@ public final class LibDBMember implements LibDAO<Member> {
         }
         url = configProps.getProperty("database-url") + "/" + configProps.getProperty("database");
         tableName = configProps.getProperty("database-name") + "." + configProps.getProperty("database-table-2");
+        field1 = configProps.getProperty("database-table-2-field-1");
+        field2 = configProps.getProperty("database-table-2-field-2");
+        field3 = configProps.getProperty("database-table-2-field-3");
     }
 
     /**
@@ -76,8 +91,9 @@ public final class LibDBMember implements LibDAO<Member> {
      */
     @Override
     public int[] countTB(User currentUser) {
-        String query1 = "SELECT COUNT(*) FROM " + tableName;
-        String query2 = String.format("SELECT idsoc FROM %s WHERE idsoc = (SELECT max(idsoc) FROM %s)", tableName, tableName);
+        String query1 = String.format("SELECT COUNT(*) FROM %s", tableName);
+        String query2 = String.format("SELECT %s FROM %s WHERE %s = (SELECT max(%s) FROM %s)",
+                field1, tableName, field1, field1, tableName);
 
         try (Connection con = DriverManager.getConnection(url, currentUser.getName(), currentUser.getPassword());
              Statement stmt1 = con.createStatement();
@@ -105,26 +121,35 @@ public final class LibDBMember implements LibDAO<Member> {
      */
     @Override
     public void addTB(User currentUser, Member member) {
-        String query1 = "SELECT * FROM " + tableName + " WHERE LOWER(nombre) = LOWER(?) AND LOWER(apellidos) = LOWER(?)";
-        String query2 = "INSERT INTO " + tableName + " VALUES (?,?,?)";
+        String query1 = String.format("SELECT COUNT(*) FROM %s", tableName);
+        String query2 = String.format("SELECT * FROM %s WHERE LOWER(%s) = LOWER(?) AND LOWER(%s) = LOWER(?)",
+                tableName, field2, field3);
+        String query3 = String.format("INSERT INTO %s VALUES (?,?,?)", tableName);
 
         try (Connection con = DriverManager.getConnection(url, currentUser.getName(), currentUser.getPassword());
-             PreparedStatement pStmt1 = con.prepareStatement(query1);
-             PreparedStatement pStmt2 = con.prepareStatement(query2)) {
-            pStmt1.setString(1, member.getName());
-            pStmt1.setString(2, member.getSurname());
-            ResultSet rs = pStmt1.executeQuery();
-            if (rs.next()) {
-                rs.close();
-                throw new SQLException("Socio ya registrado");
-            } else {
-                rs.close();
+             Statement s1 = con.createStatement();
+             PreparedStatement pStmt2 = con.prepareStatement(query2);
+             PreparedStatement pStmt3 = con.prepareStatement(query3);
+             ResultSet rs1 = s1.executeQuery(query1)) {
+            rs1.next();
+            if (rs1.getInt(1) >= Integer.parseInt(configProps.getProperty("database-table-2-maxsocs"))) {
+                throw new SQLException("Límite de socios alcanzado");
             }
 
-            pStmt2.setInt(1, member.getIdMember());
-            pStmt2.setString(2, member.getName());
-            pStmt2.setString(3, member.getSurname());
-            if (pStmt2.executeUpdate() == 1) {
+            pStmt2.setString(1, member.getName());
+            pStmt2.setString(2, member.getSurname());
+            ResultSet rs2 = pStmt2.executeQuery();
+            if (rs2.next()) {
+                rs2.close();
+                throw new SQLException("Socio ya registrado");
+            } else {
+                rs2.close();
+            }
+
+            pStmt3.setInt(1, member.getIdMember());
+            pStmt3.setString(2, member.getName());
+            pStmt3.setString(3, member.getSurname());
+            if (pStmt3.executeUpdate() == 1) {
                 System.out.println("  nuevo socio agregado con éxito.");
             } else throw new SQLException("Ha habido un problema inesperado\nal intentar agregar el socio");
         } catch (SQLException sqle) {
@@ -141,7 +166,7 @@ public final class LibDBMember implements LibDAO<Member> {
      */
     @Override
     public List<Member> searchTB(User currentUser) {
-        String query = "SELECT * FROM " + tableName;
+        String query = String.format("SELECT * FROM %s", tableName);
         List<Member> listMember = new ArrayList<>();
 
         try (Connection con = DriverManager.getConnection(url, currentUser.getName(), currentUser.getPassword());
@@ -169,9 +194,12 @@ public final class LibDBMember implements LibDAO<Member> {
      */
     @Override
     public List<Member> searchDetailTB(User currentUser) {
-        String query1 = "SELECT * FROM " + tableName;
-        String query2 = "SELECT idlib FROM " + configProps.getProperty("database-name") + "." + configProps.getProperty("database-table-3") + " WHERE idsoc = ?";
-        String query3 = "SELECT * FROM " + configProps.getProperty("database-name") + "." + configProps.getProperty("database-table-1") + " WHERE idlib = ?";
+        String query1 = String.format("SELECT * FROM %s", tableName);
+        String query2 = String.format("SELECT %s FROM %s WHERE %s = ?", configProps.getProperty("database-table-1-field-1"),
+                configProps.getProperty("database-name") + "." + configProps.getProperty("database-table-3"), field1);
+        String query3 = String.format("SELECT * FROM %s WHERE %s = ?",
+                configProps.getProperty("database-name") + "." + configProps.getProperty("database-table-1"),
+                configProps.getProperty("database-table-1-field-1"));
         List<Member> listMember = new ArrayList<>();
 
         try (Connection con = DriverManager.getConnection(url, currentUser.getName(), currentUser.getPassword());
@@ -221,7 +249,8 @@ public final class LibDBMember implements LibDAO<Member> {
      * @return Lista de objetos Socio que hayan salido de la búsqueda
      */
     public List<Member> searchTB(User currentUser, int opt, String seed) {
-        String query = "SELECT * FROM " + tableName + " WHERE LOWER(" + (opt == 2 ? "nombre" : "apellidos") + ") LIKE LOWER(?)";
+        String query = String.format("SELECT * FROM %s WHERE LOWER(%s) LIKE LOWER(?)",
+                tableName, opt == 2 ? field2 : field3);
 
         try (Connection con = DriverManager.getConnection(url, currentUser.getName(), currentUser.getPassword());
              PreparedStatement pStmt = con.prepareStatement(query)) {
@@ -253,7 +282,7 @@ public final class LibDBMember implements LibDAO<Member> {
      * @return Objeto Socio con los datos de la entrada encontrada
      */
     public Member searchTB(User currentUser, int ID) {
-        String query = "SELECT * FROM " + tableName + " WHERE idsoc = ?";
+        String query = String.format("SELECT * FROM %s WHERE %s = ?", tableName, field1);
 
         try (Connection con = DriverManager.getConnection(url, currentUser.getName(), currentUser.getPassword());
              PreparedStatement pStmt = con.prepareStatement(query)) {
@@ -283,9 +312,11 @@ public final class LibDBMember implements LibDAO<Member> {
      */
     @Override
     public int deleteTB(User currentUser, int ID) {
-        String query1 = "SELECT * FROM " + configProps.getProperty("database-name") + "." + configProps.getProperty("database-table-3") + " WHERE idsoc = ?";
-        String query2 = "DELETE FROM " + tableName + " WHERE idsoc = ?";
-        String query3 = String.format("SELECT idsoc FROM %s WHERE idsoc = (SELECT max(idsoc) FROM %s)", tableName, tableName);
+        String query1 = String.format("SELECT %s FROM %s WHERE %s = ?",
+                field1, configProps.getProperty("database-name") + "." + configProps.getProperty("database-table-3"), field1);
+        String query2 = String.format("DELETE FROM %s WHERE %s = ?", tableName, field1);
+        String query3 = String.format("SELECT %s FROM %s WHERE %s = (SELECT max(%s) FROM %s)",
+                field1, tableName, field1, field1, tableName);
 
         try (Connection con = DriverManager.getConnection(url, currentUser.getName(), currentUser.getPassword());
              PreparedStatement pStmt1 = con.prepareStatement(query1);

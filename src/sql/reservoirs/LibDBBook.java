@@ -40,6 +40,22 @@ public final class LibDBBook implements LibDAO<Book> {
      * Ruta completa de la tabla de datos manejada en esta clase
      */
     private final String tableName;
+    /**
+     * Campo 1 de la tabla de datos;
+     */
+    private final String field1;
+    /**
+     * Campo 2 de la tabla de datos;
+     */
+    private final String field2;
+    /**
+     * Campo 3 de la tabla de datos;
+     */
+    private final String field3;
+    /**
+     * Campo 4 de la tabla de datos;
+     */
+    private final String field4;
 
     /**
      * Constructor privado de la clase
@@ -55,6 +71,10 @@ public final class LibDBBook implements LibDAO<Book> {
         }
         url = configProps.getProperty("database-url") + "/" + configProps.getProperty("database");
         tableName = configProps.getProperty("database-name") + "." + configProps.getProperty("database-table-1");
+        field1 = configProps.getProperty("database-table-1-field-1");
+        field2 = configProps.getProperty("database-table-1-field-2");
+        field3 = configProps.getProperty("database-table-1-field-3");
+        field4 = configProps.getProperty("database-table-1-field-4");
     }
 
     /**
@@ -75,8 +95,9 @@ public final class LibDBBook implements LibDAO<Book> {
      */
     @Override
     public int[] countTB(User currentUser) {
-        String query1 = "SELECT COUNT(*) FROM " + tableName;
-        String query2 = String.format("SELECT idlib FROM %s WHERE idlib = (SELECT max(idlib) FROM %s)", tableName, tableName);
+        String query1 = String.format("SELECT COUNT(*) FROM %s", tableName);
+        String query2 = String.format("SELECT %s FROM %s WHERE %s = (SELECT max(%s) FROM %s)",
+                field1, tableName, field1, field1, tableName);
 
         try (Connection con = DriverManager.getConnection(url, currentUser.getName(), currentUser.getPassword());
              Statement stmt1 = con.createStatement();
@@ -104,8 +125,9 @@ public final class LibDBBook implements LibDAO<Book> {
      */
     @Override
     public void addTB(User currentUser, Book book) {
-        String query1 = "SELECT * FROM " + tableName + " WHERE LOWER(titulo) = LOWER(?) AND LOWER(autor) = LOWER(?)";
-        String query2 = "INSERT INTO " + tableName + " VALUES (?,?,?,FALSE)";
+        String query1 = String.format("SELECT * FROM %s WHERE LOWER(%s) = LOWER(?) AND LOWER(%s) = LOWER(?)",
+                tableName, field2, field3);
+        String query2 = String.format("INSERT INTO %s VALUES (?,?,?,?)", tableName);
 
         try (Connection con = DriverManager.getConnection(url, currentUser.getName(), currentUser.getPassword());
              PreparedStatement pStmt1 = con.prepareStatement(query1);
@@ -123,6 +145,7 @@ public final class LibDBBook implements LibDAO<Book> {
             pStmt2.setInt(1, book.getIdBook());
             pStmt2.setString(2, book.getTitle());
             pStmt2.setString(3, book.getAuthor());
+            pStmt2.setBoolean(4,book.isLent());
             if (pStmt2.executeUpdate() == 1) {
                 System.out.println("  nuevo libro agregado con éxito.");
             } else throw new SQLException("Ha habido un problema inesperado\nal intentar agregar el libro");
@@ -140,7 +163,7 @@ public final class LibDBBook implements LibDAO<Book> {
      */
     @Override
     public List<Book> searchTB(User currentUser) {
-        String query = "SELECT * FROM " + tableName;
+        String query = String.format("SELECT * FROM %s", tableName);
         List<Book> listBook = new ArrayList<>();
 
         try (Connection con = DriverManager.getConnection(url, currentUser.getName(), currentUser.getPassword());
@@ -184,7 +207,8 @@ public final class LibDBBook implements LibDAO<Book> {
      * @return Lista de objetos Libro que hayan salido de la búsqueda
      */
     public List<Book> searchTB(User currentUser, int opt, String seed) {
-        String query = "SELECT * FROM " + tableName + " WHERE LOWER(" + (opt == 2 ? "titulo" : "autor") + ") LIKE LOWER(?)";
+        String query = String.format("SELECT * FROM %s WHERE LOWER(%s) LIKE LOWER(?)",
+                tableName, opt == 2 ? field2 : field3);
 
         try (Connection con = DriverManager.getConnection(url, currentUser.getName(), currentUser.getPassword());
              PreparedStatement pStmt = con.prepareStatement(query)) {
@@ -217,7 +241,7 @@ public final class LibDBBook implements LibDAO<Book> {
      * @return Objeto Libro con los datos de la entrada encontrada
      */
     public Book searchTB(User currentUser, int ID) {
-        String query = "SELECT * FROM " + tableName + " WHERE idlib = ?";
+        String query = String.format("SELECT * FROM %s WHERE %s = ?", tableName, field1);
 
         try (Connection con = DriverManager.getConnection(url, currentUser.getName(), currentUser.getPassword());
              PreparedStatement pStmt = con.prepareStatement(query)) {
@@ -250,9 +274,10 @@ public final class LibDBBook implements LibDAO<Book> {
      */
     @Override
     public int deleteTB(User currentUser, int ID) {
-        String query1 = "SELECT prestado FROM " + tableName + " WHERE idlib = ?";
-        String query2 = "DELETE FROM " + tableName + " WHERE idlib = ?";
-        String query3 = String.format("SELECT idlib FROM %s WHERE idlib = (SELECT max(idlib) FROM %s)", tableName, tableName);
+        String query1 = String.format("SELECT %s FROM %s WHERE %s = ?", field4, tableName, field1);
+        String query2 = String.format("DELETE FROM %s WHERE %s = ?", tableName, field1);
+        String query3 = String.format("SELECT %s FROM %s WHERE %s = (SELECT max(%s) FROM %s)",
+                field1, tableName, field1, field1, tableName);
 
         try (Connection con = DriverManager.getConnection(url, currentUser.getName(), currentUser.getPassword());
              PreparedStatement pStmt1 = con.prepareStatement(query1);

@@ -43,6 +43,22 @@ public class LibDBLoan implements LibDAO<Loan> {
      * Ruta completa de la tabla de datos manejada en esta clase
      */
     private final String tableName;
+    /**
+     * Campo 1 de la tabla de datos;
+     */
+    private final String field1;
+    /**
+     * Campo 2 de la tabla de datos;
+     */
+    private final String field2;
+    /**
+     * Campo 3 de la tabla de datos;
+     */
+    private final String field3;
+    /**
+     * Campo 3 de la tabla de datos;
+     */
+    private final String field4;
 
     /**
      * Constructor privado de la clase
@@ -58,6 +74,10 @@ public class LibDBLoan implements LibDAO<Loan> {
         }
         url = configProps.getProperty("database-url") + "/" + configProps.getProperty("database");
         tableName = configProps.getProperty("database-name") + "." + configProps.getProperty("database-table-3");
+        field1 = configProps.getProperty("database-table-3-field-1");
+        field2 = configProps.getProperty("database-table-2-field-1");
+        field3 = configProps.getProperty("database-table-1-field-1");
+        field4 = configProps.getProperty("database-table-3-field-4");
     }
 
     /**
@@ -78,8 +98,9 @@ public class LibDBLoan implements LibDAO<Loan> {
      */
     @Override
     public int[] countTB(User currentUser) {
-        String query1 = "SELECT COUNT(*) FROM " + tableName;
-        String query2 = String.format("SELECT idpres FROM %s WHERE idpres = (SELECT max(idpres) FROM %s)", tableName, tableName);
+        String query1 = String.format("SELECT COUNT(*) FROM %s", tableName);
+        String query2 = String.format("SELECT %s FROM %s WHERE %s = (SELECT max(%s) FROM %s)",
+                field1, tableName, field1, field1, tableName);
 
         try (Connection con = DriverManager.getConnection(url, currentUser.getName(), currentUser.getPassword());
              Statement stmt1 = con.createStatement();
@@ -107,10 +128,14 @@ public class LibDBLoan implements LibDAO<Loan> {
      */
     @Override
     public void addTB(User currentUser, Loan loan) {
-        String query1 = "SELECT COUNT(*) FROM " + tableName + " WHERE idsoc = ?";
-        String query2 = "SELECT prestado FROM " + configProps.getProperty("database-name") + "." + configProps.getProperty("database-table-1") + " WHERE idlib = ?";
-        String query3 = "UPDATE " + configProps.getProperty("database-name") + "." + configProps.getProperty("database-table-1") + " SET prestado = ? WHERE idlib = ?";
-        String query4 = "INSERT INTO " + tableName + " VALUES (?,?,?,?)";
+        String query1 = String.format("SELECT COUNT(*) FROM %s WHERE %s = ?", tableName, field2);
+        String query2 = String.format("SELECT %s FROM %s WHERE %s = ?",
+                configProps.getProperty("database-table-1-field-4"),
+                configProps.getProperty("database-name") + "." + configProps.getProperty("database-table-1"), field3);
+        String query3 = String.format("UPDATE %s SET %s = ? WHERE %s = ?",
+                configProps.getProperty("database-name") + "." + configProps.getProperty("database-table-1"),
+                configProps.getProperty("database-table-1-field-4"), field3);
+        String query4 = String.format("INSERT INTO %s VALUES (?,?,?,?)", tableName);
 
         try (Connection con = DriverManager.getConnection(url, currentUser.getName(), currentUser.getPassword());
              PreparedStatement pStmt1 = con.prepareStatement(query1);
@@ -120,7 +145,7 @@ public class LibDBLoan implements LibDAO<Loan> {
             pStmt1.setInt(1, loan.getIdMember());
             ResultSet rs = pStmt1.executeQuery();
             rs.next();
-            if (rs.getInt(1) >= 10) {
+            if (rs.getInt(1) >= Integer.parseInt(configProps.getProperty("database-table-2-maxloan"))) {
                 rs.close();
                 throw new SQLException("Límite de préstamos alcanzado por el socio");
             }
@@ -169,7 +194,7 @@ public class LibDBLoan implements LibDAO<Loan> {
      */
     @Override
     public List<Loan> searchTB(User currentUser) {
-        String query = "SELECT * FROM " + tableName;
+        String query = String.format("SELECT * FROM %s", tableName);
         List<Loan> listLoan = new ArrayList<>();
 
         try (Connection con = DriverManager.getConnection(url, currentUser.getName(), currentUser.getPassword());
@@ -198,9 +223,11 @@ public class LibDBLoan implements LibDAO<Loan> {
      */
     @Override
     public List<Loan> searchDetailTB(User currentUser) {
-        String query1 = "SELECT * FROM " + tableName;
-        String query2 = "SELECT * FROM " + configProps.getProperty("database-name") + "." + configProps.getProperty("database-table-2") + " WHERE idsoc = ?";
-        String query3 = "SELECT * FROM " + configProps.getProperty("database-name") + "." + configProps.getProperty("database-table-1") + " WHERE idlib = ?";
+        String query1 = String.format("SELECT * FROM %s", tableName);
+        String query2 = String.format("SELECT * FROM %s WHERE %s = ?",
+                configProps.getProperty("database-name") + "." + configProps.getProperty("database-table-2"), field2);
+        String query3 = String.format("SELECT * FROM %s WHERE %s = ?",
+                configProps.getProperty("database-name") + "." + configProps.getProperty("database-table-1"), field3);
         List<Loan> listLoan = new ArrayList<>();
 
         try (Connection con = DriverManager.getConnection(url, currentUser.getName(), currentUser.getPassword());
@@ -244,7 +271,8 @@ public class LibDBLoan implements LibDAO<Loan> {
      * @return Objeto Préstamo con la entrada que haya salido de la búsqueda
      */
     public List<Loan> searchTB(User currentUser, int opt, int ID) {
-        String query = "SELECT * FROM " + tableName + " WHERE " + (opt == 1 ? "idpres" : opt == 2 ? "idsoc" : "idlib") + " = ?";
+        String query = String.format("SELECT * FROM %s WHERE %s = ?",
+                tableName, opt == 1 ? field1 : opt == 2 ? field2 : field3);
 
         try (Connection con = DriverManager.getConnection(url, currentUser.getName(), currentUser.getPassword());
              PreparedStatement pStmt = con.prepareStatement(query)) {
@@ -277,7 +305,7 @@ public class LibDBLoan implements LibDAO<Loan> {
      * @return Lista de objetos Préstamo de las entradas resultantes de la búsqueda
      */
     public List<Loan> searchTB(User currentUser, LocalDate date) {
-        String query = "SELECT * FROM " + tableName + " WHERE fechapres = ?";
+        String query = String.format("SELECT * FROM %s WHERE %s = ?", tableName, field4);
 
         try (Connection con = DriverManager.getConnection(url, currentUser.getName(), currentUser.getPassword());
              PreparedStatement pStmt = con.prepareStatement(query)) {
@@ -311,10 +339,14 @@ public class LibDBLoan implements LibDAO<Loan> {
      */
     @Override
     public int deleteTB(User currentUser, int ID) {
-        String query1 = "SELECT idlib FROM " + tableName + " WHERE idpres = ?";
-        String query2 = "UPDATE " + configProps.getProperty("database-name") + "." + configProps.getProperty("database-table-1") + " SET prestado = ? WHERE idlib = ?";
-        String query3 = "DELETE FROM " + tableName + " WHERE idpres = ?";
-        String query4 = String.format("SELECT idpres FROM %s WHERE idpres = (SELECT max(idpres) FROM %s)", tableName, tableName);
+        String query1 = String.format("SELECT %s FROM %s WHERE %s = ?",
+                field3, tableName, field1);
+        String query2 = String.format("UPDATE %s SET %s = ? WHERE %s = ?",
+                configProps.getProperty("database-name") + "." + configProps.getProperty("database-table-1"),
+                configProps.getProperty("database-table-1-field-4"), field3);
+        String query3 = String.format("DELETE FROM %s WHERE %s = ?", tableName, field1);
+        String query4 = String.format("SELECT %s FROM %s WHERE %s = (SELECT max(%s) FROM %s)",
+                field1, tableName, field1, field1, tableName);
 
         try (Connection con = DriverManager.getConnection(url, currentUser.getName(), currentUser.getPassword());
              PreparedStatement pStmt1 = con.prepareStatement(query1);
