@@ -93,7 +93,7 @@ final class BookMenu {
                         System.err.println("Error, no hay lista de libros disponible");
                     } else {
                         listBooks(scan);
-                        System.out.println("Total de books: " + nBook);
+                        System.out.println("Total de libros: " + nBook);
                     }
                     break;
                 case 3:

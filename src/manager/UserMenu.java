@@ -97,8 +97,8 @@ final class UserMenu {
                     if (nUser == 0) {
                         System.err.println("Error, no hay lista de usuarios disponible");
                     } else {
-                        System.out.println("Total de users: " + nUser);
                         listUsers(scan);
+                        System.out.println("Total de usuarios: " + nUser);
                     }
                     break;
                 case 3:
@@ -159,7 +159,7 @@ final class UserMenu {
                     } else if (name.trim().length() > Integer.parseInt(configProps.getProperty("database-table-4-field-2-maxchar"))) {
                         System.err.printf("  El nombre no puede superar los %s caracteres\n", configProps.getProperty("database-table-4-field-2-maxchar"));
                     } else {
-                        name = name.substring(0, 1).toUpperCase() + name.substring(1).toLowerCase();
+                        name = name.toLowerCase();
                         isValid = true;
                     }
                 } catch (InputMismatchException ime) {

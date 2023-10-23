@@ -153,6 +153,10 @@ public final class UserDerby implements UserDAO {
                 rs1.close();
             }
 
+            if (newUser.getName().equals(configProps.getProperty("database-name")) || newUser.getName().equals("user")) {
+                throw new SQLException("Nombre de usuario no válido");
+            }
+
             pStmt1.setString(1, newUser.getName());
             ResultSet pRs1 = pStmt1.executeQuery();
             if (pRs1.next()) {
@@ -292,6 +296,10 @@ public final class UserDerby implements UserDAO {
             ResultSet rs1 = pStmt1.executeQuery();
             if (rs1.next()) {
                 s1.executeUpdate(setProperty + "'derby.user." + rs1.getString(1) + "', null)");
+                for (int i = 1; i < 4; i++) {
+                    s2.executeUpdate("REVOKE ALL PRIVILEGES ON TABLE " + configProps.getProperty("database-name") +
+                                     "." + configProps.getProperty("database-table-" + i) + " FROM " + rs1.getString(1));
+                }
                 rs1.close();
             } else {
                 rs1.close();

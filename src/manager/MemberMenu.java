@@ -93,7 +93,7 @@ final class MemberMenu {
                         System.err.println("Error, no hay lista de socios disponible");
                     } else {
                         listMembers(scan);
-                        System.out.println("Total de members: " + nMember);
+                        System.out.println("Total de socios: " + nMember);
                     }
                     break;
                 case 3:
