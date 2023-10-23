@@ -28,10 +28,10 @@ final class BookMenu {
     private static final String mainMenu = """
               
               Seleccione una acción:
-            \t(1) Añadir book
-            \t(2) Listar books
-            \t(3) Buscar books
-            \t(4) Eliminar book
+            \t(1) Añadir libro
+            \t(2) Listar libros
+            \t(3) Buscar libros
+            \t(4) Eliminar libro
             \t(0) Volver al menú principal""";
     /**
      * Variable para almacenar las opciones de submenús

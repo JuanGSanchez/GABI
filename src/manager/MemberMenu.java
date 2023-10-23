@@ -28,10 +28,10 @@ final class MemberMenu {
     private static final String mainMenu = """
               
               Seleccione una acción:
-            \t(1) Alta Socio
-            \t(2) Directorio Socios
-            \t(3) Buscar Socios
-            \t(4) Baja Socio
+            \t(1) Alta socio
+            \t(2) Directorio socios
+            \t(3) Buscar socios
+            \t(4) Baja socio
             \t(0) Volver al menú principal""";
     /**
      * Variable para almacenar las opciones de submenús
