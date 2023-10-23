@@ -404,8 +404,8 @@ final class LoanMenu {
     }
 
     /**
-     * Método para buscar préstamos en la base de datos según
-     * ciertos criterios
+     * Método para buscar préstamos en la base de datos
+     * según ciertos criterios
      *
      * @param scan Entrada de datos por teclado
      */

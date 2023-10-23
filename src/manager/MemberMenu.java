@@ -6,6 +6,7 @@ package manager;
 import sql.reservoirs.LibDBMember;
 import tables.Member;
 import tables.User;
+import utils.Utils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -63,7 +64,7 @@ final class MemberMenu {
      * Método del menú principal del gestor de members, desde el cual
      * se acceden a las acciones disponibles
      *
-     * @param scan  Entrada de datos por teclado
+     * @param scan     Entrada de datos por teclado
      * @param nMember  Número de members registrados dentro de la base de datos
      * @param idMember Máxima ID de members dentro de la base de datos
      * @return Valores actualizados de nMember y idMember
@@ -125,72 +126,37 @@ final class MemberMenu {
     }
 
     /**
-     * Método para dar de alta nuevos members en la base de datos
+     * Método para dar de alta nuevos socios en la base de datos
      *
-     * @param scan  Entrada de datos por teclado
-     * @param nMember  Número de members registrados dentro de la base de datos
-     * @param idMember Máxima ID de members dentro de la base de datos
+     * @param scan     Entrada de datos por teclado
+     * @param nMember  Número de socios registrados dentro de la base de datos
+     * @param idMember Máxima ID de socios dentro de la base de datos
      * @return Valores actualizados de nMember y idMember
      */
     private int[] addMember(Scanner scan, int nMember, int idMember) {
-        boolean isValid;
         boolean repeat;
-        String name = null;
-        String surname = null;
+        String name;
+        String surname;
 
         do {
-            isValid = false;
             System.out.println("\n    Alta de Nuevo Socio\n(-1 en cualquier momento para cancelar operación)\n");
-            do {
-                System.out.print("Introduce nombre - ");
-                try {
-                    name = scan.nextLine();
-                    if ("".equals(name)) {
-                        System.err.println("  Entrada vacía");
-                    } else if (name.equals("-1")) {
-                        System.out.println("  Operación cancelada, volviendo al menú del gestor...");
-                        return new int[]{nMember, idMember};
-                    } else if (name.matches(".*[\\d¡!@#$%&ºª'`*.,:;()_+=|/<>¿?{}\\[\\]~].*")) {
-                        System.err.println("  El nombre no puede contener números o caracteres especiales");
-                    } else if (name.trim().length() > Integer.parseInt(configProps.getProperty("database-table-2-field-2-maxchar"))) {
-                        System.err.printf("  El nombre no puede superar los %s caracteres\n", configProps.getProperty("database-table-2-field-2-maxchar"));
-                    } else {
-                        name = name.trim();
-                        name = name.substring(0, 1).toUpperCase() + name.substring(1).toLowerCase();
-                        isValid = true;
-                    }
-                } catch (InputMismatchException ime) {
-                    System.err.println("  Entrada no válida");
-                }
-            } while (!isValid);
 
-            isValid = false;
-            do {
-                System.out.print("Introduce apellidos - ");
-                try {
-                    surname = scan.nextLine();
-                    if ("".equals(surname)) {
-                        System.err.println("  Entrada vacía");
-                    } else if (surname.equals("-1")) {
-                        System.out.println("  Operación cancelada, volviendo al menú del gestor...");
-                        return new int[]{nMember, idMember};
-                    } else if (surname.matches(".*[\\d¡!@#$%&ºª'`*.,:;()_+=|/<>¿?{}\\[\\]~].*")) {
-                        System.err.println("  Los apellidos no pueden contener números o caracteres especiales");
-                    } else if (surname.trim().length() > Integer.parseInt(configProps.getProperty("database-table-2-field-3-maxchar"))) {
-                        System.err.printf("  El nombre no puede superar los %s caracteres\n", configProps.getProperty("database-table-2-field-3-maxchar"));
-                    } else {
-                        surname = surname.trim();
-                        surname = surname.substring(0, 1).toUpperCase() + surname.substring(1).toLowerCase();
-                        isValid = true;
-                    }
-                } catch (InputMismatchException ime) {
-                    System.err.println("  Entrada no válida");
-                }
-            } while (!isValid);
+            name = Utils.checkString(scan, 2, configProps.getProperty("database-table-2-field-2-maxchar"));
+            if (name == null) {
+                System.out.println("  Operación cancelada, volviendo al menú del gestor...");
+                return new int[]{nMember, idMember};
+            }
+
+            surname = Utils.checkString(scan, 3, configProps.getProperty("database-table-2-field-3-maxchar"));
+            if (surname == null) {
+                System.out.println("  Operación cancelada, volviendo al menú del gestor...");
+                return new int[]{nMember, idMember};
+            }
 
             try {
                 LibDBMember.getInstance().addTB(currentUser, new Member(nMember + 1, name, surname));
-                ++nMember;
+                nMember++;
+                idMember++;
             } catch (RuntimeException re) {
                 System.err.println("  Error durante el registro en la base de datos: " + re.getMessage());
             }
@@ -203,8 +169,8 @@ final class MemberMenu {
     }
 
     /**
-     * Método para imprimir en pantalla los members registrados
-     * en la base de datos
+     * Método para imprimir en pantalla los socios
+     * registrados en la base de datos
      *
      * @param scan Entrada de datos por teclado
      */
@@ -266,8 +232,8 @@ final class MemberMenu {
     }
 
     /**
-     * Método para buscar members en la base de datos según
-     * ciertos criterios
+     * Método para buscar members en la base de datos
+     * según ciertos criterios
      *
      * @param scan Entrada de datos por teclado
      */
@@ -332,9 +298,9 @@ final class MemberMenu {
     }
 
     /**
-     * Método para dar de baja un member de la base de datos
+     * Método para dar de baja socios de la base de datos
      *
-     * @param scan  Entrada de datos por teclado
+     * @param scan     Entrada de datos por teclado
      * @param nMember  Número de members registrados dentro de la base de datos
      * @param idMember Máxima ID de members dentro de la base de datos
      * @return Valores actualizados de nMember y idMember

@@ -5,6 +5,7 @@ package manager;
 
 import sql.users.UserDerby;
 import tables.User;
+import utils.Utils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -129,65 +130,32 @@ final class UserMenu {
     }
 
     /**
-     * Método para añadir users a la base de datos
+     * Método para añadir usuarios a la base de datos
      *
-     * @param scan    Entrada de datos por teclado
-     * @param nUser  Número de users registrados en la base de datos
-     * @param idUser Máxima ID de user dentro de la base de datos
+     * @param scan   Entrada de datos por teclado
+     * @param nUser  Número de usuarios registrados dentro de la base de datos
+     * @param idUser Máxima ID de usuario dentro de la base de datos
      * @return Valores actualizados de nUser y idUser
      */
-    int[] addUser(Scanner scan, int nUser, int idUser) {
-        boolean isValid;
+    private int[] addUser(Scanner scan, int nUser, int idUser) {
         boolean repeat;
-        String name = null;
-        String password = null;
+        String name;
+        String password;
 
         do {
-            isValid = false;
             System.out.println("\n    Alta de Nuevo Usuario\n(-1 en cualquier momento para cancelar operación)\n");
-            do {
-                System.out.print("Introduce nombre - ");
-                try {
-                    name = scan.nextLine();
-                    if ("".equals(name)) {
-                        System.err.println("  Entrada vacía");
-                    } else if (name.equals("-1")) {
-                        System.out.println("  Operación cancelada, volviendo al menú del gestor...");
-                        return new int[]{nUser, idUser};
-                    } else if (name.matches(".*[\\d¡!@#$%&ºª'`* .,:;()_+=|/<>¿?{}\\[\\]~].*")) {
-                        System.err.println("  El nombre no puede contener números o caracteres especiales");
-                    } else if (name.trim().length() > Integer.parseInt(configProps.getProperty("database-table-4-field-2-maxchar"))) {
-                        System.err.printf("  El nombre no puede superar los %s caracteres\n", configProps.getProperty("database-table-4-field-2-maxchar"));
-                    } else {
-                        name = name.toLowerCase();
-                        isValid = true;
-                    }
-                } catch (InputMismatchException ime) {
-                    System.err.println("  Entrada no válida");
-                }
-            } while (!isValid);
 
-            isValid = false;
-            do {
-                System.out.print("Introduce contraseña - ");
-                try {
-                    password = scan.nextLine();
-                    if ("".equals(password)) {
-                        System.err.println("  Entrada vacía");
-                    } else if (password.equals("-1")) {
-                        System.out.println("  Operación cancelada, volviendo al menú del gestor...");
-                        return new int[]{nUser, idUser};
-                    } else if (password.matches(".*[\\d¡!@#$%&ºª'`* .,:;()_+=|/<>¿?{}\\[\\]~].*")) {
-                        System.err.println("  La contraseña no puede contener números o caracteres especiales");
-                    } else if (password.trim().length() > Integer.parseInt(configProps.getProperty("database-table-4-field-2-maxchar"))) {
-                        System.err.printf("  La contraseña no puede superar los %s caracteres\n", configProps.getProperty("database-table-4-field-2-maxchar"));
-                    } else {
-                        isValid = true;
-                    }
-                } catch (InputMismatchException ime) {
-                    System.err.println("  Entrada no válida");
-                }
-            } while (!isValid);
+            name = Utils.checkString(scan, 4, configProps.getProperty("database-table-4-field-2-maxchar"));
+            if (name == null) {
+                System.out.println("  Operación cancelada, volviendo al menú del gestor...");
+                return new int[]{nUser, idUser};
+            }
+
+            password = Utils.checkString(scan, 5, configProps.getProperty("database-table-4-field-2-maxchar"));
+            if (password == null) {
+                System.out.println("  Operación cancelada, volviendo al menú del gestor...");
+                return new int[]{nUser, idUser};
+            }
 
             try {
                 UserDerby.getInstance().addUser(currentUser, new User(idUser + 1, name, password));
@@ -202,16 +170,15 @@ final class UserMenu {
         } while (repeat);
 
         return new int[]{nUser, idUser};
-
     }
 
     /**
-     * Método para imprimir en pantalla los users registrados en la base de
-     * datos
+     * Método para imprimir en pantalla los usuarios
+     * registrados en la base de datos
      *
      * @param scan Entrada de datos por teclado
      */
-    void listUsers(Scanner scan) {
+    private void listUsers(Scanner scan) {
         boolean isValid = false;
         int opt;
         List<User> arrayUsers = new ArrayList<>();
@@ -244,15 +211,15 @@ final class UserMenu {
                     System.err.println("  Entrada no válida");
             }
         } while (!isValid);
-
     }
 
     /**
-     * Método para buscar users en la base de datos según ciertos criterios
+     * Método para buscar users en la base de datos
+     * según ciertos criterios
      *
      * @param scan Entrada de datos por teclado
      */
-    void searchUsers(Scanner scan) {
+    private void searchUsers(Scanner scan) {
         boolean isValid;
         boolean repeat;
         int opt;
@@ -312,14 +279,14 @@ final class UserMenu {
     }
 
     /**
-     * Método para eliminar users de la base de datos
+     * Método para eliminar usuarios de la base de datos
      *
-     * @param scan    Entrada de datos por teclado
+     * @param scan   Entrada de datos por teclado
      * @param nUser  Número de users registrados en la base de datos
      * @param idUser Máxima ID de user dentro de la base de datos
      * @return Valores actualizados de nUser y idUser
      */
-    int[] deleteUser(Scanner scan, int nUser, int idUser) {
+    private int[] deleteUser(Scanner scan, int nUser, int idUser) {
         boolean isValid;
         boolean repeat;
         int opt;

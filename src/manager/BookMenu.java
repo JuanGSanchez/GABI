@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import sql.reservoirs.LibDBBook;
 import tables.Book;
 import tables.User;
+import utils.Utils;
 
 /**
  * Clase del menú del gestor de books en el programa
@@ -125,81 +126,32 @@ final class BookMenu {
     }
 
     /**
-     * Método para añadir books a la base de datos
+     * Método para añadir libros a la base de datos
      *
      * @param scan   Entrada de datos por teclado
-     * @param nBook  Número de books guardados dentro de la base de datos
-     * @param idBook Máxima ID de books dentro de la base de datos
+     * @param nBook  Número de libros guardados dentro de la base de datos
+     * @param idBook Máxima ID de libros dentro de la base de datos
      * @return Valores actualizados de nBook y idBook
      */
     private int[] addBook(Scanner scan, int nBook, int idBook) {
-        boolean isValid;
         boolean repeat;
-        String title = null;
-        String author = null;
+        String title;
+        String author;
 
         do {
-            isValid = false;
             System.out.println("\n    Alta de Nuevo Libro\n(-1 en cualquier momento para cancelar operación)\n");
-            do {
-                System.out.print("Introduce título - ");
-                try {
-                    title = scan.nextLine();
-                    if ("".equals(title)) {
-                        System.err.println("  Entrada vacía");
-                    } else if (title.equals("-1")) {
-                        System.out.println("  Operación cancelada, volviendo al menú del gestor...");
-                        return new int[]{nBook, idBook};
-                    } else if (title.matches(".*[@#$%&ºª'`*_+=|/<>{}\\[\\]~].*")) {
-                        System.err.println("  El título no puede contener caracteres especiales");
-                    } else if (title.trim().length() > Integer.parseInt(configProps.getProperty("database-table-1-field-2-maxchar"))) {
-                        System.err.printf("  El título no puede superar los %s caracteres\n", configProps.getProperty("database-table-1-field-2-maxchar"));
-                    } else {
-                        title = title.trim();
-                        title = title.substring(0, 1).toUpperCase() + title.substring(1).toLowerCase();
-                        isValid = true;
-                    }
-                } catch (InputMismatchException ime) {
-                    System.err.println("  Entrada no válida");
-                }
-            } while (!isValid);
 
-            isValid = false;
-            do {
-                System.out.print("Introduce nombre de autor principal (nombre[, apellidos] - ");
-                try {
-                    author = scan.nextLine();
-                    if ("".equals(author)) {
-                        System.err.println("  Entrada vacía");
-                    } else if (author.equals("-1")) {
-                        System.out.println("  Operación cancelada, volviendo al menú del gestor...");
-                        return new int[]{nBook, idBook};
-                    } else if (author.matches(".*[\\d¡!@#$%&ºª'`*.:;()_+=|/<>¿?{}\\[\\]~].*")) {
-                        System.err.println("  El nombre no puede contener números o caracteres especiales");
-                    } else if (author.trim().length() > Integer.parseInt(configProps.getProperty("database-table-1-field-3-maxchar"))) {
-                        System.err.printf("  El nombre no puede superar los %s caracteres\n", configProps.getProperty("database-table-1-field-3-maxchar"));
-                    } else if (author.matches(".*,.*")) {
-                        author = author.trim();
-                        String[] autorArray = author.split(",");
-                        if (autorArray.length == 2) {
-                            for (int i = 0; i < autorArray.length; i++) {
-                                autorArray[i] = autorArray[i].trim();
-                                autorArray[i] = autorArray[i].substring(0, 1).toUpperCase() + autorArray[i].substring(1).toLowerCase();
-                            }
-                            author = String.format("%s %s", autorArray[0], autorArray[1]);
-                            isValid = true;
-                        } else {
-                            System.err.println("  El nombre no sigue la estructura adecuada");
-                        }
-                    } else {
-                        author = author.trim();
-                        author = author.substring(0, 1).toUpperCase() + author.substring(1).toLowerCase();
-                        isValid = true;
-                    }
-                } catch (InputMismatchException ime) {
-                    System.err.println("  Entrada no válida");
-                }
-            } while (!isValid);
+            title = Utils.checkString(scan, 0, configProps.getProperty("database-table-1-field-2-maxchar"));
+            if (title == null) {
+                System.out.println("  Operación cancelada, volviendo al menú del gestor...");
+                return new int[]{nBook, idBook};
+            }
+
+            author = Utils.checkString(scan, 1, configProps.getProperty("database-table-1-field-3-maxchar"));
+            if (author == null) {
+                System.out.println("  Operación cancelada, volviendo al menú del gestor...");
+                return new int[]{nBook, idBook};
+            }
 
             try {
                 LibDBBook.getInstance().addTB(currentUser, new Book(idBook + 1, title, author));
@@ -214,12 +166,11 @@ final class BookMenu {
         } while (repeat);
 
         return new int[]{nBook, idBook};
-
     }
 
     /**
-     * Método para imprimir en pantalla los books registrados en la base de
-     * datos
+     * Método para imprimir en pantalla los libros
+     * registrados en la base de datos
      *
      * @param scan Entrada de datos por teclado
      */
@@ -264,7 +215,8 @@ final class BookMenu {
     }
 
     /**
-     * Método para buscar books en la base de datos según ciertos criterios
+     * Método para buscar books en la base de datos
+     * según ciertos criterios
      *
      * @param scan Entrada de datos por teclado
      */
@@ -329,7 +281,7 @@ final class BookMenu {
     }
 
     /**
-     * Método para eliminar books de la base de datos
+     * Método para eliminar libros de la base de datos
      *
      * @param scan   Entrada de datos por teclado
      * @param nBook  Número de books guardados dentro de la base de datos
