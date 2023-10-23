@@ -27,10 +27,10 @@ final class UserMenu {
     private static final String mainMenu = """
                           
               Seleccione una acción:
-            \t(1) Nuevo user
-            \t(2) Listar users
-            \t(3) Buscar users
-            \t(4) Eliminar users
+            \t(1) Nuevo usuario
+            \t(2) Listar usuarios
+            \t(3) Buscar usuarios
+            \t(4) Eliminar usuario
             \t(0) Volver al menú principal""";
     /**
      * Variable para almacenar las opciones de submenús para libros

@@ -35,7 +35,7 @@ final class LoanMenu {
     /**
      * Lista con fragmentos de texto según el parámetro usado en la consulta para préstamos
      */
-    private static final String[] searchVar = {"ID de Préstamo", "ID de Libro", "ID de Socio", "fecha de realización"};
+    private static final String[] searchVar = {"ID de Préstamo", "ID de Socio", "ID de Libro", "fecha de realización"};
     /**
      * Método para almacenar aparte el texto del menú principal
      */
@@ -368,7 +368,7 @@ final class LoanMenu {
                     } else {
                         arrayLoans = LibDBLoan.getInstance().searchTB(currentUser);
                     }
-                    System.out.println("Ordenación por ID del member...");
+                    System.out.println("Ordenación por ID del socio...");
                     arrayLoans.stream().sorted(Comparator.comparing(Loan::getIdMember)).forEach(System.out::println);
                     isValid = true;
                     break;
@@ -379,7 +379,7 @@ final class LoanMenu {
                     } else {
                         arrayLoans = LibDBLoan.getInstance().searchTB(currentUser);
                     }
-                    System.out.println("Ordenación por ID del book...");
+                    System.out.println("Ordenación por ID del libro...");
                     arrayLoans.stream().sorted(Comparator.comparing(Loan::getIdBook)).forEach(System.out::println);
                     isValid = true;
                     break;
