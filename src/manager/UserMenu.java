@@ -181,25 +181,26 @@ final class UserMenu {
     private void listUsers(Scanner scan) {
         boolean isValid = false;
         int opt;
-        List<User> arrayUsers = new ArrayList<>();
+        List<User> arrayUsers;
 
         System.out.println("    Listado de Usuarios");
         do {
             System.out.println("\nSelecciona ordenación de listado -\n" + searchMenu);
             try {
                 opt = scan.nextInt();
-                arrayUsers = UserDerby.getInstance().searchUser(currentUser);
             } catch (InputMismatchException ime) {
                 opt = -1;
             }
             scan.nextLine();
             switch (opt) {
                 case 1:
+                    arrayUsers = UserDerby.getInstance().searchUser(currentUser);
                     System.out.println("Ordenación por ID...");
                     arrayUsers.stream().sorted(User::compareTo).forEach(System.out::println);
                     isValid = true;
                     break;
                 case 2:
+                    arrayUsers = UserDerby.getInstance().searchUser(currentUser);
                     System.out.println("Ordenación por nombre...");
                     arrayUsers.stream().sorted(Comparator.comparing(User::getName).thenComparing(User::getIdUser)).forEach(System.out::println);
                     isValid = true;

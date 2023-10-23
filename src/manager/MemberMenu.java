@@ -190,34 +190,19 @@ final class MemberMenu {
             scan.nextLine();
             switch (opt) {
                 case 1:
-                    System.out.println("\nIntroduce 1 para desplegar más detalles");
-                    if (scan.nextLine().equals("1")) {
-                        arrayMembers = LibDBMember.getInstance().searchDetailTB(currentUser);
-                    } else {
-                        arrayMembers = LibDBMember.getInstance().searchTB(currentUser);
-                    }
+                    arrayMembers = Utils.loadDataList(scan, currentUser, LibDBMember.getInstance());
                     System.out.println("Ordenación por ID...");
                     arrayMembers.stream().sorted(Member::compareTo).forEach(System.out::println);
                     isValid = true;
                     break;
                 case 2:
-                    System.out.println("\nIntroduce 1 para desplegar más detalles");
-                    if (scan.nextLine().equals("1")) {
-                        arrayMembers = LibDBMember.getInstance().searchDetailTB(currentUser);
-                    } else {
-                        arrayMembers = LibDBMember.getInstance().searchTB(currentUser);
-                    }
+                    arrayMembers = Utils.loadDataList(scan, currentUser, LibDBMember.getInstance());
                     System.out.println("Ordenación por nombre...");
                     arrayMembers.stream().sorted(Comparator.comparing(Member::getName).thenComparing(Member::getSurname)).forEach(System.out::println);
                     isValid = true;
                     break;
                 case 3:
-                    System.out.println("\nIntroduce 1 para desplegar más detalles");
-                    if (scan.nextLine().equals("1")) {
-                        arrayMembers = LibDBMember.getInstance().searchDetailTB(currentUser);
-                    } else {
-                        arrayMembers = LibDBMember.getInstance().searchTB(currentUser);
-                    }
+                    arrayMembers = Utils.loadDataList(scan, currentUser, LibDBMember.getInstance());
                     System.out.println("Ordenación por apellidos...");
                     arrayMembers.stream().sorted(Comparator.comparing(Member::getSurname).thenComparing(Member::getName)).forEach(System.out::println);
                     isValid = true;

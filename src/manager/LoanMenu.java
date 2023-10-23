@@ -10,6 +10,7 @@ import tables.Book;
 import tables.Loan;
 import tables.Member;
 import tables.User;
+import utils.Utils;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -351,45 +352,25 @@ final class LoanMenu {
             scan.nextLine();
             switch (opt) {
                 case 1:
-                    System.out.println("\nIntroduce 1 para desplegar más detalles");
-                    if (scan.nextLine().equals("1")) {
-                        arrayLoans = LibDBLoan.getInstance().searchDetailTB(currentUser);
-                    } else {
-                        arrayLoans = LibDBLoan.getInstance().searchTB(currentUser);
-                    }
+                    arrayLoans = Utils.loadDataList(scan, currentUser, LibDBLoan.getInstance());
                     System.out.println("Ordenación por ID del préstamo...");
                     arrayLoans.stream().sorted(Loan::compareTo).forEach(System.out::println);
                     isValid = true;
                     break;
                 case 2:
-                    System.out.println("\nIntroduce 1 para desplegar más detalles");
-                    if (scan.nextLine().equals("1")) {
-                        arrayLoans = LibDBLoan.getInstance().searchDetailTB(currentUser);
-                    } else {
-                        arrayLoans = LibDBLoan.getInstance().searchTB(currentUser);
-                    }
+                    arrayLoans = Utils.loadDataList(scan, currentUser, LibDBLoan.getInstance());
                     System.out.println("Ordenación por ID del socio...");
                     arrayLoans.stream().sorted(Comparator.comparing(Loan::getIdMember)).forEach(System.out::println);
                     isValid = true;
                     break;
                 case 3:
-                    System.out.println("\nIntroduce 1 para desplegar más detalles");
-                    if (scan.nextLine().equals("1")) {
-                        arrayLoans = LibDBLoan.getInstance().searchDetailTB(currentUser);
-                    } else {
-                        arrayLoans = LibDBLoan.getInstance().searchTB(currentUser);
-                    }
+                    arrayLoans = Utils.loadDataList(scan, currentUser, LibDBLoan.getInstance());
                     System.out.println("Ordenación por ID del libro...");
                     arrayLoans.stream().sorted(Comparator.comparing(Loan::getIdBook)).forEach(System.out::println);
                     isValid = true;
                     break;
                 case 4:
-                    System.out.println("\nIntroduce 1 para desplegar más detalles");
-                    if (scan.nextLine().equals("1")) {
-                        arrayLoans = LibDBLoan.getInstance().searchDetailTB(currentUser);
-                    } else {
-                        arrayLoans = LibDBLoan.getInstance().searchTB(currentUser);
-                    }
+                    arrayLoans = Utils.loadDataList(scan, currentUser, LibDBLoan.getInstance());
                     System.out.println("Ordenación por fecha...");
                     arrayLoans.stream().sorted(Comparator.comparing(Loan::getDateLoan)).forEach(System.out::println);
                     isValid = true;

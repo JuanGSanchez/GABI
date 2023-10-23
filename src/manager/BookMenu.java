@@ -177,30 +177,32 @@ final class BookMenu {
     private void listBooks(Scanner scan) {
         boolean isValid = false;
         int opt;
-        List<Book> arrayBooks = new ArrayList<>();
+        List<Book> arrayBooks;
 
         System.out.println("    Listado de Libros");
         do {
             System.out.println("\nSelecciona ordenación de listado -\n" + searchMenu);
             try {
                 opt = scan.nextInt();
-                arrayBooks = LibDBBook.getInstance().searchTB(currentUser);
             } catch (InputMismatchException ime) {
                 opt = -1;
             }
             scan.nextLine();
             switch (opt) {
                 case 1:
+                    arrayBooks = LibDBBook.getInstance().searchTB(currentUser);
                     System.out.println("Ordenación por ID...");
                     arrayBooks.stream().sorted(Book::compareTo).forEach(System.out::println);
                     isValid = true;
                     break;
                 case 2:
+                    arrayBooks = LibDBBook.getInstance().searchTB(currentUser);
                     System.out.println("Ordenación por título...");
                     arrayBooks.stream().sorted(Comparator.comparing(Book::getTitle).thenComparingInt(Book::getIdBook)).forEach(System.out::println);
                     isValid = true;
                     break;
                 case 3:
+                    arrayBooks = LibDBBook.getInstance().searchTB(currentUser);
                     System.out.println("Ordenación por autor...");
                     arrayBooks.stream().sorted(Comparator.comparing(Book::getAuthor).thenComparing(Book::getTitle)).forEach(System.out::println);
                     isValid = true;

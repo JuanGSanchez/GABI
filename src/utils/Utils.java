@@ -4,7 +4,11 @@
  */
 package utils;
 
+import sql.reservoirs.LibDAO;
+import tables.User;
+
 import java.util.InputMismatchException;
+import java.util.List;
 import java.util.Scanner;
 
 /**
@@ -89,5 +93,14 @@ public final class Utils {
         } while (!isValid);
 
         return s;
+    }
+
+    public static <T> List<T> loadDataList(Scanner scan, User currentUser, LibDAO<T> libDAO) {
+        System.out.println("\n  Introduce 1 para desplegar más detalles");
+        if (scan.nextLine().equals("1")) {
+            return libDAO.searchDetailTB(currentUser);
+        } else {
+            return libDAO.searchTB(currentUser);
+        }
     }
 }
