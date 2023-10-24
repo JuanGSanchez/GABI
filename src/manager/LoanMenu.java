@@ -395,7 +395,6 @@ final class LoanMenu {
         boolean repeat;
         int opt;
         int ID = 0;
-        String fragString;
         LocalDate date = null;
 
         do {
@@ -406,39 +405,17 @@ final class LoanMenu {
 
                 opt = checkOptionInput(scan);
 
-                switch (opt) {
-                    case 1:
-                    case 2:
-                    case 3:
-                        System.out.println("Introduce " + searchVar[opt - 1] + " -");
-                        try {
-                            ID = scan.nextInt();
-                            isValid = true;
-                        } catch (InputMismatchException ime) {
-                            System.err.println("  Entrada no válida");
-                        }
-                        scan.nextLine();
-                        break;
-                    case 4:
-                        boolean isDone = false;
-                        do {
-                            System.out.println("Introduce " + searchVar[opt - 1] + " (" + configProps.getProperty("database-table-3-field-4-format-text") + ") -");
-                            fragString = scan.nextLine();
-                            try {
-                                date = LocalDate.parse(fragString, DateTimeFormatter.ofPattern(configProps.getProperty("database-table-3-field-4-format-code")));
-                                isDone = true;
-                            } catch (RuntimeException re) {
-                                System.err.println("  Formato de fecha no válido");
-                            }
-                        } while (!isDone);
-                        isValid = true;
-                        break;
-                    case 0:
-                        System.out.println("  Volviendo al menú del gestor...");
-                        return;
-                    default:
-                        System.err.println("  Entrada no válida");
+                Object o = checkCase(scan, opt);
+                if (o instanceof Integer) {
+                    ID = (Integer) o;
+                    isValid = true;
+                } else if (o instanceof LocalDate) {
+                    date = (LocalDate) o;
+                    isValid = true;
+                } else if (o instanceof Double) {
+                    return;
                 }
+
             } while (!isValid);
 
             try {
@@ -471,7 +448,6 @@ final class LoanMenu {
         boolean repeat;
         int opt;
         int ID = 0;
-        String fragString;
         LocalDate date = null;
 
         do {
@@ -482,39 +458,17 @@ final class LoanMenu {
 
                 opt = checkOptionInput(scan);
 
-                switch (opt) {
-                    case 1:
-                    case 2:
-                    case 3:
-                        System.out.println("Introduce " + searchVar[opt - 1] + " -");
-                        try {
-                            ID = scan.nextInt();
-                            isValid = true;
-                        } catch (InputMismatchException ime) {
-                            System.err.println("  Entrada no válida");
-                        }
-                        scan.nextLine();
-                        break;
-                    case 4:
-                        boolean isDone = false;
-                        do {
-                            System.out.println("Introduce " + searchVar[opt - 1] + " (" + configProps.getProperty("database-table-3-field-4-format-text") + ") -");
-                            fragString = scan.nextLine();
-                            try {
-                                date = LocalDate.parse(fragString, DateTimeFormatter.ofPattern(configProps.getProperty("database-table-3-field-4-format-code")));
-                                isDone = true;
-                            } catch (RuntimeException re) {
-                                System.err.println("  Formato de fecha no válido");
-                            }
-                        } while (!isDone);
-                        isValid = true;
-                        break;
-                    case 0:
-                        System.out.println("  Volviendo al menú del gestor...");
-                        return new int[]{nLoan, idLoan};
-                    default:
-                        System.err.println("  Entrada no válida");
+                Object o = checkCase(scan, opt);
+                if (o instanceof Integer) {
+                    ID = (Integer) o;
+                    isValid = true;
+                } else if (o instanceof LocalDate) {
+                    date = (LocalDate) o;
+                    isValid = true;
+                } else if (o instanceof Double) {
+                    return new int[]{nLoan, idLoan};
                 }
+
             } while (!isValid);
 
             try {
@@ -561,6 +515,53 @@ final class LoanMenu {
         } while (repeat);
 
         return new int[]{nLoan, idLoan};
+    }
+
+    /**
+     * Método con la selección para
+     * el criterio de búsqueda en la tabla de datos
+     *
+     * @param scan Entrada de datos por teclado
+     * @param opt  Índice del criterio de búsqueda
+     * @return Resultado de la lectura de opt
+     */
+    private Object checkCase(Scanner scan, int opt) {
+        Object obj = null;
+
+        switch (opt) {
+            case 1:
+            case 2:
+            case 3:
+                System.out.println("Introduce " + searchVar[opt - 1] + " -");
+                try {
+                    obj = scan.nextInt();
+                } catch (InputMismatchException ime) {
+                    System.err.println("  Entrada no válida");
+                }
+                scan.nextLine();
+                break;
+            case 4:
+                boolean isDone = false;
+                do {
+                    System.out.println("Introduce " + searchVar[opt - 1] + " (" + configProps.getProperty("database-table-3-field-4-format-text") + ") -");
+                    obj = scan.nextLine();
+                    try {
+                        obj = LocalDate.parse((String) obj, DateTimeFormatter.ofPattern(configProps.getProperty("database-table-3-field-4-format-code")));
+                        isDone = true;
+                    } catch (RuntimeException re) {
+                        System.err.println("  Formato de fecha no válido");
+                    }
+                } while (!isDone);
+                break;
+            case 0:
+                System.out.println("  Volviendo al menú del gestor...");
+                obj = 0.;
+                break;
+            default:
+                System.err.println("  Entrada no válida");
+        }
+
+        return obj;
     }
 
 }

@@ -237,29 +237,17 @@ final class BookMenu {
 
                 opt = checkOptionInput(scan);
 
-                switch (opt) {
-                    case 1:
-                        System.out.println("Introduce " + searchVar[opt - 1] + " -");
-                        try {
-                            ID = scan.nextInt();
-                            isValid = true;
-                        } catch (InputMismatchException ime) {
-                            System.err.println("  Entrada no válida");
-                        }
-                        scan.nextLine();
-                        break;
-                    case 2:
-                    case 3:
-                        System.out.println("Introduce " + searchVar[opt - 1] + " -");
-                        fragString = scan.nextLine();
-                        isValid = true;
-                        break;
-                    case 0:
-                        System.out.println("  Volviendo al menú del gestor...");
-                        return;
-                    default:
-                        System.err.println("  Entrada no válida");
+                Object o = checkCase(scan, opt);
+                if (o instanceof String) {
+                    fragString = (String) o;
+                    isValid = true;
+                } else if (o instanceof Integer) {
+                    ID = (Integer) o;
+                    isValid = true;
+                } else if (o instanceof Double) {
+                    return;
                 }
+
             } while (!isValid);
 
             try {
@@ -302,29 +290,17 @@ final class BookMenu {
 
                 opt = checkOptionInput(scan);
 
-                switch (opt) {
-                    case 1:
-                        System.out.println("Introduce " + searchVar[opt - 1] + " -");
-                        try {
-                            ID = scan.nextInt();
-                            isValid = true;
-                        } catch (InputMismatchException ime) {
-                            System.err.println("  Entrada no válida");
-                        }
-                        scan.nextLine();
-                        break;
-                    case 2:
-                    case 3:
-                        System.out.println("Introduce " + searchVar[opt - 1] + " -");
-                        fragString = scan.nextLine();
-                        isValid = true;
-                        break;
-                    case 0:
-                        System.out.println("  Volviendo al menú del gestor...");
-                        return new int[]{nBook, idBook};
-                    default:
-                        System.err.println("  Entrada no válida");
+                Object o = checkCase(scan, opt);
+                if (o instanceof String) {
+                    fragString = (String) o;
+                    isValid = true;
+                } else if (o instanceof Integer) {
+                    ID = (Integer) o;
+                    isValid = true;
+                } else if (o instanceof Double) {
+                    return new int[]{nBook, idBook};
                 }
+
             } while (!isValid);
 
             try {
@@ -365,6 +341,43 @@ final class BookMenu {
         } while (repeat);
 
         return new int[]{nBook, idBook};
+    }
+
+    /**
+     * Método con la selección para
+     * el criterio de búsqueda en la tabla de datos
+     *
+     * @param scan Entrada de datos por teclado
+     * @param opt  Índice del criterio de búsqueda
+     * @return Resultado de la lectura de opt
+     */
+    private Object checkCase(Scanner scan, int opt) {
+        Object obj = null;
+
+        switch (opt) {
+            case 1:
+                System.out.println("Introduce " + searchVar[opt - 1] + " -");
+                try {
+                    obj = scan.nextInt();
+                } catch (InputMismatchException ime) {
+                    System.err.println("  Entrada no válida");
+                }
+                scan.nextLine();
+                break;
+            case 2:
+            case 3:
+                System.out.println("Introduce " + searchVar[opt - 1] + " -");
+                obj = scan.nextLine();
+                break;
+            case 0:
+                System.out.println("  Volviendo al menú del gestor...");
+                obj = 0.;
+                break;
+            default:
+                System.err.println("  Entrada no válida");
+        }
+
+        return obj;
     }
 
 }
