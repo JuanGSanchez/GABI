@@ -6,10 +6,8 @@ package sql.reservoirs;
 
 import tables.Book;
 import tables.User;
+import utils.Utils;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -61,14 +59,7 @@ public final class LibDBBook implements LibDAO<Book> {
      * Constructor privado de la clase
      */
     private LibDBBook() {
-        configProps = new Properties();
-        try (FileInputStream fis = new FileInputStream("src/utils/configuration.properties")) {
-            configProps.load(fis);
-        } catch (FileNotFoundException ffe) {
-            System.err.println("  Error, no se encontró el archivo de propiedades del programa");
-        } catch (IOException ioe) {
-            System.err.println("  Error leyendo las propiedades del programa: " + ioe.getMessage());
-        }
+        configProps = Utils.readProperties();
         url = configProps.getProperty("database-url") + "/" + configProps.getProperty("database");
         tableName = configProps.getProperty("database-name") + "." + configProps.getProperty("database-table-1");
         field1 = configProps.getProperty("database-table-1-field-1");
@@ -145,7 +136,7 @@ public final class LibDBBook implements LibDAO<Book> {
             pStmt2.setInt(1, book.getIdBook());
             pStmt2.setString(2, book.getTitle());
             pStmt2.setString(3, book.getAuthor());
-            pStmt2.setBoolean(4,book.isLent());
+            pStmt2.setBoolean(4, book.isLent());
             if (pStmt2.executeUpdate() == 1) {
                 System.out.println("  nuevo libro agregado con éxito.");
             } else throw new SQLException("Ha habido un problema inesperado\nal intentar agregar el libro");

@@ -11,8 +11,6 @@ import sql.users.UserDerby;
 import tables.User;
 import utils.Utils;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Properties;
@@ -33,7 +31,7 @@ public final class LibMenu {
     /**
      * Lista de propiedades comunes del programa
      */
-    private static final Properties configProps = new Properties();
+    private static final Properties configProps;
     /**
      * Variable para almacenar aparte el texto del menú principal,
      * versión para users
@@ -82,17 +80,14 @@ public final class LibMenu {
      */
     private static int idLoans;
 
+    static {
+        configProps = Utils.readProperties();
+    }
+
     /**
      * Constructor privado de la clase para evitar instancias
      */
     private LibMenu() {
-        try (FileInputStream fis = new FileInputStream("src/utils/configuration.properties")) {
-            configProps.load(fis);
-        } catch (FileNotFoundException ffe) {
-            System.err.println("  Error, no se encontró el archivo de propiedades del programa");
-        } catch (IOException ioe) {
-            System.err.println("  Error leyendo las propiedades del programa: " + ioe.getMessage());
-        }
     }
 
     /**
@@ -103,8 +98,6 @@ public final class LibMenu {
     public static void main(String[] args) {
         boolean repeat = true;
         User currentUser = null;
-
-        new LibMenu();
 
         if (configProps.getProperty("database-isbuilt").equals("false")) {
             DatabaseBuilder.sqlExecuter(configProps);

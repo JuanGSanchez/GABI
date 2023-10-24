@@ -7,8 +7,12 @@ package utils;
 import sql.reservoirs.LibDAO;
 import tables.User;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.InputMismatchException;
 import java.util.List;
+import java.util.Properties;
 import java.util.Scanner;
 
 /**
@@ -33,6 +37,25 @@ public final class Utils {
     private static final String[] varName = new String[]{
             "título", "autor", "nombre", "apellidos", "nombre", "contraseña"
     };
+
+    /**
+     * Método para la lectura del archivo de propiedades
+     *
+     * @return Lista de propiedades del programa
+     */
+    public static Properties readProperties() {
+        Properties configProps = new Properties();
+
+        try (FileInputStream fis = new FileInputStream("src/utils/configuration.properties")) {
+            configProps.load(fis);
+        } catch (FileNotFoundException ffe) {
+            System.err.println("  Error, no se encontró el archivo de propiedades del programa");
+        } catch (IOException ioe) {
+            System.err.println("  Error leyendo las propiedades del programa: " + ioe.getMessage());
+        }
+
+        return configProps;
+    }
 
     /**
      * Método general de lectura para la opción

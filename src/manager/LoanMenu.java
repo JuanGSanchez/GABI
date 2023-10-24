@@ -185,12 +185,9 @@ final class LoanMenu {
                 System.out.println("Introduce socio receptor del préstamo - ");
                 do {
                     System.out.println("\n  Selecciona criterio de búsqueda:\n" + searchMemberMenu);
-                    try {
-                        opt = scan.nextInt();
-                    } catch (InputMismatchException ime) {
-                        opt = -1;
-                    }
-                    scan.nextLine();
+
+                    opt = checkOptionInput(scan);
+
                     switch (opt) {
                         case 1:
                             System.out.println("Introduce " + searchMemberVar[opt - 1] + " -");
@@ -222,7 +219,7 @@ final class LoanMenu {
                         Set<Integer> idsocs = members.stream().map(Member::getIdMember).collect(Collectors.toSet());
                         members.stream().sorted(Member::compareTo).forEach(System.out::println);
                         do {
-                            System.out.println("Introduce ID del member de la lista anterior\n" +
+                            System.out.println("Introduce ID del socio de la lista anterior\n" +
                                                "(-1 para cancelar operación):");
                             try {
                                 ID = scan.nextInt();
@@ -291,7 +288,7 @@ final class LoanMenu {
                         Set<Integer> idlibs = books.stream().map(Book::getIdBook).collect(Collectors.toSet());
                         books.stream().sorted(Book::compareTo).forEach(System.out::println);
                         do {
-                            System.out.println("Introduce ID del book de la lista anterior\n" +
+                            System.out.println("Introduce ID del libro de la lista anterior\n" +
                                                "(-1 para cancelar operación):");
                             try {
                                 ID = scan.nextInt();
@@ -472,18 +469,17 @@ final class LoanMenu {
             } while (!isValid);
 
             try {
-                List<Loan> loans;
-                Set<Integer> idloans;
                 if (opt == 1) {
                     idLoan = LibDBLoan.getInstance().deleteTB(currentUser, ID);
                     nLoan--;
                 } else {
+                    List<Loan> loans;
                     if (opt == 2 || opt == 3) {
                         loans = LibDBLoan.getInstance().searchTB(currentUser, opt, ID);
                     } else {
                         loans = LibDBLoan.getInstance().searchTB(currentUser, date);
                     }
-                    idloans = loans.stream().map(Loan::getIdLoan).collect(Collectors.toSet());
+                    Set<Integer> idloans = loans.stream().map(Loan::getIdLoan).collect(Collectors.toSet());
                     loans.stream().sorted(Loan::compareTo).forEach(System.out::println);
                     do {
                         System.out.println("Introduce ID del préstamo a eliminar de la lista anterior\n" +

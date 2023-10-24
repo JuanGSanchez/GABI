@@ -5,10 +5,8 @@
 package sql.users;
 
 import tables.User;
+import utils.Utils;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -52,14 +50,7 @@ public final class UserDerby implements UserDAO {
      * Constructor privado de la clase
      */
     private UserDerby() {
-        configProps = new Properties();
-        try (FileInputStream fis = new FileInputStream("src/utils/configuration.properties")) {
-            configProps.load(fis);
-        } catch (FileNotFoundException ffe) {
-            System.err.println("  Error, no se encontró el archivo de propiedades del programa");
-        } catch (IOException ioe) {
-            System.err.println("  Error leyendo las propiedades del programa: " + ioe.getMessage());
-        }
+        configProps = Utils.readProperties();
         url = configProps.getProperty("database-url") + "/" + configProps.getProperty("database");
         tableName = configProps.getProperty("database-name") + "." + configProps.getProperty("database-table-4");
         field1 = configProps.getProperty("database-table-4-field-1");
