@@ -5,10 +5,12 @@ package manager;
 
 import sql.users.UserDerby;
 import tables.User;
-import utils.Utils;
 
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static utils.Utils.checkOptionInput;
+import static utils.Utils.checkString;
 
 /**
  * Clase del menú del gestor de users en el programa
@@ -52,6 +54,10 @@ final class UserMenu {
 
     /**
      * Constructor de la clase, restringido al paquete
+     *
+     * @param currentUser Objeto de usuario con sus datos
+     *                    de acceso a la base de datos
+     * @param configProps Lista de propiedades comunes del programa
      */
     UserMenu(User currentUser, Properties configProps) {
         this.currentUser = currentUser;
@@ -82,12 +88,9 @@ final class UserMenu {
 
         do {
             System.out.println(mainMenu);
-            try {
-                optionMenu = scan.nextInt();
-            } catch (InputMismatchException ime) {
-                optionMenu = -1;
-            }
-            scan.nextLine();
+
+            optionMenu = checkOptionInput(scan);
+
             switch (optionMenu) {
                 case 1:
                     count = addUser(scan, nUser, idUser);
@@ -145,13 +148,13 @@ final class UserMenu {
         do {
             System.out.println("\n    Alta de Nuevo Usuario\n(-1 en cualquier momento para cancelar operación)\n");
 
-            name = Utils.checkString(scan, 4, configProps.getProperty("database-table-4-field-2-maxchar"));
+            name = checkString(scan, 4, configProps.getProperty("database-table-4-field-2-maxchar"));
             if (name == null) {
                 System.out.println("  Operación cancelada, volviendo al menú del gestor...");
                 return new int[]{nUser, idUser};
             }
 
-            password = Utils.checkString(scan, 5, configProps.getProperty("database-table-4-field-2-maxchar"));
+            password = checkString(scan, 5, configProps.getProperty("database-table-4-field-2-maxchar"));
             if (password == null) {
                 System.out.println("  Operación cancelada, volviendo al menú del gestor...");
                 return new int[]{nUser, idUser};
@@ -186,12 +189,9 @@ final class UserMenu {
         System.out.println("    Listado de Usuarios");
         do {
             System.out.println("\nSelecciona ordenación de listado -\n" + searchMenu);
-            try {
-                opt = scan.nextInt();
-            } catch (InputMismatchException ime) {
-                opt = -1;
-            }
-            scan.nextLine();
+
+            opt = checkOptionInput(scan);
+
             switch (opt) {
                 case 1:
                     arrayUsers = UserDerby.getInstance().searchUser(currentUser);
@@ -232,12 +232,9 @@ final class UserMenu {
             System.out.println("    Buscador de Usuarios");
             do {
                 System.out.println("\nSelecciona criterio de búsqueda -\n" + searchMenu);
-                try {
-                    opt = scan.nextInt();
-                } catch (InputMismatchException ime) {
-                    opt = -1;
-                }
-                scan.nextLine();
+
+                opt = checkOptionInput(scan);
+
                 switch (opt) {
                     case 1:
                         System.out.println("Introduce " + searchVar[opt - 1] + " -");
@@ -299,12 +296,9 @@ final class UserMenu {
             System.out.println("    Baja de Usuarios");
             do {
                 System.out.println("\nSelecciona criterio de búsqueda -\n" + searchMenu);
-                try {
-                    opt = scan.nextInt();
-                } catch (InputMismatchException ime) {
-                    opt = -1;
-                }
-                scan.nextLine();
+
+                opt = checkOptionInput(scan);
+
                 switch (opt) {
                     case 1:
                         System.out.println("Introduce " + searchVar[opt - 1] + " -");

@@ -3,13 +3,15 @@
  */
 package manager;
 
-import java.util.*;
-import java.util.stream.Collectors;
-
 import sql.reservoirs.LibDBBook;
 import tables.Book;
 import tables.User;
-import utils.Utils;
+
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static utils.Utils.checkOptionInput;
+import static utils.Utils.checkString;
 
 /**
  * Clase del menú del gestor de books en el programa
@@ -54,6 +56,10 @@ final class BookMenu {
 
     /**
      * Constructor de la clase, restringido al paquete
+     *
+     * @param currentUser Objeto de usuario con sus datos
+     *                    de acceso a la base de datos
+     * @param configProps Lista de propiedades comunes del programa
      */
     BookMenu(User currentUser, Properties configProps) {
         this.currentUser = currentUser;
@@ -77,12 +83,9 @@ final class BookMenu {
         System.out.println("\n\tGESTOR LIBROS");
         do {
             System.out.println(mainMenu);
-            try {
-                optionMenu = scan.nextInt();
-            } catch (InputMismatchException ime) {
-                optionMenu = -1;
-            }
-            scan.nextLine();
+
+            optionMenu = checkOptionInput(scan);
+
             switch (optionMenu) {
                 case 1:
                     count = addBook(scan, nBook, idBook);
@@ -141,13 +144,13 @@ final class BookMenu {
         do {
             System.out.println("\n    Alta de Nuevo Libro\n(-1 en cualquier momento para cancelar operación)\n");
 
-            title = Utils.checkString(scan, 0, configProps.getProperty("database-table-1-field-2-maxchar"));
+            title = checkString(scan, 0, configProps.getProperty("database-table-1-field-2-maxchar"));
             if (title == null) {
                 System.out.println("  Operación cancelada, volviendo al menú del gestor...");
                 return new int[]{nBook, idBook};
             }
 
-            author = Utils.checkString(scan, 1, configProps.getProperty("database-table-1-field-3-maxchar"));
+            author = checkString(scan, 1, configProps.getProperty("database-table-1-field-3-maxchar"));
             if (author == null) {
                 System.out.println("  Operación cancelada, volviendo al menú del gestor...");
                 return new int[]{nBook, idBook};
@@ -182,12 +185,9 @@ final class BookMenu {
         System.out.println("    Listado de Libros");
         do {
             System.out.println("\nSelecciona ordenación de listado -\n" + searchMenu);
-            try {
-                opt = scan.nextInt();
-            } catch (InputMismatchException ime) {
-                opt = -1;
-            }
-            scan.nextLine();
+
+            opt = checkOptionInput(scan);
+
             switch (opt) {
                 case 1:
                     arrayBooks = LibDBBook.getInstance().searchTB(currentUser);
@@ -234,12 +234,9 @@ final class BookMenu {
             System.out.println("    Buscador de Libros");
             do {
                 System.out.println("\nSelecciona criterio de búsqueda -\n" + searchMenu);
-                try {
-                    opt = scan.nextInt();
-                } catch (InputMismatchException ime) {
-                    opt = -1;
-                }
-                scan.nextLine();
+
+                opt = checkOptionInput(scan);
+
                 switch (opt) {
                     case 1:
                         System.out.println("Introduce " + searchVar[opt - 1] + " -");
@@ -302,12 +299,9 @@ final class BookMenu {
             System.out.println("    Baja de Libros");
             do {
                 System.out.println("\nSelecciona criterio de búsqueda -\n" + searchMenu);
-                try {
-                    opt = scan.nextInt();
-                } catch (InputMismatchException ime) {
-                    opt = -1;
-                }
-                scan.nextLine();
+
+                opt = checkOptionInput(scan);
+
                 switch (opt) {
                     case 1:
                         System.out.println("Introduce " + searchVar[opt - 1] + " -");

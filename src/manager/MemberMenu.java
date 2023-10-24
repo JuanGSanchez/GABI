@@ -6,10 +6,11 @@ package manager;
 import sql.reservoirs.LibDBMember;
 import tables.Member;
 import tables.User;
-import utils.Utils;
 
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static utils.Utils.*;
 
 /**
  * Clase del menú del gestor de members en el programa
@@ -54,6 +55,10 @@ final class MemberMenu {
 
     /**
      * Constructor de la clase, restringido al paquete
+     *
+     * @param currentUser Objeto de usuario con sus datos
+     *                    de acceso a la base de datos
+     * @param configProps Lista de propiedades comunes del programa
      */
     MemberMenu(User currentUser, Properties configProps) {
         this.currentUser = currentUser;
@@ -77,12 +82,9 @@ final class MemberMenu {
         System.out.println("\n\tGESTOR SOCIOS");
         do {
             System.out.println(mainMenu);
-            try {
-                optionMenu = scan.nextInt();
-            } catch (InputMismatchException ime) {
-                optionMenu = -1;
-            }
-            scan.nextLine();
+
+            optionMenu = checkOptionInput(scan);
+
             switch (optionMenu) {
                 case 1:
                     count = addMember(scan, nMember, idMember);
@@ -141,13 +143,13 @@ final class MemberMenu {
         do {
             System.out.println("\n    Alta de Nuevo Socio\n(-1 en cualquier momento para cancelar operación)\n");
 
-            name = Utils.checkString(scan, 2, configProps.getProperty("database-table-2-field-2-maxchar"));
+            name = checkString(scan, 2, configProps.getProperty("database-table-2-field-2-maxchar"));
             if (name == null) {
                 System.out.println("  Operación cancelada, volviendo al menú del gestor...");
                 return new int[]{nMember, idMember};
             }
 
-            surname = Utils.checkString(scan, 3, configProps.getProperty("database-table-2-field-3-maxchar"));
+            surname = checkString(scan, 3, configProps.getProperty("database-table-2-field-3-maxchar"));
             if (surname == null) {
                 System.out.println("  Operación cancelada, volviendo al menú del gestor...");
                 return new int[]{nMember, idMember};
@@ -182,27 +184,24 @@ final class MemberMenu {
         System.out.println("    Listado de Socios");
         do {
             System.out.println("\nSelecciona ordenación de listado -\n" + searchMenu);
-            try {
-                opt = scan.nextInt();
-            } catch (InputMismatchException ime) {
-                opt = -1;
-            }
-            scan.nextLine();
+
+            opt = checkOptionInput(scan);
+
             switch (opt) {
                 case 1:
-                    arrayMembers = Utils.loadDataList(scan, currentUser, LibDBMember.getInstance());
+                    arrayMembers = loadDataList(scan, currentUser, LibDBMember.getInstance());
                     System.out.println("Ordenación por ID...");
                     arrayMembers.stream().sorted(Member::compareTo).forEach(System.out::println);
                     isValid = true;
                     break;
                 case 2:
-                    arrayMembers = Utils.loadDataList(scan, currentUser, LibDBMember.getInstance());
+                    arrayMembers = loadDataList(scan, currentUser, LibDBMember.getInstance());
                     System.out.println("Ordenación por nombre...");
                     arrayMembers.stream().sorted(Comparator.comparing(Member::getName).thenComparing(Member::getSurname)).forEach(System.out::println);
                     isValid = true;
                     break;
                 case 3:
-                    arrayMembers = Utils.loadDataList(scan, currentUser, LibDBMember.getInstance());
+                    arrayMembers = loadDataList(scan, currentUser, LibDBMember.getInstance());
                     System.out.println("Ordenación por apellidos...");
                     arrayMembers.stream().sorted(Comparator.comparing(Member::getSurname).thenComparing(Member::getName)).forEach(System.out::println);
                     isValid = true;
@@ -234,12 +233,9 @@ final class MemberMenu {
             System.out.println("    Buscador de Socios");
             do {
                 System.out.println("\nSelecciona criterio de búsqueda -\n" + searchMenu);
-                try {
-                    opt = scan.nextInt();
-                } catch (InputMismatchException ime) {
-                    opt = -1;
-                }
-                scan.nextLine();
+
+                opt = checkOptionInput(scan);
+
                 switch (opt) {
                     case 1:
                         System.out.println("Introduce " + searchVar[opt - 1] + " -");
@@ -302,12 +298,9 @@ final class MemberMenu {
             System.out.println("    Baja de Socios");
             do {
                 System.out.println("\nSelecciona criterio de búsqueda -\n" + searchMenu);
-                try {
-                    opt = scan.nextInt();
-                } catch (InputMismatchException ime) {
-                    opt = -1;
-                }
-                scan.nextLine();
+
+                opt = checkOptionInput(scan);
+
                 switch (opt) {
                     case 1:
                         System.out.println("Introduce " + searchVar[opt - 1] + " -");

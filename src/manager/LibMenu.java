@@ -9,12 +9,12 @@ import sql.reservoirs.LibDBLoan;
 import sql.reservoirs.LibDBMember;
 import sql.users.UserDerby;
 import tables.User;
+import utils.Utils;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.InputMismatchException;
 import java.util.Properties;
 import java.util.Scanner;
 
@@ -86,7 +86,7 @@ public final class LibMenu {
      * Constructor privado de la clase para evitar instancias
      */
     private LibMenu() {
-        try (FileInputStream fis = new FileInputStream("src/configuration.properties")) {
+        try (FileInputStream fis = new FileInputStream("src/utils/configuration.properties")) {
             configProps.load(fis);
         } catch (FileNotFoundException ffe) {
             System.err.println("  Error, no se encontró el archivo de propiedades del programa");
@@ -105,10 +105,11 @@ public final class LibMenu {
         User currentUser = null;
 
         new LibMenu();
+
         if (configProps.getProperty("database-isbuilt").equals("false")) {
             DatabaseBuilder.sqlExecuter(configProps);
             configProps.setProperty("database-isbuilt", "true");
-            try (FileOutputStream fos = new FileOutputStream("src/configuration.properties")) {
+            try (FileOutputStream fos = new FileOutputStream("src/utils/configuration.properties")) {
                 configProps.store(fos, "Propiedades del programa GABI");
             } catch (IOException ioe) {
                 System.err.println("  Error guardando las propiedades actualizadas: " + ioe.getMessage());
@@ -195,7 +196,8 @@ public final class LibMenu {
      * Método que encierra la selección del gestor en el que introducirse
      * el usuario verificado
      *
-     * @param currentUser Objeto User con sus datos para el acceso a la base de datos
+     * @param currentUser Objeto de usuario con sus datos
+     *                    de acceso a la base de datos
      */
     private static void selectionBlock(User currentUser) {
         boolean checkMenu = true;
@@ -226,12 +228,9 @@ public final class LibMenu {
 
             System.out.println(currentUser.getName().equals(configProps.getProperty("database-name")) ? mainMenu2 : mainMenu1);
 
-            try {
-                optionMenu = scanMenu.nextInt();
-            } catch (InputMismatchException ime) {
-                optionMenu = -1;
-            }
-            scanMenu.nextLine();
+
+            optionMenu = Utils.checkOptionInput(scanMenu);
+
             switch (optionMenu) {
                 case 1:
                     count = lMenu.selectionMenu(scanMenu, nBooks, idBooks);

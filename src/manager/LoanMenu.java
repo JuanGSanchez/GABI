@@ -10,12 +10,14 @@ import tables.Book;
 import tables.Loan;
 import tables.Member;
 import tables.User;
-import utils.Utils;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static utils.Utils.checkOptionInput;
+import static utils.Utils.loadDataList;
 
 /**
  * Clase del menú del gestor de libros en el programa
@@ -85,6 +87,10 @@ final class LoanMenu {
 
     /**
      * Constructor de la clase, restringido al paquete
+     *
+     * @param currentUser Objeto de usuario con sus datos
+     *                    de acceso a la base de datos
+     * @param configProps Lista de propiedades comunes del programa
      */
     LoanMenu(User currentUser, Properties configProps) {
         this.currentUser = currentUser;
@@ -108,12 +114,9 @@ final class LoanMenu {
         System.out.println("\n\tGESTOR PRESTAMOS");
         do {
             System.out.println(mainMenu);
-            try {
-                optionMenu = scan.nextInt();
-            } catch (InputMismatchException ime) {
-                optionMenu = -1;
-            }
-            scan.nextLine();
+
+            optionMenu = checkOptionInput(scan);
+
             switch (optionMenu) {
                 case 1:
                     count = addLoan(scan, nLoan, idLoan);
@@ -344,33 +347,30 @@ final class LoanMenu {
         System.out.println("    Listado de Préstamos");
         do {
             System.out.println("\nSelecciona ordenación de listado -\n" + searchMenu);
-            try {
-                opt = scan.nextInt();
-            } catch (InputMismatchException ime) {
-                opt = -1;
-            }
-            scan.nextLine();
+
+            opt = checkOptionInput(scan);
+
             switch (opt) {
                 case 1:
-                    arrayLoans = Utils.loadDataList(scan, currentUser, LibDBLoan.getInstance());
+                    arrayLoans = loadDataList(scan, currentUser, LibDBLoan.getInstance());
                     System.out.println("Ordenación por ID del préstamo...");
                     arrayLoans.stream().sorted(Loan::compareTo).forEach(System.out::println);
                     isValid = true;
                     break;
                 case 2:
-                    arrayLoans = Utils.loadDataList(scan, currentUser, LibDBLoan.getInstance());
+                    arrayLoans = loadDataList(scan, currentUser, LibDBLoan.getInstance());
                     System.out.println("Ordenación por ID del socio...");
                     arrayLoans.stream().sorted(Comparator.comparing(Loan::getIdMember)).forEach(System.out::println);
                     isValid = true;
                     break;
                 case 3:
-                    arrayLoans = Utils.loadDataList(scan, currentUser, LibDBLoan.getInstance());
+                    arrayLoans = loadDataList(scan, currentUser, LibDBLoan.getInstance());
                     System.out.println("Ordenación por ID del libro...");
                     arrayLoans.stream().sorted(Comparator.comparing(Loan::getIdBook)).forEach(System.out::println);
                     isValid = true;
                     break;
                 case 4:
-                    arrayLoans = Utils.loadDataList(scan, currentUser, LibDBLoan.getInstance());
+                    arrayLoans = loadDataList(scan, currentUser, LibDBLoan.getInstance());
                     System.out.println("Ordenación por fecha...");
                     arrayLoans.stream().sorted(Comparator.comparing(Loan::getDateLoan)).forEach(System.out::println);
                     isValid = true;
@@ -403,12 +403,9 @@ final class LoanMenu {
             System.out.println("    Buscador de Préstamos");
             do {
                 System.out.println("\nSelecciona criterio de búsqueda -\n" + searchMenu);
-                try {
-                    opt = scan.nextInt();
-                } catch (InputMismatchException ime) {
-                    opt = -1;
-                }
-                scan.nextLine();
+
+                opt = checkOptionInput(scan);
+
                 switch (opt) {
                     case 1:
                     case 2:
@@ -425,10 +422,10 @@ final class LoanMenu {
                     case 4:
                         boolean isDone = false;
                         do {
-                            System.out.println("Introduce " + searchVar[opt - 1] + " (dd-mm-aaaa) -");
+                            System.out.println("Introduce " + searchVar[opt - 1] + " (" + configProps.getProperty("database-table-3-field-4-format-text") + ") -");
                             fragString = scan.nextLine();
                             try {
-                                date = LocalDate.parse(fragString, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+                                date = LocalDate.parse(fragString, DateTimeFormatter.ofPattern(configProps.getProperty("database-table-3-field-4-format-code")));
                                 isDone = true;
                             } catch (RuntimeException re) {
                                 System.err.println("  Formato de fecha no válido");
@@ -482,12 +479,9 @@ final class LoanMenu {
             System.out.println("    Devolución de Préstamos");
             do {
                 System.out.println("\nSelecciona criterio de búsqueda -\n" + searchMenu);
-                try {
-                    opt = scan.nextInt();
-                } catch (InputMismatchException ime) {
-                    opt = -1;
-                }
-                scan.nextLine();
+
+                opt = checkOptionInput(scan);
+
                 switch (opt) {
                     case 1:
                     case 2:

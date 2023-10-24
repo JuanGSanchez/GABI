@@ -35,6 +35,26 @@ public final class Utils {
     };
 
     /**
+     * Método general de lectura para la opción
+     * numérica de menús
+     *
+     * @param scan Entrada de datos por teclado
+     * @return Índice numérico para el menú
+     */
+    public static int checkOptionInput(Scanner scan) {
+        int opt;
+
+        try {
+            opt = scan.nextInt();
+        } catch (InputMismatchException ime) {
+            opt = -1;
+        }
+        scan.nextLine();
+
+        return opt;
+    }
+
+    /**
      * Método general de lectura por consola de un campo de texto
      *
      * @param scan      Entrada de datos por teclado
@@ -95,6 +115,19 @@ public final class Utils {
         return s;
     }
 
+    /**
+     * Método general para conectar con la base de datos
+     * en el listado de su contenido, con o sin detalles
+     *
+     * @param scan        Entrada de datos por teclado
+     * @param currentUser Objeto de usuario con sus datos
+     *                    de acceso a la base de datos
+     * @param libDAO      Referencia general a la clase de conexión
+     *                    a la tabla de datos
+     * @param <T>         Clase asociada a la tabla de datos
+     * @return Lista de contenido en la tabla de datos
+     * en objetos de la clase T
+     */
     public static <T> List<T> loadDataList(Scanner scan, User currentUser, LibDAO<T> libDAO) {
         System.out.println("\n  Introduce 1 para desplegar más detalles");
         if (scan.nextLine().equals("1")) {

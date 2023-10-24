@@ -65,7 +65,7 @@ public class LibDBLoan implements LibDAO<Loan> {
      */
     private LibDBLoan() {
         configProps = new Properties();
-        try (FileInputStream fis = new FileInputStream("src/configuration.properties")) {
+        try (FileInputStream fis = new FileInputStream("src/utils/configuration.properties")) {
             configProps.load(fis);
         } catch (FileNotFoundException ffe) {
             System.err.println("  Error, no se encontró el archivo de propiedades del programa");
