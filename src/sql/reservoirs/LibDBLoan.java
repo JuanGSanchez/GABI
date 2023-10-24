@@ -30,45 +30,40 @@ public class LibDBLoan implements LibDAO<Loan> {
      */
     private static final LibDBLoan instance = new LibDBLoan();
     /**
-     * URL de la base de datos utilizada por este código
-     */
-    private final String url;
-    /**
      * Lista de propiedades del programa
      */
-    private final Properties configProps;
+    private final Properties configProps = Utils.readProperties();
+    /**
+     * URL de la base de datos utilizada por este código
+     */
+    private final String url = configProps.getProperty("database-url") + "/" +
+                               configProps.getProperty("database");
     /**
      * Ruta completa de la tabla de datos manejada en esta clase
      */
-    private final String tableName;
+    private final String tableName = configProps.getProperty("database-name") + "." +
+                                     configProps.getProperty("database-table-3");
     /**
      * Campo 1 de la tabla de datos;
      */
-    private final String field1;
+    private final String field1 = configProps.getProperty("database-table-3-field-1");
     /**
      * Campo 2 de la tabla de datos;
      */
-    private final String field2;
+    private final String field2 = configProps.getProperty("database-table-2-field-1");
     /**
      * Campo 3 de la tabla de datos;
      */
-    private final String field3;
+    private final String field3 = configProps.getProperty("database-table-1-field-1");
     /**
      * Campo 3 de la tabla de datos;
      */
-    private final String field4;
+    private final String field4 = configProps.getProperty("database-table-3-field-4");
 
     /**
      * Constructor privado de la clase
      */
     private LibDBLoan() {
-        configProps = Utils.readProperties();
-        url = configProps.getProperty("database-url") + "/" + configProps.getProperty("database");
-        tableName = configProps.getProperty("database-name") + "." + configProps.getProperty("database-table-3");
-        field1 = configProps.getProperty("database-table-3-field-1");
-        field2 = configProps.getProperty("database-table-2-field-1");
-        field3 = configProps.getProperty("database-table-1-field-1");
-        field4 = configProps.getProperty("database-table-3-field-4");
     }
 
     /**
@@ -367,7 +362,7 @@ public class LibDBLoan implements LibDAO<Loan> {
 
             pStmt3.setInt(1, ID);
             if (pStmt3.executeUpdate() == 1) {
-                System.out.println("Devolución de préstamo completada con éxito.");
+                System.out.println("  devolución de préstamo completada con éxito.");
                 ResultSet rs4 = stmt4.executeQuery(query4);
                 if (rs4.next()) {
                     int maxIDLib = rs4.getInt(1);

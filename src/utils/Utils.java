@@ -78,6 +78,26 @@ public final class Utils {
     }
 
     /**
+     * Método general de lectura para la opción
+     * numérica de menús, caso de mensaje de error
+     *
+     * @param scan Entrada de datos por teclado
+     * @return Índice numérico para el menú
+     */
+    public static Integer checkOptionInput(Scanner scan, String errorMessage) {
+        Integer opt = null;
+
+        try {
+            opt = scan.nextInt();
+        } catch (InputMismatchException ime) {
+            System.err.println(errorMessage);
+        }
+        scan.nextLine();
+
+        return opt;
+    }
+
+    /**
      * Método general de lectura por consola de un campo de texto
      *
      * @param scan      Entrada de datos por teclado

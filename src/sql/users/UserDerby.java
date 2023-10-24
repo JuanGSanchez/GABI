@@ -26,35 +26,32 @@ public final class UserDerby implements UserDAO {
      */
     private static final UserDerby instance = new UserDerby();
     /**
-     * URL de la base de datos utilizada por este código
-     */
-    private final String url;
-    /**
      * Lista de propiedades del programa
      */
-    private final Properties configProps;
+    private final Properties configProps = Utils.readProperties();
+    /**
+     * URL de la base de datos utilizada por este código
+     */
+    private final String url = configProps.getProperty("database-url") + "/" +
+                               configProps.getProperty("database");
     /**
      * Ruta completa de la tabla de datos manejada en esta clase
      */
-    private final String tableName;
+    private final String tableName = configProps.getProperty("database-name") + "." +
+                                     configProps.getProperty("database-table-4");
     /**
      * Campo 1 de la tabla de datos;
      */
-    private final String field1;
+    private final String field1 = configProps.getProperty("database-table-4-field-1");
     /**
      * Campo 2 de la tabla de datos;
      */
-    private final String field2;
+    private final String field2 = configProps.getProperty("database-table-4-field-2");
 
     /**
      * Constructor privado de la clase
      */
     private UserDerby() {
-        configProps = Utils.readProperties();
-        url = configProps.getProperty("database-url") + "/" + configProps.getProperty("database");
-        tableName = configProps.getProperty("database-name") + "." + configProps.getProperty("database-table-4");
-        field1 = configProps.getProperty("database-table-4-field-1");
-        field2 = configProps.getProperty("database-table-4-field-2");
     }
 
     /**
@@ -306,7 +303,7 @@ public final class UserDerby implements UserDAO {
                 }
                 rs2.close();
                 s1.executeUpdate(setProperty + fullAccessUsers + ", '" + listUsers.deleteCharAt(listUsers.length() - 1) + "')");
-                System.out.println("Usuario eliminado con éxito.");
+                System.out.println("  usuario eliminado con éxito.");
                 ResultSet rs4 = stmt4.executeQuery(query4);
                 if (rs4.next()) {
                     int maxIDUser = rs4.getInt(1);

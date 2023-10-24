@@ -152,7 +152,7 @@ final class LoanMenu {
                     checkMenu = false;
                     break;
                 default:
-                    System.err.println("Entrada no válida");
+                    System.err.println("  Entrada no válida");
             }
         } while (checkMenu);
 
@@ -171,10 +171,10 @@ final class LoanMenu {
         boolean isValid;
         boolean isPossible;
         boolean repeat;
-        int idSoc = 0;
-        int idLib = 0;
         int opt;
         int ID;
+        int idMember = 0;
+        int idBook = 0;
         String fragString = null;
 
         do {
@@ -188,33 +188,23 @@ final class LoanMenu {
 
                     opt = checkOptionInput(scan);
 
-                    switch (opt) {
-                        case 1:
-                            System.out.println("Introduce " + searchMemberVar[opt - 1] + " -");
-                            try {
-                                idSoc = scan.nextInt();
-                                isValid = true;
-                            } catch (InputMismatchException ime) {
-                                System.err.println("  Entrada no válida");
-                            }
-                            scan.nextLine();
-                            break;
-                        case 2:
-                        case 3:
-                            System.out.println("Introduce " + searchMemberVar[opt - 1] + " -");
-                            fragString = scan.nextLine();
-                            isValid = true;
-                            break;
-                        case 0:
-                            System.out.println("  Volviendo al menú del gestor...");
-                            return new int[]{nLoan, idLoan};
-                        default:
-                            System.err.println("  Entrada no válida");
+                    Object o = checkCaseAdd(scan, opt, searchMemberVar);
+                    if (o instanceof String) {
+                        fragString = (String) o;
+                        isValid = true;
+                    } else if (o instanceof Integer) {
+                        idMember = (Integer) o;
+                        isValid = true;
+                    } else if (o instanceof Double) {
+                        return new int[]{nLoan, idLoan};
                     }
+
                 } while (!isValid);
 
                 try {
-                    if (opt != 1) {
+                    if (opt == 1) {
+                        LibDBMember.getInstance().searchTB(currentUser, idMember);
+                    } else {
                         List<Member> members = LibDBMember.getInstance().searchTB(currentUser, opt, fragString);
                         Set<Integer> idsocs = members.stream().map(Member::getIdMember).collect(Collectors.toSet());
                         members.stream().sorted(Member::compareTo).forEach(System.out::println);
@@ -227,18 +217,16 @@ final class LoanMenu {
                                     System.out.println("  Operación cancelada, volviendo al menú del gestor...");
                                     return new int[]{nLoan, idLoan};
                                 } else if (!idsocs.add(ID)) {
-                                    idSoc = ID;
+                                    idMember = ID;
                                     isValid = false;
                                 } else {
                                     System.err.println("El ID proporcionado no se encuentra en la lista");
                                 }
                             } catch (InputMismatchException ime) {
-                                System.err.println("Entrada no válida");
+                                System.err.println("  Entrada no válida");
                             }
                             scan.nextLine();
                         } while (isValid);
-                    } else {
-                        LibDBMember.getInstance().searchTB(currentUser, idSoc);
                     }
                     isPossible = true;
                 } catch (RuntimeException re) {
@@ -250,40 +238,27 @@ final class LoanMenu {
             do {
                 System.out.println("Introduce libro a ser prestado - ");
                 do {
-                    System.out.println("\nSelecciona criterio de búsqueda:\n" + searchBookMenu);
-                    try {
-                        opt = scan.nextInt();
-                    } catch (InputMismatchException ime) {
-                        opt = -1;
+                    System.out.println("\n  Selecciona criterio de búsqueda:\n" + searchBookMenu);
+
+                    opt = checkOptionInput(scan);
+
+                    Object o = checkCaseAdd(scan, opt, searchBookVar);
+                    if (o instanceof String) {
+                        fragString = (String) o;
+                        isValid = true;
+                    } else if (o instanceof Integer) {
+                        idBook = (Integer) o;
+                        isValid = true;
+                    } else if (o instanceof Double) {
+                        return new int[]{nLoan, idLoan};
                     }
-                    scan.nextLine();
-                    switch (opt) {
-                        case 1:
-                            System.out.println("Introduce " + searchBookVar[opt - 1] + " -");
-                            try {
-                                idLib = scan.nextInt();
-                                isValid = true;
-                            } catch (InputMismatchException ime) {
-                                System.err.println("  Entrada no válida");
-                            }
-                            scan.nextLine();
-                            break;
-                        case 2:
-                        case 3:
-                            System.out.println("Introduce " + searchBookVar[opt - 1] + " -");
-                            fragString = scan.nextLine();
-                            isValid = true;
-                            break;
-                        case 0:
-                            System.out.println("  Volviendo al menú del gestor...");
-                            return new int[]{nLoan, idLoan};
-                        default:
-                            System.err.println("  Entrada no válida");
-                    }
+
                 } while (!isValid);
 
                 try {
-                    if (opt != 1) {
+                    if (opt == 1) {
+                        LibDBBook.getInstance().searchTB(currentUser, idBook);
+                    } else {
                         List<Book> books = LibDBBook.getInstance().searchTB(currentUser, opt, fragString);
                         Set<Integer> idlibs = books.stream().map(Book::getIdBook).collect(Collectors.toSet());
                         books.stream().sorted(Book::compareTo).forEach(System.out::println);
@@ -296,18 +271,16 @@ final class LoanMenu {
                                     System.out.println("  Operación cancelada, volviendo al menú del gestor...");
                                     return new int[]{nLoan, idLoan};
                                 } else if (!idlibs.add(ID)) {
-                                    idLib = ID;
+                                    idBook = ID;
                                     isValid = false;
                                 } else {
                                     System.err.println("El ID proporcionado no se encuentra en la lista");
                                 }
                             } catch (InputMismatchException ime) {
-                                System.err.println("Entrada no válida");
+                                System.err.println("  Entrada no válida");
                             }
                             scan.nextLine();
                         } while (isValid);
-                    } else {
-                        LibDBBook.getInstance().searchTB(currentUser, idLib);
                     }
                     isPossible = true;
                 } catch (RuntimeException re) {
@@ -317,8 +290,9 @@ final class LoanMenu {
             } while (!isPossible);
 
             try {
-                LibDBLoan.getInstance().addTB(currentUser, new Loan(nLoan + 1, idSoc, idLib));
-                ++nLoan;
+                LibDBLoan.getInstance().addTB(currentUser, new Loan(idLoan + 1, idMember, idBook));
+                nLoan++;
+                idLoan++;
             } catch (RuntimeException re) {
                 System.err.println("  Error durante el registro en la base de datos: " + re.getMessage());
             }
@@ -497,7 +471,7 @@ final class LoanMenu {
                                 System.err.println("El ID proporcionado no se encuentra en la lista");
                             }
                         } catch (InputMismatchException ime) {
-                            System.err.println("Entrada no válida");
+                            System.err.println("  Entrada no válida");
                         }
                         scan.nextLine();
                     } while (isValid);
@@ -528,13 +502,8 @@ final class LoanMenu {
             case 1:
             case 2:
             case 3:
-                System.out.println("Introduce " + searchVar[opt - 1] + " -");
-                try {
-                    obj = scan.nextInt();
-                } catch (InputMismatchException ime) {
-                    System.err.println("  Entrada no válida");
-                }
-                scan.nextLine();
+                System.out.printf("Introduce %s -\n", searchVar[opt - 1]);
+                obj = checkOptionInput(scan, "  Entrada no válida");
                 break;
             case 4:
                 boolean isDone = false;
@@ -560,4 +529,36 @@ final class LoanMenu {
         return obj;
     }
 
+    /**
+     * Método con la selección para
+     * el criterio de búsqueda en las tablas de datos adicionales
+     *
+     * @param scan Entrada de datos por teclado
+     * @param opt  Índice del criterio de búsqueda
+     * @param listVar Lista de nombres de los campos en la tabla
+     * @return Resultado de la lectura de opt
+     */
+    private Object checkCaseAdd(Scanner scan, int opt, String[] listVar) {
+        Object obj = null;
+
+        switch (opt) {
+            case 1:
+                System.out.printf("Introduce %s -\n", listVar[opt - 1]);
+                obj = checkOptionInput(scan, "  Entrada no válida");
+                break;
+            case 2:
+            case 3:
+                System.out.printf("Introduce %s -\n", listVar[opt - 1]);
+                obj = scan.nextLine();
+                break;
+            case 0:
+                System.out.println("  Volviendo al menú del gestor...");
+                obj = 0.;
+                break;
+            default:
+                System.err.println("  Entrada no válida");
+        }
+
+        return obj;
+    }
 }

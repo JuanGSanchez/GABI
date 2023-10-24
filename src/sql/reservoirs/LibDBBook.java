@@ -27,45 +27,40 @@ public final class LibDBBook implements LibDAO<Book> {
      */
     private static final LibDBBook instance = new LibDBBook();
     /**
-     * URL de la base de datos utilizada por este código
-     */
-    private final String url;
-    /**
      * Lista de propiedades del programa
      */
-    private final Properties configProps;
+    private final Properties configProps = Utils.readProperties();
+    /**
+     * URL de la base de datos utilizada por este código
+     */
+    private final String url = configProps.getProperty("database-url") + "/" +
+                               configProps.getProperty("database");
     /**
      * Ruta completa de la tabla de datos manejada en esta clase
      */
-    private final String tableName;
+    private final String tableName = configProps.getProperty("database-name") + "." +
+                                     configProps.getProperty("database-table-1");
     /**
      * Campo 1 de la tabla de datos;
      */
-    private final String field1;
+    private final String field1 = configProps.getProperty("database-table-1-field-1");
     /**
      * Campo 2 de la tabla de datos;
      */
-    private final String field2;
+    private final String field2 = configProps.getProperty("database-table-1-field-2");
     /**
      * Campo 3 de la tabla de datos;
      */
-    private final String field3;
+    private final String field3 = configProps.getProperty("database-table-1-field-3");
     /**
      * Campo 4 de la tabla de datos;
      */
-    private final String field4;
+    private final String field4 = configProps.getProperty("database-table-1-field-4");
 
     /**
      * Constructor privado de la clase
      */
     private LibDBBook() {
-        configProps = Utils.readProperties();
-        url = configProps.getProperty("database-url") + "/" + configProps.getProperty("database");
-        tableName = configProps.getProperty("database-name") + "." + configProps.getProperty("database-table-1");
-        field1 = configProps.getProperty("database-table-1-field-1");
-        field2 = configProps.getProperty("database-table-1-field-2");
-        field3 = configProps.getProperty("database-table-1-field-3");
-        field4 = configProps.getProperty("database-table-1-field-4");
     }
 
     /**
@@ -289,7 +284,7 @@ public final class LibDBBook implements LibDAO<Book> {
 
             pStmt2.setInt(1, ID);
             if (pStmt2.executeUpdate() == 1) {
-                System.out.println("Entrada de libro eliminada con éxito.");
+                System.out.println("  entrada de libro eliminada con éxito.");
                 ResultSet rs3 = stmt3.executeQuery(query3);
                 if (rs3.next()) {
                     int maxIDLib = rs3.getInt(1);

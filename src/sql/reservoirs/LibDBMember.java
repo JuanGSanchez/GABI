@@ -28,40 +28,36 @@ public final class LibDBMember implements LibDAO<Member> {
      */
     private static final LibDBMember instance = new LibDBMember();
     /**
-     * URL de la base de datos utilizada por este código
-     */
-    private final String url;
-    /**
      * Lista de propiedades del programa
      */
-    private final Properties configProps;
+    private final Properties configProps = Utils.readProperties();
+    /**
+     * URL de la base de datos utilizada por este código
+     */
+    private final String url = configProps.getProperty("database-url") + "/" +
+                               configProps.getProperty("database");
     /**
      * Ruta completa de la tabla de datos manejada en esta clase
      */
-    private final String tableName;
+    private final String tableName = configProps.getProperty("database-name") + "." +
+                                     configProps.getProperty("database-table-2");
     /**
      * Campo 1 de la tabla de datos;
      */
-    private final String field1;
+    private final String field1 = configProps.getProperty("database-table-2-field-1");
     /**
      * Campo 2 de la tabla de datos;
      */
-    private final String field2;
+    private final String field2 = configProps.getProperty("database-table-2-field-2");
     /**
      * Campo 3 de la tabla de datos;
      */
-    private final String field3;
+    private final String field3 = configProps.getProperty("database-table-2-field-3");
 
     /**
      * Constructor privado de la clase
      */
     private LibDBMember() {
-        configProps = Utils.readProperties();
-        url = configProps.getProperty("database-url") + "/" + configProps.getProperty("database");
-        tableName = configProps.getProperty("database-name") + "." + configProps.getProperty("database-table-2");
-        field1 = configProps.getProperty("database-table-2-field-1");
-        field2 = configProps.getProperty("database-table-2-field-2");
-        field3 = configProps.getProperty("database-table-2-field-3");
     }
 
     /**
@@ -322,7 +318,7 @@ public final class LibDBMember implements LibDAO<Member> {
 
             pStmt2.setInt(1, ID);
             if (pStmt2.executeUpdate() == 1) {
-                System.out.println("Entrada de socio eliminada con éxito.");
+                System.out.println("  entrada de socio eliminada con éxito.");
                 ResultSet rs3 = stmt3.executeQuery(query3);
                 if (rs3.next()) {
                     int maxIDLib = rs3.getInt(1);

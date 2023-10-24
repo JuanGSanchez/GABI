@@ -326,7 +326,7 @@ final class MemberMenu {
                                 System.err.println("El ID proporcionado no se encuentra en la lista");
                             }
                         } catch (InputMismatchException ime) {
-                            System.err.println("Entrada no válida");
+                            System.err.println("  Entrada no válida");
                         }
                         scan.nextLine();
                     } while (isValid);
@@ -355,17 +355,12 @@ final class MemberMenu {
 
         switch (opt) {
             case 1:
-                System.out.println("Introduce " + searchVar[opt - 1] + " -");
-                try {
-                    obj = scan.nextInt();
-                } catch (InputMismatchException ime) {
-                    System.err.println("  Entrada no válida");
-                }
-                scan.nextLine();
+                System.out.printf("Introduce %s -\n", searchVar[opt - 1]);
+                obj = checkOptionInput(scan, "  Entrada no válida");
                 break;
             case 2:
             case 3:
-                System.out.println("Introduce " + searchVar[opt - 1] + " -");
+                System.out.printf("Introduce %s -\n", searchVar[opt - 1]);
                 obj = scan.nextLine();
                 break;
             case 0:

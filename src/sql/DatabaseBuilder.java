@@ -118,7 +118,7 @@ public class DatabaseBuilder {
 
             System.out.println("  Montaje de la base de datos finalizado con éxito");
         } catch (SQLException sqle) {
-            System.out.println("  Error montando la base de datos: " + sqle.getMessage());
+            System.err.println("  Error montando la base de datos: " + sqle.getMessage());
         }
     }
 

@@ -31,7 +31,7 @@ public final class LibMenu {
     /**
      * Lista de propiedades comunes del programa
      */
-    private static final Properties configProps;
+    private static final Properties configProps = Utils.readProperties();
     /**
      * Variable para almacenar aparte el texto del menú principal,
      * versión para users
@@ -79,10 +79,6 @@ public final class LibMenu {
      * Máxima ID de préstamos dentro de la base de datos
      */
     private static int idLoans;
-
-    static {
-        configProps = Utils.readProperties();
-    }
 
     /**
      * Constructor privado de la clase para evitar instancias
@@ -221,7 +217,6 @@ public final class LibMenu {
 
             System.out.println(currentUser.getName().equals(configProps.getProperty("database-name")) ? mainMenu2 : mainMenu1);
 
-
             optionMenu = Utils.checkOptionInput(scanMenu);
 
             switch (optionMenu) {
@@ -245,7 +240,7 @@ public final class LibMenu {
                         UserMenu uMenu = new UserMenu(currentUser, configProps);
                         uMenu.selectionMenu(scanMenu);
                     } else {
-                        System.err.println("Entrada no válida");
+                        System.err.println("  Entrada no válida");
                     }
                     break;
                 case 0:
@@ -253,7 +248,7 @@ public final class LibMenu {
                     checkMenu = false;
                     break;
                 default:
-                    System.err.println("Entrada no válida");
+                    System.err.println("  Entrada no válida");
             }
         } while (checkMenu);
     }
