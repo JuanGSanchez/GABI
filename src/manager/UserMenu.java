@@ -51,6 +51,10 @@ final class UserMenu {
      * Lista de propiedades comunes del programa
      */
     private final Properties configProps;
+    /**
+     * Recurso para la localización del texto del programa
+     */
+    private final ResourceBundle rb;
 
     /**
      * Constructor de la clase, restringido al paquete
@@ -59,9 +63,10 @@ final class UserMenu {
      *                    de acceso a la base de datos
      * @param configProps Lista de propiedades comunes del programa
      */
-    UserMenu(User currentUser, Properties configProps) {
+    UserMenu(User currentUser, Properties configProps, ResourceBundle rb) {
         this.currentUser = currentUser;
         this.configProps = configProps;
+        this.rb = rb;
     }
 
     /**
@@ -77,7 +82,7 @@ final class UserMenu {
         int idUser = 0;
         int[] count;
 
-        System.out.println("\n\tGESTOR USUARIOS");
+        System.out.println("\n\t" + String.format(rb.getString("program-intro-menu-seed"), rb.getString("program-properties-field-4-plural")).toUpperCase());
 
         count = UserDerby.getInstance().countUser(currentUser);
         if (count != null) {
@@ -122,11 +127,11 @@ final class UserMenu {
                     }
                     break;
                 case 0:
-                    System.out.println("Volviendo al menú principal...");
+                    System.out.printf("  %s...\n", rb.getString("program-return-3"));
                     checkMenu = false;
                     break;
                 default:
-                    System.err.println("Entrada no válida");
+                    System.err.printf("  %s\n", rb.getString("program-error-entry"));
             }
         } while (checkMenu);
 
@@ -150,13 +155,15 @@ final class UserMenu {
 
             name = checkString(scan, 4, configProps.getProperty("database-table-4-field-2-maxchar"));
             if (name == null) {
-                System.out.println("  Operación cancelada, volviendo al menú del gestor...");
+                System.out.printf("  %s, %s...\n", rb.getString("program-return-2"),
+                        rb.getString("program-return-1").toLowerCase());
                 return new int[]{nUser, idUser};
             }
 
             password = checkString(scan, 5, configProps.getProperty("database-table-4-field-2-maxchar"));
             if (password == null) {
-                System.out.println("  Operación cancelada, volviendo al menú del gestor...");
+                System.out.printf("  %s, %s...\n", rb.getString("program-return-2"),
+                        rb.getString("program-return-1").toLowerCase());
                 return new int[]{nUser, idUser};
             }
 
@@ -168,7 +175,7 @@ final class UserMenu {
                 System.err.println("  Error durante el registro en la base de datos: " + re.getMessage());
             }
 
-            System.out.println("\nIntroduce 1 para repetir operación - ");
+            System.out.printf("\n%s - \n", rb.getString("program-general-repeat"));
             repeat = scan.nextLine().equals("1");
         } while (repeat);
 
@@ -206,10 +213,10 @@ final class UserMenu {
                     isValid = true;
                     break;
                 case 0:
-                    System.out.println("  Volviendo al menú del gestor...");
+                    System.out.printf("  %s...\n", rb.getString("program-return-1"));
                     return;
                 default:
-                    System.err.println("  Entrada no válida");
+                    System.err.printf("  %s\n", rb.getString("program-error-entry"));
             }
         } while (!isValid);
     }
@@ -260,7 +267,7 @@ final class UserMenu {
                 System.err.println(re.getMessage());
             }
 
-            System.out.println("\nIntroduce 1 para repetir operación - ");
+            System.out.printf("\n%s - \n", rb.getString("program-general-repeat"));
             repeat = scan.nextLine().equals("1");
         } while (repeat);
     }
@@ -310,12 +317,14 @@ final class UserMenu {
                     Set<Integer> idusers = users.stream().map(User::getIdUser).collect(Collectors.toSet());
                     users.stream().sorted(User::compareTo).forEach(System.out::println);
                     do {
-                        System.out.println("Introduce ID del usuario a eliminar de la lista anterior\n" +
-                                           "(-1 para cancelar operación) -");
+                        System.out.printf(rb.getString("program-general-enter") + "\n(%s) -\n",
+                                rb.getString("program-properties-field-4-singular").toLowerCase(),
+                                rb.getString("program-general-cancel"));
                         try {
                             ID = scan.nextInt();
                             if (ID == -1) {
-                                System.out.println("  Operación cancelada, volviendo al menú del gestor...");
+                                System.out.printf("  %s, %s...\n", rb.getString("program-return-2"),
+                                        rb.getString("program-return-1").toLowerCase());
                                 return new int[]{nUser, idUser};
                             } else if (!idusers.add(ID)) {
                                 idUser = UserDerby.getInstance().deleteUser(currentUser, ID);
@@ -325,7 +334,7 @@ final class UserMenu {
                                 System.err.println("El ID proporcionado no se encuentra en la lista");
                             }
                         } catch (InputMismatchException ime) {
-                            System.err.println("  Entrada no válida");
+                            System.err.printf("  %s\n", rb.getString("program-error-entry"));
                         }
                         scan.nextLine();
                     } while (isValid);
@@ -334,7 +343,7 @@ final class UserMenu {
                 System.err.println(re.getMessage());
             }
 
-            System.out.println("\nIntroduce 1 para repetir operación - ");
+            System.out.printf("\n%s - \n", rb.getString("program-general-repeat"));
             repeat = scan.nextLine().equals("1");
         } while (repeat);
 
@@ -355,19 +364,19 @@ final class UserMenu {
 
         switch (opt) {
             case 1:
-                System.out.printf("Introduce %s -\n", searchVar[opt - 1]);
-                obj = checkOptionInput(scan, "  Entrada no válida");
+                System.out.printf("%s %s -\n", rb.getString("program-general-intro"), searchVar[opt - 1]);
+                obj = checkOptionInput(scan, String.format("  %s\n", rb.getString("program-error-entry")));
                 break;
             case 2:
-                System.out.printf("Introduce %s -\n", searchVar[opt - 1]);
+                System.out.printf("%s %s -\n", rb.getString("program-general-intro"), searchVar[opt - 1]);
                 obj = scan.nextLine();
                 break;
             case 0:
-                System.out.println("  Volviendo al menú del gestor...");
+                System.out.printf("  %s...\n", rb.getString("program-return-1"));
                 obj = 0.;
                 break;
             default:
-                System.err.println("  Entrada no válida");
+                System.err.printf("  %s\n", rb.getString("program-error-entry"));
         }
 
         return obj;

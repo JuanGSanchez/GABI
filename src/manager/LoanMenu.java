@@ -84,6 +84,10 @@ final class LoanMenu {
      * Lista de propiedades comunes del programa
      */
     private final Properties configProps;
+    /**
+     * Recurso para la localización del texto del programa
+     */
+    private final ResourceBundle rb;
 
     /**
      * Constructor de la clase, restringido al paquete
@@ -92,9 +96,10 @@ final class LoanMenu {
      *                    de acceso a la base de datos
      * @param configProps Lista de propiedades comunes del programa
      */
-    LoanMenu(User currentUser, Properties configProps) {
+    LoanMenu(User currentUser, Properties configProps, ResourceBundle rb) {
         this.currentUser = currentUser;
         this.configProps = configProps;
+        this.rb = rb;
     }
 
     /**
@@ -111,7 +116,7 @@ final class LoanMenu {
         int optionMenu;
         int[] count;
 
-        System.out.println("\n\tGESTOR PRESTAMOS");
+        System.out.println("\n\t" + String.format(rb.getString("program-intro-menu-seed"), rb.getString("program-properties-field-3-plural")).toUpperCase());
         do {
             System.out.println(mainMenu);
 
@@ -148,11 +153,11 @@ final class LoanMenu {
                     }
                     break;
                 case 0:
-                    System.out.println("Volviendo al menú principal...");
+                    System.out.printf("  %s...\n", rb.getString("program-return-3"));
                     checkMenu = false;
                     break;
                 default:
-                    System.err.println("  Entrada no válida");
+                    System.err.printf("  %s\n", rb.getString("program-error-entry"));
             }
         } while (checkMenu);
 
@@ -209,12 +214,14 @@ final class LoanMenu {
                         Set<Integer> idsocs = members.stream().map(Member::getIdMember).collect(Collectors.toSet());
                         members.stream().sorted(Member::compareTo).forEach(System.out::println);
                         do {
-                            System.out.println("Introduce ID del socio de la lista anterior\n" +
-                                               "(-1 para cancelar operación):");
+                            System.out.printf(rb.getString("program-general-enter") + "\n(%s) -\n",
+                                    rb.getString("program-properties-field-2-singular").toLowerCase(),
+                                    rb.getString("program-general-cancel"));
                             try {
                                 ID = scan.nextInt();
                                 if (ID == -1) {
-                                    System.out.println("  Operación cancelada, volviendo al menú del gestor...");
+                                    System.out.printf("  %s, %s...\n", rb.getString("program-return-2"),
+                                            rb.getString("program-return-1").toLowerCase());
                                     return new int[]{nLoan, idLoan};
                                 } else if (!idsocs.add(ID)) {
                                     idMember = ID;
@@ -223,7 +230,7 @@ final class LoanMenu {
                                     System.err.println("El ID proporcionado no se encuentra en la lista");
                                 }
                             } catch (InputMismatchException ime) {
-                                System.err.println("  Entrada no válida");
+                                System.err.printf("  %s\n", rb.getString("program-error-entry"));
                             }
                             scan.nextLine();
                         } while (isValid);
@@ -263,12 +270,14 @@ final class LoanMenu {
                         Set<Integer> idlibs = books.stream().map(Book::getIdBook).collect(Collectors.toSet());
                         books.stream().sorted(Book::compareTo).forEach(System.out::println);
                         do {
-                            System.out.println("Introduce ID del libro de la lista anterior\n" +
-                                               "(-1 para cancelar operación):");
+                            System.out.printf(rb.getString("program-general-enter") + "\n(%s) -\n",
+                                    rb.getString("program-properties-field-1-singular").toLowerCase(),
+                                    rb.getString("program-general-cancel"));
                             try {
                                 ID = scan.nextInt();
                                 if (ID == -1) {
-                                    System.out.println("  Operación cancelada, volviendo al menú del gestor...");
+                                    System.out.printf("  %s, %s...\n", rb.getString("program-return-2"),
+                                            rb.getString("program-return-1").toLowerCase());
                                     return new int[]{nLoan, idLoan};
                                 } else if (!idlibs.add(ID)) {
                                     idBook = ID;
@@ -277,7 +286,7 @@ final class LoanMenu {
                                     System.err.println("El ID proporcionado no se encuentra en la lista");
                                 }
                             } catch (InputMismatchException ime) {
-                                System.err.println("  Entrada no válida");
+                                System.err.printf("  %s\n", rb.getString("program-error-entry"));
                             }
                             scan.nextLine();
                         } while (isValid);
@@ -297,7 +306,7 @@ final class LoanMenu {
                 System.err.println("  Error durante el registro en la base de datos: " + re.getMessage());
             }
 
-            System.out.println("\nIntroduce 1 para repetir operación - ");
+            System.out.printf("\n%s - \n", rb.getString("program-general-repeat"));
             repeat = scan.nextLine().equals("1");
         } while (repeat);
 
@@ -347,10 +356,10 @@ final class LoanMenu {
                     isValid = true;
                     break;
                 case 0:
-                    System.out.println("  Volviendo al menú del gestor...");
+                    System.out.printf("  %s...\n", rb.getString("program-return-1"));
                     return;
                 default:
-                    System.err.println("  Entrada no válida");
+                    System.err.printf("  %s\n", rb.getString("program-error-entry"));
             }
         } while (!isValid);
     }
@@ -401,7 +410,7 @@ final class LoanMenu {
                 System.err.println(re.getMessage());
             }
 
-            System.out.println("\nIntroduce 1 para repetir operación - ");
+            System.out.printf("\n%s - \n", rb.getString("program-general-repeat"));
             repeat = scan.nextLine().equals("1");
         } while (repeat);
     }
@@ -456,12 +465,14 @@ final class LoanMenu {
                     Set<Integer> idloans = loans.stream().map(Loan::getIdLoan).collect(Collectors.toSet());
                     loans.stream().sorted(Loan::compareTo).forEach(System.out::println);
                     do {
-                        System.out.println("Introduce ID del préstamo a eliminar de la lista anterior\n" +
-                                           "(-1 para cancelar operación) -");
+                        System.out.printf(rb.getString("program-general-enter") + "\n(%s) -\n",
+                                rb.getString("program-properties-field-3-singular").toLowerCase(),
+                                rb.getString("program-general-cancel"));
                         try {
                             ID = scan.nextInt();
                             if (ID == -1) {
-                                System.out.println("  Operación cancelada, volviendo al menú del gestor...");
+                                System.out.printf("  %s, %s...\n", rb.getString("program-return-2"),
+                                        rb.getString("program-return-1").toLowerCase());
                                 return new int[]{nLoan, idLoan};
                             } else if (!idloans.add(ID)) {
                                 idLoan = LibDBBook.getInstance().deleteTB(currentUser, ID);
@@ -471,7 +482,7 @@ final class LoanMenu {
                                 System.err.println("El ID proporcionado no se encuentra en la lista");
                             }
                         } catch (InputMismatchException ime) {
-                            System.err.println("  Entrada no válida");
+                            System.err.printf("  %s\n", rb.getString("program-error-entry"));
                         }
                         scan.nextLine();
                     } while (isValid);
@@ -480,7 +491,7 @@ final class LoanMenu {
                 System.err.println(re.getMessage());
             }
 
-            System.out.println("\nIntroduce 1 para repetir operación - ");
+            System.out.printf("\n%s - \n", rb.getString("program-general-repeat"));
             repeat = scan.nextLine().equals("1");
         } while (repeat);
 
@@ -502,13 +513,14 @@ final class LoanMenu {
             case 1:
             case 2:
             case 3:
-                System.out.printf("Introduce %s -\n", searchVar[opt - 1]);
-                obj = checkOptionInput(scan, "  Entrada no válida");
+                System.out.printf("%s %s -\n", rb.getString("program-general-intro"), searchVar[opt - 1]);
+                obj = checkOptionInput(scan, String.format("  %s\n", rb.getString("program-error-entry")));
                 break;
             case 4:
                 boolean isDone = false;
                 do {
-                    System.out.println("Introduce " + searchVar[opt - 1] + " (" + configProps.getProperty("database-table-3-field-4-format-text") + ") -");
+                    System.out.printf("%s %s (%s) -", rb.getString("program-general-intro"), searchVar[opt - 1],
+                            configProps.getProperty("database-table-3-field-4-format-text"));
                     obj = scan.nextLine();
                     try {
                         obj = LocalDate.parse((String) obj, DateTimeFormatter.ofPattern(configProps.getProperty("database-table-3-field-4-format-code")));
@@ -519,11 +531,11 @@ final class LoanMenu {
                 } while (!isDone);
                 break;
             case 0:
-                System.out.println("  Volviendo al menú del gestor...");
+                System.out.printf("  %s...\n", rb.getString("program-return-1"));
                 obj = 0.;
                 break;
             default:
-                System.err.println("  Entrada no válida");
+                System.err.printf("  %s\n", rb.getString("program-error-entry"));
         }
 
         return obj;
@@ -533,8 +545,8 @@ final class LoanMenu {
      * Método con la selección para
      * el criterio de búsqueda en las tablas de datos adicionales
      *
-     * @param scan Entrada de datos por teclado
-     * @param opt  Índice del criterio de búsqueda
+     * @param scan    Entrada de datos por teclado
+     * @param opt     Índice del criterio de búsqueda
      * @param listVar Lista de nombres de los campos en la tabla
      * @return Resultado de la lectura de opt
      */
@@ -543,20 +555,20 @@ final class LoanMenu {
 
         switch (opt) {
             case 1:
-                System.out.printf("Introduce %s -\n", listVar[opt - 1]);
-                obj = checkOptionInput(scan, "  Entrada no válida");
+                System.out.printf("%s %s -\n", rb.getString("program-general-intro"), listVar[opt - 1]);
+                obj = checkOptionInput(scan, String.format("  %s\n", rb.getString("program-error-entry")));
                 break;
             case 2:
             case 3:
-                System.out.printf("Introduce %s -\n", listVar[opt - 1]);
+                System.out.printf("%s %s -\n", rb.getString("program-general-intro"), listVar[opt - 1]);
                 obj = scan.nextLine();
                 break;
             case 0:
-                System.out.println("  Volviendo al menú del gestor...");
+                System.out.printf("  %s...\n", rb.getString("program-return-1"));
                 obj = 0.;
                 break;
             default:
-                System.err.println("  Entrada no válida");
+                System.err.printf("  %s\n", rb.getString("program-error-entry"));
         }
 
         return obj;

@@ -14,6 +14,7 @@ import utils.Utils;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Properties;
+import java.util.ResourceBundle;
 import java.util.Scanner;
 
 /**
@@ -33,28 +34,33 @@ public final class LibMenu {
      */
     private static final Properties configProps = Utils.readProperties();
     /**
+     * Recurso para la localización del texto del programa
+     */
+    private static final ResourceBundle rb = Utils.readLanguage(configProps.getProperty("program-lang", "es"),
+            configProps.getProperty("program-country", "ES"));
+    /**
      * Variable para almacenar aparte el texto del menú principal,
      * versión para users
      */
-    private static final String mainMenu1 = """
-                            
-            Seleccione una de las opciones:
-              (1) Gestor de Libros
-              (2) Gestor de Socios
-              (3) Gestor de Préstamos
-              (0) Salir del sistema""";
+    private static final String mainMenu1 = String.format("\n%s:\n  (1) " + rb.getString("program-intro-menu-seed") +
+                                                          "\n  (2) " + rb.getString("program-intro-menu-seed") +
+                                                          "\n  (3) " + rb.getString("program-intro-menu-seed") +
+                                                          "\n  (0) %s",
+            rb.getString("program-intro-menu"), rb.getString("program-properties-field-1-plural"),
+            rb.getString("program-properties-field-2-plural"), rb.getString("program-properties-field-3-plural"),
+            rb.getString("program-intro-menu-exit"));
     /**
      * Variable para almacenar aparte el texto del menú principal,
      * versión para el administrador del programa
      */
-    private static final String mainMenu2 = """
-                            
-            Seleccione una de las opciones:
-              (1) Gestor de Libros
-              (2) Gestor de Socios
-              (3) Gestor de Préstamos
-              (4) Gestor de Usuarios
-              (0) Salir del sistema""";
+    private static final String mainMenu2 = String.format("\n%s:\n  (1) " + rb.getString("program-intro-menu-seed") +
+                                                          "\n  (2) " + rb.getString("program-intro-menu-seed") +
+                                                          "\n  (3) " + rb.getString("program-intro-menu-seed") +
+                                                          "\n  (4) " + rb.getString("program-intro-menu-seed") +
+                                                          "\n  (0) %s",
+            rb.getString("program-intro-menu"), rb.getString("program-properties-field-1-plural"),
+            rb.getString("program-properties-field-2-plural"), rb.getString("program-properties-field-3-plural"),
+            rb.getString("program-properties-field-4-plural"), rb.getString("program-intro-menu-exit"));
     /**
      * Número de books guardados dentro de la base de datos
      */
@@ -99,14 +105,14 @@ public final class LibMenu {
             DatabaseBuilder.sqlExecuter(configProps);
             configProps.setProperty("database-isbuilt", "true");
             try (FileOutputStream fos = new FileOutputStream("src/utils/configuration.properties")) {
-                configProps.store(fos, "Propiedades del programa GABI");
+                configProps.store(fos, rb.getString("program-properties"));
             } catch (IOException ioe) {
-                System.err.println("  Error guardando las propiedades actualizadas: " + ioe.getMessage());
+                System.err.printf("  %s: %s\n", rb.getString("program-error-properties"), ioe.getMessage());
             }
         }
 
         do {
-            System.out.println("\t\t|- G.A.B.I -|\n(Gestor Autónomo de Biblioteca Interactivo)");
+            System.out.printf("\t\t|- G.A.B.I -|\n%s\n", rb.getString("program-name"));
 
             if (args.length != 0) {
                 if (args.length == 2) {
@@ -114,10 +120,10 @@ public final class LibMenu {
                         UserDerby.getInstance().tryUser(args[0], args[1].toCharArray());
                         currentUser = new User(args[0], args[1]);
                     } catch (RuntimeException re) {
-                        System.err.println("\nError en el acceso a la base de datos: " + re.getMessage() + "\n");
+                        System.err.printf("\n  %s: %s\n\n", rb.getString("program-error-intro"), re.getMessage());
                     }
                 } else {
-                    System.err.println("  Error en la entrada de argumentos al programa, número incorrecto de parámetros");
+                    System.err.printf("  %s\n", rb.getString("program-error-args"));
                 }
                 args = new String[]{};
             }
@@ -125,16 +131,16 @@ public final class LibMenu {
             if (currentUser == null) {
                 currentUser = acessBlock();
                 if (currentUser == null) {
-                    System.out.println("\nSaliendo...");
+                    System.out.printf("\n%s...\n", rb.getString("program-exit-2"));
                     System.exit(0);
                 }
             }
 
             selectionBlock(currentUser);
 
-            System.out.print("\nIntroduce 1 para cambiar de usuario: ");
+            System.out.printf("\n%s: ", rb.getString("program-intro-log-3"));
             if (!scanMenu.nextLine().equals("1")) {
-                System.out.println("\nSaliendo...");
+                System.out.printf("\n%s...\n", rb.getString("program-exit-2"));
                 repeat = false;
             } else {
                 currentUser = null;
@@ -156,15 +162,15 @@ public final class LibMenu {
 
         do {
             try {
-                System.out.print("\nIntroduce nombre de usuario (-1 para salir): ");
+                System.out.printf("\n%s: ", rb.getString("program-intro-log-1"));
                 name = scanMenu.nextLine();
                 if (name.equals("-1")) {
                     return null;
                 }
 //                Console console = System.console();
-//                char[] password = console.readPassword("\nIntroduce contraseña: ");
+//                char[] password = console.readPassword(String.format("\n%s: ", rb.getString("program-intro-password"));
 //                Arrays.fill(password, 'x');
-                System.out.print("\nIntroduce contraseña (-1 para salir): ");
+                System.out.printf("\n%s: ", rb.getString("program-intro-log-2"));
                 password = scanMenu.nextLine();
                 if (password.equals("-1")) {
                     return null;
@@ -172,9 +178,9 @@ public final class LibMenu {
                 UserDerby.getInstance().tryUser(name, password.toCharArray());
                 isUser = true;
 //            } catch (IllegalFormatException ife) {
-//                System.err.println("\nError en la lectura por consola\n");
+//                System.err.println("\n" + ife.getMessage() + "\n");
             } catch (RuntimeException re) {
-                System.err.println("\nError en el acceso a la base de datos: " + re.getMessage() + "\n");
+                System.err.printf("\n%s: %s\n\n", rb.getString("program-error-intro"), re.getMessage());
             }
         } while (!isUser);
 
@@ -193,9 +199,9 @@ public final class LibMenu {
         int optionMenu;
         int[] count;
 
-        BookMenu lMenu = new BookMenu(currentUser, configProps);
-        MemberMenu sMenu = new MemberMenu(currentUser, configProps);
-        LoanMenu pMenu = new LoanMenu(currentUser, configProps);
+        BookMenu lMenu = new BookMenu(currentUser, configProps, rb);
+        MemberMenu sMenu = new MemberMenu(currentUser, configProps, rb);
+        LoanMenu pMenu = new LoanMenu(currentUser, configProps, rb);
 
         do {
             count = LibDBBook.getInstance().countTB(currentUser);
@@ -213,7 +219,7 @@ public final class LibMenu {
                 nLoans = count[0];
                 idLoans = count[1];
             }
-            System.out.printf("\nHay %d libros, %d socios y %d préstamos registrados actualmente\n", nBooks, nMembers, nLoans);
+            System.out.printf("\n" + rb.getString("program-intro-showinfo") + "\n", nBooks, nMembers, nLoans);
 
             System.out.println(currentUser.getName().equals(configProps.getProperty("database-name")) ? mainMenu2 : mainMenu1);
 
@@ -237,18 +243,18 @@ public final class LibMenu {
                     break;
                 case 4:
                     if (currentUser.getName().equals(configProps.getProperty("database-name"))) {
-                        UserMenu uMenu = new UserMenu(currentUser, configProps);
+                        UserMenu uMenu = new UserMenu(currentUser, configProps, rb);
                         uMenu.selectionMenu(scanMenu);
                     } else {
-                        System.err.println("  Entrada no válida");
+                        System.err.printf("  %s\n", rb.getString("program-error-entry"));
                     }
                     break;
                 case 0:
-                    System.out.println("Saliendo del sistema...");
+                    System.out.printf("%s...\n", rb.getString("program-exit-1"));
                     checkMenu = false;
                     break;
                 default:
-                    System.err.println("  Entrada no válida");
+                    System.err.printf("  %s\n", rb.getString("program-error-entry"));
             }
         } while (checkMenu);
     }

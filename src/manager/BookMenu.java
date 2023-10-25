@@ -53,6 +53,10 @@ final class BookMenu {
      * Lista de propiedades comunes del programa
      */
     private final Properties configProps;
+    /**
+     * Recurso para la localización del texto del programa
+     */
+    private final ResourceBundle rb;
 
     /**
      * Constructor de la clase, restringido al paquete
@@ -61,9 +65,10 @@ final class BookMenu {
      *                    de acceso a la base de datos
      * @param configProps Lista de propiedades comunes del programa
      */
-    BookMenu(User currentUser, Properties configProps) {
+    BookMenu(User currentUser, Properties configProps, ResourceBundle rb) {
         this.currentUser = currentUser;
         this.configProps = configProps;
+        this.rb = rb;
     }
 
     /**
@@ -80,7 +85,7 @@ final class BookMenu {
         int optionMenu;
         int[] count;
 
-        System.out.println("\n\tGESTOR LIBROS");
+        System.out.println("\n\t" + String.format(rb.getString("program-intro-menu-seed"), rb.getString("program-properties-field-1-plural")).toUpperCase());
         do {
             System.out.println(mainMenu);
 
@@ -117,11 +122,11 @@ final class BookMenu {
                     }
                     break;
                 case 0:
-                    System.out.println("Volviendo al menú principal...");
+                    System.out.printf("  %s...\n", rb.getString("program-return-3"));
                     checkMenu = false;
                     break;
                 default:
-                    System.err.println("Entrada no válida");
+                    System.err.printf("  %s\n", rb.getString("program-error-entry"));
             }
         } while (checkMenu);
 
@@ -146,13 +151,15 @@ final class BookMenu {
 
             title = checkString(scan, 0, configProps.getProperty("database-table-1-field-2-maxchar"));
             if (title == null) {
-                System.out.println("  Operación cancelada, volviendo al menú del gestor...");
+                System.out.printf("  %s, %s...\n", rb.getString("program-return-2"),
+                        rb.getString("program-return-1").toLowerCase());
                 return new int[]{nBook, idBook};
             }
 
             author = checkString(scan, 1, configProps.getProperty("database-table-1-field-3-maxchar"));
             if (author == null) {
-                System.out.println("  Operación cancelada, volviendo al menú del gestor...");
+                System.out.printf("  %s, %s...\n", rb.getString("program-return-2"),
+                        rb.getString("program-return-1").toLowerCase());
                 return new int[]{nBook, idBook};
             }
 
@@ -164,7 +171,7 @@ final class BookMenu {
                 System.err.println("  Error durante el registro en la base de datos: " + re.getMessage());
             }
 
-            System.out.println("\nIntroduce 1 para repetir operación - ");
+            System.out.printf("\n%s - \n", rb.getString("program-general-repeat"));
             repeat = scan.nextLine().equals("1");
         } while (repeat);
 
@@ -208,10 +215,10 @@ final class BookMenu {
                     isValid = true;
                     break;
                 case 0:
-                    System.out.println("  Volviendo al menú del gestor...");
+                    System.out.printf("  %s...\n", rb.getString("program-return-1"));
                     return;
                 default:
-                    System.err.println("  Entrada no válida");
+                    System.err.printf("  %s\n", rb.getString("program-error-entry"));
             }
         } while (!isValid);
     }
@@ -262,7 +269,7 @@ final class BookMenu {
                 System.err.println(re.getMessage());
             }
 
-            System.out.println("\nIntroduce 1 para repetir operación - ");
+            System.out.printf("\n%s - \n", rb.getString("program-general-repeat"));
             repeat = scan.nextLine().equals("1");
         } while (repeat);
     }
@@ -312,12 +319,14 @@ final class BookMenu {
                     Set<Integer> idbooks = books.stream().map(Book::getIdBook).collect(Collectors.toSet());
                     books.stream().sorted(Book::compareTo).forEach(System.out::println);
                     do {
-                        System.out.println("Introduce ID del libro a eliminar de la lista anterior\n" +
-                                           "(-1 para cancelar operación) -");
+                        System.out.printf(rb.getString("program-general-enter") + "\n(%s) -\n",
+                                rb.getString("program-properties-field-1-singular"),
+                                rb.getString("program-general-cancel"));
                         try {
                             ID = scan.nextInt();
                             if (ID == -1) {
-                                System.out.println("  Operación cancelada, volviendo al menú del gestor...");
+                                System.out.printf("  %s, %s...\n", rb.getString("program-return-2"),
+                                        rb.getString("program-return-1").toLowerCase());
                                 return new int[]{nBook, idBook};
                             } else if (!idbooks.add(ID)) {
                                 idBook = LibDBBook.getInstance().deleteTB(currentUser, ID);
@@ -327,7 +336,7 @@ final class BookMenu {
                                 System.err.println("El ID proporcionado no se encuentra en la lista");
                             }
                         } catch (InputMismatchException ime) {
-                            System.err.println("  Entrada no válida");
+                            System.err.printf("  %s\n", rb.getString("program-error-entry"));
                         }
                         scan.nextLine();
                     } while (isValid);
@@ -336,7 +345,7 @@ final class BookMenu {
                 System.err.println(re.getMessage());
             }
 
-            System.out.println("\nIntroduce 1 para repetir operación - ");
+            System.out.printf("\n%s - \n", rb.getString("program-general-repeat"));
             repeat = scan.nextLine().equals("1");
         } while (repeat);
 
@@ -356,20 +365,20 @@ final class BookMenu {
 
         switch (opt) {
             case 1:
-                System.out.printf("Introduce %s -\n", searchVar[opt - 1]);
-                obj = checkOptionInput(scan, "  Entrada no válida");
+                System.out.printf("%s %s -\n", rb.getString("program-general-intro"), searchVar[opt - 1]);
+                obj = checkOptionInput(scan, String.format("  %s\n", rb.getString("program-error-entry")));
                 break;
             case 2:
             case 3:
-                System.out.printf("Introduce %s -\n", searchVar[opt - 1]);
+                System.out.printf("%s %s -\n", rb.getString("program-general-intro"), searchVar[opt - 1]);
                 obj = scan.nextLine();
                 break;
             case 0:
-                System.out.println("  Volviendo al menú del gestor...");
+                System.out.printf("  %s...\n", rb.getString("program-return-1"));
                 obj = 0.;
                 break;
             default:
-                System.err.println("  Entrada no válida");
+                System.err.printf("  %s\n", rb.getString("program-error-entry"));
         }
 
         return obj;

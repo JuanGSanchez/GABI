@@ -10,10 +10,7 @@ import tables.User;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.InputMismatchException;
-import java.util.List;
-import java.util.Properties;
-import java.util.Scanner;
+import java.util.*;
 
 /**
  * Clase de utilidades para la entrada de datos por consola
@@ -55,6 +52,21 @@ public final class Utils {
         }
 
         return configProps;
+    }
+
+    /**
+     * Método para la lectura del texto para el programa
+     * en el idioma seleccionado
+     *
+     * @param language Abreviatura del idioma
+     * @param country  Abreviatura del país
+     * @return Recurso con el texto del programa
+     * en el idioma seleccionado
+     */
+    public static ResourceBundle readLanguage(String language, String country) {
+        Locale locale = new Locale(language, country);
+        Locale.setDefault(locale);
+        return ResourceBundle.getBundle("statements", locale);
     }
 
     /**
