@@ -9,13 +9,14 @@ import sql.reservoirs.LibDBLoan;
 import sql.reservoirs.LibDBMember;
 import sql.users.UserDerby;
 import tables.User;
-import utils.Utils;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.Scanner;
+
+import static utils.Utils.*;
 
 /**
  * Clase del menú principal del programa de gestión Biblioteca
@@ -32,11 +33,11 @@ public final class LibMenu {
     /**
      * Lista de propiedades comunes del programa
      */
-    private static final Properties configProps = Utils.readProperties();
+    private static final Properties configProps = readProperties();
     /**
      * Recurso para la localización del texto del programa
      */
-    private static final ResourceBundle rb = Utils.readLanguage(configProps.getProperty("program-lang", "es"),
+    private static final ResourceBundle rb = readLanguage(configProps.getProperty("program-lang", "es"),
             configProps.getProperty("program-country", "ES"));
     /**
      * Variable para almacenar aparte el texto del menú principal,
@@ -223,7 +224,7 @@ public final class LibMenu {
 
             System.out.println(currentUser.getName().equals(configProps.getProperty("database-name")) ? mainMenu2 : mainMenu1);
 
-            optionMenu = Utils.checkOptionInput(scanMenu);
+            optionMenu = checkOptionInput(scanMenu);
 
             switch (optionMenu) {
                 case 1:

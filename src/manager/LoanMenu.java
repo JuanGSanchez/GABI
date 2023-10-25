@@ -16,8 +16,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static utils.Utils.checkOptionInput;
-import static utils.Utils.loadDataList;
+import static utils.Utils.*;
 
 /**
  * Clase del menú del gestor de libros en el programa
@@ -116,7 +115,8 @@ final class LoanMenu {
         int optionMenu;
         int[] count;
 
-        System.out.println("\n\t" + String.format(rb.getString("program-intro-menu-seed"), rb.getString("program-properties-field-3-plural")).toUpperCase());
+        System.out.println("\n\t" + String.format(rb.getString("program-intro-menu-seed"),
+                rb.getString("program-properties-field-3-plural")).toUpperCase());
         do {
             System.out.println(mainMenu);
 
@@ -130,7 +130,8 @@ final class LoanMenu {
                     break;
                 case 2:
                     if (nLoan == 0) {
-                        System.err.println("Error, no hay lista de préstamos disponible");
+                        System.err.printf(rb.getString("program-error-avail") + "\n",
+                                rb.getString("program-properties-field-3-plural").toLowerCase());
                     } else {
                         listLoans(scan);
                         System.out.println("Total de préstamos activos: " + nLoan);
@@ -138,14 +139,16 @@ final class LoanMenu {
                     break;
                 case 3:
                     if (nLoan == 0) {
-                        System.err.println("Error, no hay lista de préstamos disponible");
+                        System.err.printf(rb.getString("program-error-avail") + "\n",
+                                rb.getString("program-properties-field-3-plural").toLowerCase());
                     } else {
                         searchLoans(scan);
                     }
                     break;
                 case 4:
                     if (nLoan == 0) {
-                        System.err.println("Error, no hay lista de préstamos disponible");
+                        System.err.printf(rb.getString("program-error-avail") + "\n",
+                                rb.getString("program-properties-field-3-plural").toLowerCase());
                     } else {
                         count = deleteLoan(scan, nLoan, idLoan);
                         nLoan = count[0];
@@ -184,7 +187,8 @@ final class LoanMenu {
 
         do {
             isValid = false;
-            System.out.println("\n    Nuevo Préstamo\n");
+            System.out.printf("    " + rb.getString("program-general-add-2") + "\n\n",
+                    rb.getString("program-properties-field-3-singular"));
 
             do {
                 System.out.println("Introduce socio receptor del préstamo - ");
@@ -227,7 +231,7 @@ final class LoanMenu {
                                     idMember = ID;
                                     isValid = false;
                                 } else {
-                                    System.err.println("El ID proporcionado no se encuentra en la lista");
+                                    System.err.printf("  %s\n", rb.getString("program-error-id"));
                                 }
                             } catch (InputMismatchException ime) {
                                 System.err.printf("  %s\n", rb.getString("program-error-entry"));
@@ -283,7 +287,7 @@ final class LoanMenu {
                                     idBook = ID;
                                     isValid = false;
                                 } else {
-                                    System.err.println("El ID proporcionado no se encuentra en la lista");
+                                    System.err.printf("  %s\n", rb.getString("program-error-id"));
                                 }
                             } catch (InputMismatchException ime) {
                                 System.err.printf("  %s\n", rb.getString("program-error-entry"));
@@ -303,7 +307,7 @@ final class LoanMenu {
                 nLoan++;
                 idLoan++;
             } catch (RuntimeException re) {
-                System.err.println("  Error durante el registro en la base de datos: " + re.getMessage());
+                System.err.printf("  %s: %s\n", rb.getString("program-error-database"), re.getMessage());
             }
 
             System.out.printf("\n%s - \n", rb.getString("program-general-repeat"));
@@ -324,7 +328,8 @@ final class LoanMenu {
         int opt;
         List<Loan> arrayLoans;
 
-        System.out.println("    Listado de Préstamos");
+        System.out.printf("    " + rb.getString("program-general-list") + "\n",
+                rb.getString("program-properties-field-3-plural"));
         do {
             System.out.println("\nSelecciona ordenación de listado -\n" + searchMenu);
 
@@ -379,7 +384,8 @@ final class LoanMenu {
 
         do {
             isValid = false;
-            System.out.println("    Buscador de Préstamos");
+            System.out.printf("    " + rb.getString("program-general-search") + "\n",
+                    rb.getString("program-properties-field-3-plural"));
             do {
                 System.out.println("\nSelecciona criterio de búsqueda -\n" + searchMenu);
 
@@ -432,7 +438,8 @@ final class LoanMenu {
 
         do {
             isValid = false;
-            System.out.println("    Devolución de Préstamos");
+            System.out.printf("    " + rb.getString("program-general-delete-2") + "\n",
+                    rb.getString("program-properties-field-3-singular"));
             do {
                 System.out.println("\nSelecciona criterio de búsqueda -\n" + searchMenu);
 
@@ -479,7 +486,7 @@ final class LoanMenu {
                                 nLoan--;
                                 isValid = false;
                             } else {
-                                System.err.println("El ID proporcionado no se encuentra en la lista");
+                                System.err.printf("  %s\n", rb.getString("program-error-id"));
                             }
                         } catch (InputMismatchException ime) {
                             System.err.printf("  %s\n", rb.getString("program-error-entry"));
@@ -526,7 +533,7 @@ final class LoanMenu {
                         obj = LocalDate.parse((String) obj, DateTimeFormatter.ofPattern(configProps.getProperty("database-table-3-field-4-format-code")));
                         isDone = true;
                     } catch (RuntimeException re) {
-                        System.err.println("  Formato de fecha no válido");
+                        System.err.printf("  %s\n", rb.getString("program-error-date"));
                     }
                 } while (!isDone);
                 break;

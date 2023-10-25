@@ -10,8 +10,7 @@ import tables.User;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static utils.Utils.checkOptionInput;
-import static utils.Utils.checkString;
+import static utils.Utils.*;
 
 /**
  * Clase del menú del gestor de books en el programa
@@ -85,7 +84,8 @@ final class BookMenu {
         int optionMenu;
         int[] count;
 
-        System.out.println("\n\t" + String.format(rb.getString("program-intro-menu-seed"), rb.getString("program-properties-field-1-plural")).toUpperCase());
+        System.out.println("\n\t" + String.format(rb.getString("program-intro-menu-seed"),
+                rb.getString("program-properties-field-1-plural")).toUpperCase());
         do {
             System.out.println(mainMenu);
 
@@ -99,7 +99,8 @@ final class BookMenu {
                     break;
                 case 2:
                     if (nBook == 0) {
-                        System.err.println("Error, no hay lista de libros disponible");
+                        System.err.printf(rb.getString("program-error-avail") + "\n",
+                                rb.getString("program-properties-field-1-plural").toLowerCase());
                     } else {
                         listBooks(scan);
                         System.out.println("Total de libros: " + nBook);
@@ -107,14 +108,16 @@ final class BookMenu {
                     break;
                 case 3:
                     if (nBook == 0) {
-                        System.err.println("Error, no hay lista de libros disponible");
+                        System.err.printf(rb.getString("program-error-avail") + "\n",
+                                rb.getString("program-properties-field-1-plural").toLowerCase());
                     } else {
                         searchBooks(scan);
                     }
                     break;
                 case 4:
                     if (nBook == 0) {
-                        System.err.println("Error, no hay lista de libros disponible");
+                        System.err.printf(rb.getString("program-error-avail") + "\n",
+                                rb.getString("program-properties-field-1-plural").toLowerCase());
                     } else {
                         count = deleteBook(scan, nBook, idBook);
                         nBook = count[0];
@@ -147,7 +150,8 @@ final class BookMenu {
         String author;
 
         do {
-            System.out.println("\n    Alta de Nuevo Libro\n(-1 en cualquier momento para cancelar operación)\n");
+            System.out.printf("    " + rb.getString("program-general-add-1") + "\n(%s)\n\n",
+                    rb.getString("program-properties-field-1-singular"), rb.getString("program-general-cancel"));
 
             title = checkString(scan, 0, configProps.getProperty("database-table-1-field-2-maxchar"));
             if (title == null) {
@@ -168,7 +172,7 @@ final class BookMenu {
                 nBook++;
                 idBook++;
             } catch (RuntimeException re) {
-                System.err.println("  Error durante el registro en la base de datos: " + re.getMessage());
+                System.err.printf("  %s: %s\n", rb.getString("program-error-database"), re.getMessage());
             }
 
             System.out.printf("\n%s - \n", rb.getString("program-general-repeat"));
@@ -189,7 +193,8 @@ final class BookMenu {
         int opt;
         List<Book> arrayBooks;
 
-        System.out.println("    Listado de Libros");
+        System.out.printf("    " + rb.getString("program-general-list") + "\n",
+                rb.getString("program-properties-field-1-plural"));
         do {
             System.out.println("\nSelecciona ordenación de listado -\n" + searchMenu);
 
@@ -238,7 +243,8 @@ final class BookMenu {
 
         do {
             isValid = false;
-            System.out.println("    Buscador de Libros");
+            System.out.printf("    " + rb.getString("program-general-search") + "\n",
+                    rb.getString("program-properties-field-1-plural"));
             do {
                 System.out.println("\nSelecciona criterio de búsqueda -\n" + searchMenu);
 
@@ -291,7 +297,8 @@ final class BookMenu {
 
         do {
             isValid = false;
-            System.out.println("    Baja de Libros");
+            System.out.printf("    " + rb.getString("program-general-delete-1") + "\n",
+                    rb.getString("program-properties-field-1-singular"));
             do {
                 System.out.println("\nSelecciona criterio de búsqueda -\n" + searchMenu);
 
@@ -333,7 +340,7 @@ final class BookMenu {
                                 nBook--;
                                 isValid = false;
                             } else {
-                                System.err.println("El ID proporcionado no se encuentra en la lista");
+                                System.err.printf("  %s\n", rb.getString("program-error-id"));
                             }
                         } catch (InputMismatchException ime) {
                             System.err.printf("  %s\n", rb.getString("program-error-entry"));
