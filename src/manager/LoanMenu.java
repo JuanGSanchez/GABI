@@ -239,9 +239,9 @@ final class LoanMenu {
 
                 try {
                     if (opt == 1) {
-                        LibDBMember.getInstance().searchTB(currentUser, idMember);
+                        LibDBMember.getInstance().searchTB(currentUser, idMember, rb);
                     } else {
-                        List<Member> members = LibDBMember.getInstance().searchTB(currentUser, opt, fragString);
+                        List<Member> members = LibDBMember.getInstance().searchTB(currentUser, opt, fragString, rb);
                         Set<Integer> idsocs = members.stream().map(Member::getIdMember).collect(Collectors.toSet());
                         members.stream().sorted(Member::compareTo).forEach(System.out::println);
                         do {
@@ -295,9 +295,9 @@ final class LoanMenu {
 
                 try {
                     if (opt == 1) {
-                        LibDBBook.getInstance().searchTB(currentUser, idBook);
+                        LibDBBook.getInstance().searchTB(currentUser, idBook, rb);
                     } else {
-                        List<Book> books = LibDBBook.getInstance().searchTB(currentUser, opt, fragString);
+                        List<Book> books = LibDBBook.getInstance().searchTB(currentUser, opt, fragString, rb);
                         Set<Integer> idlibs = books.stream().map(Book::getIdBook).collect(Collectors.toSet());
                         books.stream().sorted(Book::compareTo).forEach(System.out::println);
                         do {
@@ -330,7 +330,7 @@ final class LoanMenu {
             } while (!isPossible);
 
             try {
-                LibDBLoan.getInstance().addTB(currentUser, new Loan(idLoan + 1, idMember, idBook));
+                LibDBLoan.getInstance().addTB(currentUser, new Loan(idLoan + 1, idMember, idBook), rb);
                 nLoan++;
                 idLoan++;
             } catch (RuntimeException re) {
@@ -438,9 +438,9 @@ final class LoanMenu {
             try {
                 List<Loan> loans;
                 if (opt < 4) {
-                    loans = LibDBLoan.getInstance().searchTB(currentUser, opt, ID);
+                    loans = LibDBLoan.getInstance().searchTB(currentUser, opt, ID, rb);
                 } else {
-                    loans = LibDBLoan.getInstance().searchTB(currentUser, date);
+                    loans = LibDBLoan.getInstance().searchTB(currentUser, date, rb);
                 }
                 loans.forEach(System.out::println);
             } catch (RuntimeException re) {
@@ -491,14 +491,14 @@ final class LoanMenu {
 
             try {
                 if (opt == 1) {
-                    idLoan = LibDBLoan.getInstance().deleteTB(currentUser, ID);
+                    idLoan = LibDBLoan.getInstance().deleteTB(currentUser, ID, rb);
                     nLoan--;
                 } else {
                     List<Loan> loans;
                     if (opt == 2 || opt == 3) {
-                        loans = LibDBLoan.getInstance().searchTB(currentUser, opt, ID);
+                        loans = LibDBLoan.getInstance().searchTB(currentUser, opt, ID, rb);
                     } else {
-                        loans = LibDBLoan.getInstance().searchTB(currentUser, date);
+                        loans = LibDBLoan.getInstance().searchTB(currentUser, date, rb);
                     }
                     Set<Integer> idloans = loans.stream().map(Loan::getIdLoan).collect(Collectors.toSet());
                     loans.stream().sorted(Loan::compareTo).forEach(System.out::println);
@@ -513,7 +513,7 @@ final class LoanMenu {
                                         rb.getString("program-return-1").toLowerCase());
                                 return new int[]{nLoan, idLoan};
                             } else if (!idloans.add(ID)) {
-                                idLoan = LibDBBook.getInstance().deleteTB(currentUser, ID);
+                                idLoan = LibDBBook.getInstance().deleteTB(currentUser, ID, rb);
                                 nLoan--;
                                 isValid = false;
                             } else {

@@ -15,6 +15,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.ResourceBundle;
 
 /**
  * Clase principal de métodos de conexión a la base de datos
@@ -80,10 +81,12 @@ public class LibDBLoan implements LibDAO<Loan> {
      *
      * @param currentUser Objeto de usuario con sus datos
      *                    de acceso a la base de datos
+     * @param rb          Recurso para la localización
+     *                    del texto del programa
      * @return Número de filas de la tabla de datos
      */
     @Override
-    public int[] countTB(User currentUser) {
+    public int[] countTB(User currentUser, ResourceBundle rb) {
         String query1 = String.format("SELECT COUNT(*) FROM %s", tableName);
         String query2 = String.format("SELECT %s FROM %s WHERE %s = (SELECT max(%s) FROM %s)",
                 field1, tableName, field1, field1, tableName);
@@ -100,7 +103,7 @@ public class LibDBLoan implements LibDAO<Loan> {
                 return new int[]{rs1.getInt(1), 0};
             }
         } catch (SQLException sqle) {
-            System.err.println("  Error inesperado durante el contacto con la base de datos\n" + sqle.getMessage());
+            System.err.printf("  %s\n%s\n", rb.getString("dao-general-error"), sqle.getMessage());
             return null;
         }
     }
@@ -111,9 +114,11 @@ public class LibDBLoan implements LibDAO<Loan> {
      * @param currentUser Objeto de usuario con sus datos
      *                    de acceso a la base de datos
      * @param loan        Objeto Préstamo que registrar en la base de datos
+     * @param rb          Recurso para la localización
+     *                    del texto del programa
      */
     @Override
-    public void addTB(User currentUser, Loan loan) {
+    public void addTB(User currentUser, Loan loan, ResourceBundle rb) {
         String query1 = String.format("SELECT COUNT(*) FROM %s WHERE %s = ?", tableName, field2);
         String query2 = String.format("SELECT %s FROM %s WHERE %s = ?",
                 configProps.getProperty("database-table-1-field-4"),
@@ -133,7 +138,7 @@ public class LibDBLoan implements LibDAO<Loan> {
             rs.next();
             if (rs.getInt(1) >= Integer.parseInt(configProps.getProperty("database-table-2-maxloan"))) {
                 rs.close();
-                throw new SQLException("Límite de préstamos alcanzado por el socio");
+                throw new SQLException(rb.getString("dao-loan-error-limit"));
             }
             rs.close();
 
@@ -142,11 +147,11 @@ public class LibDBLoan implements LibDAO<Loan> {
             if (rs2.next()) {
                 if (rs2.getBoolean(1)) {
                     rs2.close();
-                    throw new SQLException("Libro ya prestado");
+                    throw new SQLException(rb.getString("dao-loan-error-lent"));
                 }
             } else {
                 rs2.close();
-                throw new SQLException("Libro inexistente");
+                throw new SQLException(rb.getString(rb.getString("dao-loan-error-exist")));
             }
             rs2.close();
 
@@ -155,7 +160,7 @@ public class LibDBLoan implements LibDAO<Loan> {
             if (pStmt3.executeUpdate() > 1) {
                 pStmt3.setBoolean(1, false);
                 pStmt3.executeUpdate();
-                throw new SQLException("Error inesperado en la localización del libro");
+                throw new SQLException(rb.getString("dao-loan-error-location-book"));
             }
 
             pStmt4.setInt(1, loan.getIdLoan());
@@ -163,8 +168,8 @@ public class LibDBLoan implements LibDAO<Loan> {
             pStmt4.setInt(3, loan.getIdBook());
             pStmt4.setDate(4, Date.valueOf(loan.getDateLoan()));
             if (pStmt4.executeUpdate() == 1) {
-                System.out.println("  nuevo préstamo registrado con éxito.");
-            } else throw new SQLException("Ha habido un problema inesperado\nal intentar registrar el préstamo");
+                System.out.printf("  %s.\n", rb.getString("dao-loan-add"));
+            } else throw new SQLException(rb.getString("dao-loan-error-add"));
 
         } catch (SQLException sqle) {
             throw new RuntimeException(sqle.getMessage());
@@ -176,10 +181,12 @@ public class LibDBLoan implements LibDAO<Loan> {
      *
      * @param currentUser Objeto de usuario con sus datos
      *                    de acceso a la base de datos
+     * @param rb          Recurso para la localización
+     *                    del texto del programa
      * @return Lista de objetos Préstamo por cada entrada de la tabla de datos
      */
     @Override
-    public List<Loan> searchTB(User currentUser) {
+    public List<Loan> searchTB(User currentUser, ResourceBundle rb) {
         String query = String.format("SELECT * FROM %s", tableName);
         List<Loan> listLoan = new ArrayList<>();
 
@@ -193,7 +200,7 @@ public class LibDBLoan implements LibDAO<Loan> {
                         rs.getDate(4).toLocalDate()));
             }
         } catch (SQLException sqle) {
-            System.err.println("  Error inesperado durante el contacto con la base de datos\n" + sqle.getMessage());
+            System.err.printf("  %s\n%s\n", rb.getString("dao-general-error"), sqle.getMessage());
         }
 
         return listLoan;
@@ -205,10 +212,12 @@ public class LibDBLoan implements LibDAO<Loan> {
      *
      * @param currentUser Objeto de usuario con sus datos
      *                    de acceso a la base de datos
+     * @param rb          Recurso para la localización
+     *                    del texto del programa
      * @return Lista de objetos Préstamo por cada entrada de la tabla de datos
      */
     @Override
-    public List<Loan> searchDetailTB(User currentUser) {
+    public List<Loan> searchDetailTB(User currentUser, ResourceBundle rb) {
         String query1 = String.format("SELECT * FROM %s", tableName);
         String query2 = String.format("SELECT * FROM %s WHERE %s = ?",
                 configProps.getProperty("database-name") + "." + configProps.getProperty("database-table-2"), field2);
@@ -240,7 +249,7 @@ public class LibDBLoan implements LibDAO<Loan> {
             rs2.close();
             rs3.close();
         } catch (SQLException sqle) {
-            System.err.println("  Error inesperado durante el contacto con la base de datos\n" + sqle.getMessage());
+            System.err.printf("  %s\n%s\n", rb.getString("dao-general-error"), sqle.getMessage());
         }
 
         return listLoan;
@@ -254,9 +263,11 @@ public class LibDBLoan implements LibDAO<Loan> {
      *                    de acceso a la base de datos
      * @param opt         Número para indicar la columna de la tabla donde buscar
      * @param ID          ID que buscar en las entradas de la tabla
+     * @param rb          Recurso para la localización
+     *                    del texto del programa
      * @return Objeto Préstamo con la entrada que haya salido de la búsqueda
      */
-    public List<Loan> searchTB(User currentUser, int opt, int ID) {
+    public List<Loan> searchTB(User currentUser, int opt, int ID, ResourceBundle rb) {
         String query = String.format("SELECT * FROM %s WHERE %s = ?",
                 tableName, opt == 1 ? field1 : opt == 2 ? field2 : field3);
 
@@ -273,11 +284,11 @@ public class LibDBLoan implements LibDAO<Loan> {
             }
             rs.close();
             if (listLoans.isEmpty()) {
-                throw new SQLException("No se encuentran préstamos con los parámetros de búsqueda indicados");
+                throw new SQLException(rb.getString("dao-loan-error-search"));
             }
             return listLoans;
         } catch (SQLException sqle) {
-            throw new RuntimeException("  Error inesperado durante el contacto con la base de datos\n" + sqle.getMessage());
+            throw new RuntimeException(String.format("  %s\n%s\n", rb.getString("dao-general-error"), sqle.getMessage()));
         }
     }
 
@@ -288,9 +299,11 @@ public class LibDBLoan implements LibDAO<Loan> {
      * @param currentUser Objeto de usuario con sus datos
      *                    de acceso a la base de datos
      * @param date        Fecha de realización del préstamo
+     * @param rb          Recurso para la localización
+     *                    del texto del programa
      * @return Lista de objetos Préstamo de las entradas resultantes de la búsqueda
      */
-    public List<Loan> searchTB(User currentUser, LocalDate date) {
+    public List<Loan> searchTB(User currentUser, LocalDate date, ResourceBundle rb) {
         String query = String.format("SELECT * FROM %s WHERE %s = ?", tableName, field4);
 
         try (Connection con = DriverManager.getConnection(url, currentUser.getName(), currentUser.getPassword());
@@ -306,11 +319,11 @@ public class LibDBLoan implements LibDAO<Loan> {
             }
             rs.close();
             if (listLoans.isEmpty()) {
-                throw new SQLException("No se encuentran préstamos con los parámetros de búsqueda indicados");
+                throw new SQLException(rb.getString("dao-loan-error-search"));
             }
             return listLoans;
         } catch (SQLException sqle) {
-            throw new RuntimeException("  Error inesperado durante el contacto con la base de datos\n" + sqle.getMessage());
+            throw new RuntimeException(String.format("  %s\n%s\n", rb.getString("dao-general-error"), sqle.getMessage()));
         }
     }
 
@@ -321,10 +334,12 @@ public class LibDBLoan implements LibDAO<Loan> {
      * @param currentUser Objeto de usuario con sus datos
      *                    de acceso a la base de datos
      * @param ID          Identificación numérica de la entrada a eliminar
+     * @param rb          Recurso para la localización
+     *                    del texto del programa
      * @return ID máxima tras la eliminación de la entrada
      */
     @Override
-    public int deleteTB(User currentUser, int ID) {
+    public int deleteTB(User currentUser, int ID, ResourceBundle rb) {
         String query1 = String.format("SELECT %s FROM %s WHERE %s = ?",
                 field3, tableName, field1);
         String query2 = String.format("UPDATE %s SET %s = ? WHERE %s = ?",
@@ -345,7 +360,7 @@ public class LibDBLoan implements LibDAO<Loan> {
             int idlib = rs.getInt(1);
             if (rs.next()) {
                 rs.close();
-                throw new SQLException("Error inesperado en la localización del préstamo");
+                throw new SQLException(rb.getString("dao-loan-error-location-loan"));
             }
             rs.close();
 
@@ -353,16 +368,16 @@ public class LibDBLoan implements LibDAO<Loan> {
             pStmt2.setInt(2, idlib);
             int updates = pStmt2.executeUpdate();
             if (updates == 0) {
-                throw new SQLException("Libro ya disponible o inexistente");
+                throw new SQLException(rb.getString("dao-loan-error-avail"));
             } else if (updates > 1) {
                 pStmt2.setBoolean(1, true);
                 pStmt2.executeUpdate();
-                throw new SQLException("Error inesperado en la localización del libro");
+                throw new SQLException(rb.getString("dao-loan-error-location-book"));
             }
 
             pStmt3.setInt(1, ID);
             if (pStmt3.executeUpdate() == 1) {
-                System.out.println("  devolución de préstamo completada con éxito.");
+                System.out.printf("  %s.\n", rb.getString("dao-loan-delete"));
                 ResultSet rs4 = stmt4.executeQuery(query4);
                 if (rs4.next()) {
                     int maxIDLib = rs4.getInt(1);
@@ -376,7 +391,7 @@ public class LibDBLoan implements LibDAO<Loan> {
                 throw new SQLException();
             }
         } catch (SQLException sqle) {
-            throw new RuntimeException("  Error inesperado durante el contacto con la base de datos\n" + sqle.getMessage());
+            throw new RuntimeException(String.format("  %s\n%s\n", rb.getString("dao-general-error"), sqle.getMessage()));
         }
     }
 }

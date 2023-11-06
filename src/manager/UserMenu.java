@@ -92,7 +92,7 @@ final class UserMenu {
         System.out.println("\n\t" + String.format(rb.getString("program-intro-menu-seed"),
                 rb.getString("program-properties-field-4-plural")).toUpperCase());
 
-        count = UserDerby.getInstance().countUser(currentUser);
+        count = UserDerby.getInstance().countUser(currentUser, rb);
         if (count != null) {
             nUser = count[0];
             idUser = count[1];
@@ -181,7 +181,7 @@ final class UserMenu {
             }
 
             try {
-                UserDerby.getInstance().addUser(currentUser, new User(idUser + 1, name, password));
+                UserDerby.getInstance().addUser(currentUser, new User(idUser + 1, name, password), rb);
                 nUser++;
                 idUser++;
             } catch (RuntimeException re) {
@@ -215,14 +215,14 @@ final class UserMenu {
 
             switch (opt) {
                 case 1:
-                    arrayUsers = UserDerby.getInstance().searchUser(currentUser);
+                    arrayUsers = UserDerby.getInstance().searchUser(currentUser, rb);
                     System.out.printf(rb.getString("program-general-order-selection") + "...\n",
                             rb.getString("program-user-properties-1"));
                     arrayUsers.stream().sorted(User::compareTo).forEach(System.out::println);
                     isValid = true;
                     break;
                 case 2:
-                    arrayUsers = UserDerby.getInstance().searchUser(currentUser);
+                    arrayUsers = UserDerby.getInstance().searchUser(currentUser, rb);
                     System.out.printf(rb.getString("program-general-order-selection") + "...\n",
                             rb.getString("program-user-properties-2"));
                     arrayUsers.stream().sorted(Comparator.comparing(User::getName).thenComparing(User::getIdUser)).forEach(System.out::println);
@@ -274,10 +274,10 @@ final class UserMenu {
 
             try {
                 if (opt == 1) {
-                    User user = UserDerby.getInstance().searchUser(currentUser, ID);
+                    User user = UserDerby.getInstance().searchUser(currentUser, ID, rb);
                     System.out.println(user);
                 } else {
-                    List<User> users = UserDerby.getInstance().searchUser(currentUser, fragString);
+                    List<User> users = UserDerby.getInstance().searchUser(currentUser, fragString, rb);
                     users.forEach(System.out::println);
                 }
             } catch (RuntimeException re) {
@@ -328,10 +328,10 @@ final class UserMenu {
 
             try {
                 if (opt == 1) {
-                    idUser = UserDerby.getInstance().deleteUser(currentUser, ID);
+                    idUser = UserDerby.getInstance().deleteUser(currentUser, ID, rb);
                     nUser--;
                 } else {
-                    List<User> users = UserDerby.getInstance().searchUser(currentUser, fragString);
+                    List<User> users = UserDerby.getInstance().searchUser(currentUser, fragString, rb);
                     Set<Integer> idusers = users.stream().map(User::getIdUser).collect(Collectors.toSet());
                     users.stream().sorted(User::compareTo).forEach(System.out::println);
                     do {
@@ -345,7 +345,7 @@ final class UserMenu {
                                         rb.getString("program-return-1").toLowerCase());
                                 return new int[]{nUser, idUser};
                             } else if (!idusers.add(ID)) {
-                                idUser = UserDerby.getInstance().deleteUser(currentUser, ID);
+                                idUser = UserDerby.getInstance().deleteUser(currentUser, ID, rb);
                                 nUser--;
                                 isValid = false;
                             } else {

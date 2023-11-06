@@ -7,6 +7,7 @@ package sql.reservoirs;
 import tables.User;
 
 import java.util.List;
+import java.util.ResourceBundle;
 
 /**
  * Interfaz principal de métodos de conexión a una base de datos
@@ -24,9 +25,11 @@ public interface LibDAO<T> {
      *
      * @param currentUser Objeto de usuario con sus datos
      *                    de acceso a la base de datos
+     * @param rb          Recurso para la localización
+     *                    del texto del programa
      * @return Número de entradas en la base de datos
      */
-    int[] countTB(User currentUser);
+    int[] countTB(User currentUser, ResourceBundle rb);
 
     /**
      * Método de introducción de una nueva entrada en la
@@ -36,8 +39,10 @@ public interface LibDAO<T> {
      *                    de acceso a la base de datos
      * @param t           Objeto de la clase T, cuyos datos se introducen
      *                    en la tabla de datos
+     * @param rb          Recurso para la localización
+     *                    del texto del programa
      */
-    void addTB(User currentUser, T t);
+    void addTB(User currentUser, T t, ResourceBundle rb);
 
     /**
      * Método de búsqueda de entradas en la tabla de datos
@@ -45,10 +50,12 @@ public interface LibDAO<T> {
      *
      * @param currentUser Objeto de usuario con sus datos
      *                    de acceso a la base de datos
+     * @param rb          Recurso para la localización
+     *                    del texto del programa
      * @return Lista de objetos de la clase T, construidos
      * desde los datos recuperados de la tabla
      */
-    List<T> searchTB(User currentUser);
+    List<T> searchTB(User currentUser, ResourceBundle rb);
 
     /**
      * Método de búsqueda de entradas en la tabla de datos
@@ -56,10 +63,12 @@ public interface LibDAO<T> {
      *
      * @param currentUser Objeto de usuario con sus datos
      *                    de acceso a la base de datos
+     * @param rb          Recurso para la localización
+     *                    del texto del programa
      * @return Lista de objetos de la clase T, construidos
      * desde los datos recuperados de la tabla
      */
-    List<T> searchDetailTB(User currentUser);
+    List<T> searchDetailTB(User currentUser, ResourceBundle rb);
 
     /**
      * Método para eliminar una entrada en la tabla de datos
@@ -68,7 +77,9 @@ public interface LibDAO<T> {
      * @param currentUser Objeto de usuario con sus datos
      *                    de acceso a la base de datos
      * @param ID          Identificación numérica de la entrada a eliminar
+     * @param rb          Recurso para la localización
+     *                    del texto del programa
      * @return ID máxima actualizada de la tabla de datos
      */
-    int deleteTB(User currentUser, int ID);
+    int deleteTB(User currentUser, int ID, ResourceBundle rb);
 }

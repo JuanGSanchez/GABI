@@ -179,7 +179,7 @@ final class MemberMenu {
             }
 
             try {
-                LibDBMember.getInstance().addTB(currentUser, new Member(nMember + 1, name, surname));
+                LibDBMember.getInstance().addTB(currentUser, new Member(nMember + 1, name, surname), rb);
                 nMember++;
                 idMember++;
             } catch (RuntimeException re) {
@@ -279,10 +279,10 @@ final class MemberMenu {
 
             try {
                 if (opt == 1) {
-                    Member member = LibDBMember.getInstance().searchTB(currentUser, ID);
+                    Member member = LibDBMember.getInstance().searchTB(currentUser, ID, rb);
                     System.out.println(member);
                 } else {
-                    List<Member> members = LibDBMember.getInstance().searchTB(currentUser, opt, fragString);
+                    List<Member> members = LibDBMember.getInstance().searchTB(currentUser, opt, fragString, rb);
                     members.forEach(System.out::println);
                 }
             } catch (RuntimeException re) {
@@ -333,10 +333,10 @@ final class MemberMenu {
 
             try {
                 if (opt == 1) {
-                    idMember = LibDBMember.getInstance().deleteTB(currentUser, ID);
+                    idMember = LibDBMember.getInstance().deleteTB(currentUser, ID, rb);
                     nMember--;
                 } else {
-                    List<Member> members = LibDBMember.getInstance().searchTB(currentUser, opt, fragString);
+                    List<Member> members = LibDBMember.getInstance().searchTB(currentUser, opt, fragString, rb);
                     Set<Integer> idmembers = members.stream().map(Member::getIdMember).collect(Collectors.toSet());
                     members.stream().sorted(Member::compareTo).forEach(System.out::println);
                     do {
@@ -350,7 +350,7 @@ final class MemberMenu {
                                         rb.getString("program-return-1").toLowerCase());
                                 return new int[]{nMember, idMember};
                             } else if (!idmembers.add(ID)) {
-                                idMember = LibDBMember.getInstance().deleteTB(currentUser, ID);
+                                idMember = LibDBMember.getInstance().deleteTB(currentUser, ID, rb);
                                 nMember--;
                                 isValid = false;
                             } else {

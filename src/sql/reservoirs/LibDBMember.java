@@ -13,6 +13,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.ResourceBundle;
 
 /**
  * Clase principal de métodos de conexión a la base de datos
@@ -74,10 +75,12 @@ public final class LibDBMember implements LibDAO<Member> {
      *
      * @param currentUser Objeto de usuario con sus datos
      *                    de acceso a la base de datos
+     * @param rb          Recurso para la localización
+     *                    del texto del programa
      * @return Número de filas de la tabla de datos
      */
     @Override
-    public int[] countTB(User currentUser) {
+    public int[] countTB(User currentUser, ResourceBundle rb) {
         String query1 = String.format("SELECT COUNT(*) FROM %s", tableName);
         String query2 = String.format("SELECT %s FROM %s WHERE %s = (SELECT max(%s) FROM %s)",
                 field1, tableName, field1, field1, tableName);
@@ -94,7 +97,7 @@ public final class LibDBMember implements LibDAO<Member> {
                 return new int[]{rs1.getInt(1), 0};
             }
         } catch (SQLException sqle) {
-            System.err.println("  Error inesperado durante el contacto con la base de datos\n" + sqle.getMessage());
+            System.err.printf("  %s\n%s\n", rb.getString("dao-general-error"), sqle.getMessage());
             return null;
         }
     }
@@ -105,9 +108,11 @@ public final class LibDBMember implements LibDAO<Member> {
      * @param currentUser Objeto de usuario con sus datos
      *                    de acceso a la base de datos
      * @param member      Objeto Socio que registrar en la base de datos
+     * @param rb          Recurso para la localización
+     *                    del texto del programa
      */
     @Override
-    public void addTB(User currentUser, Member member) {
+    public void addTB(User currentUser, Member member, ResourceBundle rb) {
         String query1 = String.format("SELECT COUNT(*) FROM %s", tableName);
         String query2 = String.format("SELECT * FROM %s WHERE LOWER(%s) = LOWER(?) AND LOWER(%s) = LOWER(?)",
                 tableName, field2, field3);
@@ -120,7 +125,7 @@ public final class LibDBMember implements LibDAO<Member> {
              ResultSet rs1 = s1.executeQuery(query1)) {
             rs1.next();
             if (rs1.getInt(1) >= Integer.parseInt(configProps.getProperty("database-table-2-maxsocs"))) {
-                throw new SQLException("Límite de socios alcanzado");
+                throw new SQLException(rb.getString("dao-member-error-limit"));
             }
 
             pStmt2.setString(1, member.getName());
@@ -128,7 +133,7 @@ public final class LibDBMember implements LibDAO<Member> {
             ResultSet rs2 = pStmt2.executeQuery();
             if (rs2.next()) {
                 rs2.close();
-                throw new SQLException("Socio ya registrado");
+                throw new SQLException(rb.getString("dao-member-error-register"));
             } else {
                 rs2.close();
             }
@@ -137,8 +142,8 @@ public final class LibDBMember implements LibDAO<Member> {
             pStmt3.setString(2, member.getName());
             pStmt3.setString(3, member.getSurname());
             if (pStmt3.executeUpdate() == 1) {
-                System.out.println("  nuevo socio agregado con éxito.");
-            } else throw new SQLException("Ha habido un problema inesperado\nal intentar agregar el socio");
+                System.out.printf("  %s.\n", rb.getString("dao-member-add"));
+            } else throw new SQLException(rb.getString("dao-member-error-add"));
         } catch (SQLException sqle) {
             throw new RuntimeException(sqle.getMessage());
         }
@@ -149,10 +154,12 @@ public final class LibDBMember implements LibDAO<Member> {
      *
      * @param currentUser Objeto de usuario con sus datos
      *                    de acceso a la base de datos
+     * @param rb          Recurso para la localización
+     *                    del texto del programa
      * @return Lista de objetos Socio por cada entrada de la tabla de datos
      */
     @Override
-    public List<Member> searchTB(User currentUser) {
+    public List<Member> searchTB(User currentUser, ResourceBundle rb) {
         String query = String.format("SELECT * FROM %s", tableName);
         List<Member> listMember = new ArrayList<>();
 
@@ -165,7 +172,7 @@ public final class LibDBMember implements LibDAO<Member> {
                         rs.getString(3)));
             }
         } catch (SQLException sqle) {
-            System.err.println("  Error inesperado durante el contacto con la base de datos\n" + sqle.getMessage());
+            System.err.printf("  %s\n%s\n", rb.getString("dao-general-error"), sqle.getMessage());
         }
 
         return listMember;
@@ -177,10 +184,12 @@ public final class LibDBMember implements LibDAO<Member> {
      *
      * @param currentUser Objeto de usuario con sus datos
      *                    de acceso a la base de datos
+     * @param rb          Recurso para la localización
+     *                    del texto del programa
      * @return Lista de objetos Socio por cada entrada de la tabla de datos
      */
     @Override
-    public List<Member> searchDetailTB(User currentUser) {
+    public List<Member> searchDetailTB(User currentUser, ResourceBundle rb) {
         String query1 = String.format("SELECT * FROM %s", tableName);
         String query2 = String.format("SELECT %s FROM %s WHERE %s = ?", configProps.getProperty("database-table-1-field-1"),
                 configProps.getProperty("database-name") + "." + configProps.getProperty("database-table-3"), field1);
@@ -218,7 +227,7 @@ public final class LibDBMember implements LibDAO<Member> {
             }
             rs2.close();
         } catch (SQLException sqle) {
-            System.err.println("  Error inesperado durante el contacto con la base de datos\n" + sqle.getMessage());
+            System.err.printf("  %s\n%s\n", rb.getString("dao-general-error"), sqle.getMessage());
         }
 
         return listMember;
@@ -233,9 +242,11 @@ public final class LibDBMember implements LibDAO<Member> {
      *                    de acceso a la base de datos
      * @param opt         Número para indicar la columna de la tabla donde buscar
      * @param seed        Fragmento de texto que buscar en las entradas de la tabla
+     * @param rb          Recurso para la localización
+     *                    del texto del programa
      * @return Lista de objetos Socio que hayan salido de la búsqueda
      */
-    public List<Member> searchTB(User currentUser, int opt, String seed) {
+    public List<Member> searchTB(User currentUser, int opt, String seed, ResourceBundle rb) {
         String query = String.format("SELECT * FROM %s WHERE LOWER(%s) LIKE LOWER(?)",
                 tableName, opt == 2 ? field2 : field3);
 
@@ -251,11 +262,11 @@ public final class LibDBMember implements LibDAO<Member> {
             }
             rs.close();
             if (listMember.isEmpty()) {
-                throw new SQLException("No se encuentran socios con los parámetros de búsqueda indicados");
+                throw new SQLException(rb.getString("dao-member-error-search-1"));
             }
             return listMember;
         } catch (SQLException sqle) {
-            throw new RuntimeException("  Error inesperado durante el contacto con la base de datos\n" + sqle.getMessage());
+            throw new RuntimeException(String.format("  %s\n%s\n", rb.getString("dao-general-error"), sqle.getMessage()));
         }
     }
 
@@ -266,9 +277,11 @@ public final class LibDBMember implements LibDAO<Member> {
      * @param currentUser Objeto de usuario con sus datos
      *                    de acceso a la base de datos
      * @param ID          Identificación numérica de la entrada en la tabla
+     * @param rb          Recurso para la localización
+     *                    del texto del programa
      * @return Objeto Socio con los datos de la entrada encontrada
      */
-    public Member searchTB(User currentUser, int ID) {
+    public Member searchTB(User currentUser, int ID, ResourceBundle rb) {
         String query = String.format("SELECT * FROM %s WHERE %s = ?", tableName, field1);
 
         try (Connection con = DriverManager.getConnection(url, currentUser.getName(), currentUser.getPassword());
@@ -281,10 +294,10 @@ public final class LibDBMember implements LibDAO<Member> {
                 return newMember;
             } else {
                 rs.close();
-                throw new SQLException("No se encuentra socio con la ID indicada");
+                throw new SQLException(rb.getString("dao-member-error-search-2"));
             }
         } catch (SQLException sqle) {
-            throw new RuntimeException("  Error inesperado durante el contacto con la base de datos\n" + sqle.getMessage());
+            throw new RuntimeException(String.format("  %s\n%s\n", rb.getString("dao-general-error"), sqle.getMessage()));
         }
     }
 
@@ -295,10 +308,12 @@ public final class LibDBMember implements LibDAO<Member> {
      * @param currentUser Objeto de usuario con sus datos
      *                    de acceso a la base de datos
      * @param ID          Identificación numérica de la entrada a eliminar
+     * @param rb          Recurso para la localización
+     *                    del texto del programa
      * @return ID máxima tras la eliminación de la entrada
      */
     @Override
-    public int deleteTB(User currentUser, int ID) {
+    public int deleteTB(User currentUser, int ID, ResourceBundle rb) {
         String query1 = String.format("SELECT %s FROM %s WHERE %s = ?",
                 field1, configProps.getProperty("database-name") + "." + configProps.getProperty("database-table-3"), field1);
         String query2 = String.format("DELETE FROM %s WHERE %s = ?", tableName, field1);
@@ -312,13 +327,13 @@ public final class LibDBMember implements LibDAO<Member> {
             pStmt1.setInt(1, ID);
             ResultSet rs = pStmt1.executeQuery();
             if (rs.next()) {
-                throw new SQLException("El socio aún tiene préstamos pendientes por devolver");
+                throw new SQLException(rb.getString("dao-member-error-delete"));
             }
             rs.close();
 
             pStmt2.setInt(1, ID);
             if (pStmt2.executeUpdate() == 1) {
-                System.out.println("  entrada de socio eliminada con éxito.");
+                System.out.printf("  %s.\n", rb.getString("dao-member-delete"));
                 ResultSet rs3 = stmt3.executeQuery(query3);
                 if (rs3.next()) {
                     int maxIDLib = rs3.getInt(1);
@@ -332,7 +347,7 @@ public final class LibDBMember implements LibDAO<Member> {
                 throw new SQLException();
             }
         } catch (SQLException sqle) {
-            throw new RuntimeException("  Error inesperado durante el contacto con la base de datos\n" + sqle.getMessage());
+            throw new RuntimeException(String.format("  %s\n%s\n", rb.getString("dao-general-error"), sqle.getMessage()));
         }
     }
 }

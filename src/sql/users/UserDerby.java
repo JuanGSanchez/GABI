@@ -11,6 +11,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.ResourceBundle;
 
 /**
  * Clase principal de métodos de conexión a la base de datos
@@ -69,12 +70,14 @@ public final class UserDerby implements UserDAO {
      *
      * @param user     Nombre del usuario
      * @param password Contraseña asociada al usuario
+     * @param rb          Recurso para la localización
+     *                    del texto del programa
      */
     @Override
-    public void tryUser(String user, char[] password) {
+    public void tryUser(String user, char[] password, ResourceBundle rb) {
         try (Connection con = DriverManager.getConnection(url, user, String.valueOf(password))) {
             con.isReadOnly();
-            System.out.println("  Identidad verificada, acceso concedido: bienvenido, " + user);
+            System.out.printf("  %s %s\n", rb.getString("dao-user-id"), user);
         } catch (SQLException sqle) {
             throw new RuntimeException(sqle.getMessage());
         }
@@ -86,9 +89,11 @@ public final class UserDerby implements UserDAO {
      *
      * @param currentUser Objeto de usuario con sus datos
      *                    de acceso a la base de datos
+     * @param rb          Recurso para la localización
+     *                    del texto del programa
      */
     @Override
-    public int[] countUser(User currentUser) {
+    public int[] countUser(User currentUser, ResourceBundle rb) {
         String query1 = String.format("SELECT COUNT(*) FROM %s", tableName);
         String query2 = String.format("SELECT %s FROM %s WHERE %s = (SELECT max(%s) FROM %s)",
                 field1, tableName, field1, field1, tableName);
@@ -105,7 +110,7 @@ public final class UserDerby implements UserDAO {
                 return new int[]{rs1.getInt(1), 0};
             }
         } catch (SQLException sqle) {
-            System.err.println("  Error inesperado durante el contacto con la base de datos\n" + sqle.getMessage());
+            System.err.printf("  %s:\n%s\n", rb.getString("dao-general-error"), sqle.getMessage());
             return null;
         }
     }
@@ -115,9 +120,11 @@ public final class UserDerby implements UserDAO {
      *
      * @param currentUser Objeto de usuario con sus datos
      *                    de acceso a la base de datos
+     * @param rb          Recurso para la localización
+     *                    del texto del programa
      */
     @Override
-    public void addUser(User currentUser, User newUser) {
+    public void addUser(User currentUser, User newUser, ResourceBundle rb) {
         String setProperty = "CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(";
         String fullAccessUsers = "'derby.database.fullAccessUsers'";
         String query1 = String.format("SELECT COUNT(*) FROM %s", tableName);
@@ -136,20 +143,20 @@ public final class UserDerby implements UserDAO {
             rs1.next();
             if (rs1.getInt(1) >= Integer.parseInt(configProps.getProperty("database-user-maxusers"))) {
                 rs1.close();
-                throw new SQLException("Límite de usuarios registrados ya alcanzado");
+                throw new SQLException(rb.getString("dao-user-error-limit"));
             } else {
                 rs1.close();
             }
 
             if (newUser.getName().equals(configProps.getProperty("database-name")) || newUser.getName().equals("user")) {
-                throw new SQLException("Nombre de usuario no válido");
+                throw new SQLException(rb.getString("dao-user-error-valid"));
             }
 
             pStmt1.setString(1, newUser.getName());
             ResultSet pRs1 = pStmt1.executeQuery();
             if (pRs1.next()) {
                 pRs1.close();
-                throw new SQLException("Usuario ya registrado");
+                throw new SQLException(rb.getString("dao-user-error-register"));
             } else {
                 pRs1.close();
             }
@@ -167,8 +174,8 @@ public final class UserDerby implements UserDAO {
             pStmt2.setInt(1, newUser.getIdUser());
             pStmt2.setString(2, newUser.getName());
             if (pStmt2.executeUpdate() == 1) {
-                System.out.println("  nuevo usuario agregado con éxito.");
-            } else throw new SQLException("Ha habido un problema inesperado\nal intentar agregar el libro");
+                System.out.printf("  %s.\n", rb.getString("dao-user-add"));
+            } else throw new SQLException(rb.getString("dao-user-error-add"));
         } catch (SQLException sqle) {
             throw new RuntimeException(sqle.getMessage());
         }
@@ -179,9 +186,11 @@ public final class UserDerby implements UserDAO {
      *
      * @param currentUser Objeto de usuario con sus datos
      *                    de acceso a la base de datos
+     * @param rb          Recurso para la localización
+     *                    del texto del programa
      */
     @Override
-    public List<User> searchUser(User currentUser) {
+    public List<User> searchUser(User currentUser, ResourceBundle rb) {
         String query = String.format("SELECT * FROM %s", tableName);
         List<User> listUser = new ArrayList<>();
 
@@ -193,7 +202,7 @@ public final class UserDerby implements UserDAO {
                         rs.getString(2)));
             }
         } catch (SQLException sqle) {
-            System.err.println("  Error inesperado durante el contacto con la base de datos\n" + sqle.getMessage());
+            System.err.printf("  %s:\n%s\n", rb.getString("dao-general-error"), sqle.getMessage());
         }
 
         return listUser;
@@ -206,8 +215,10 @@ public final class UserDerby implements UserDAO {
      * @param currentUser Objeto de usuario con sus datos
      *                    de acceso a la base de datos
      * @param seed        Fragmento de texto a buscar entre los nombres
+     * @param rb          Recurso para la localización
+     *                    del texto del programa
      */
-    public List<User> searchUser(User currentUser, String seed) {
+    public List<User> searchUser(User currentUser, String seed, ResourceBundle rb) {
         String query = String.format("SELECT * FROM %s WHERE LOWER(%s) LIKE LOWER(?)", tableName, field2);
 
         try (Connection con = DriverManager.getConnection(url, currentUser.getName(), currentUser.getPassword());
@@ -221,11 +232,11 @@ public final class UserDerby implements UserDAO {
             }
             rs.close();
             if (listUsers.isEmpty()) {
-                throw new SQLException("No se encuentran usuarios con los parámetros de búsqueda indicados");
+                throw new SQLException(rb.getString("dao-user-error-search-1"));
             }
             return listUsers;
         } catch (SQLException sqle) {
-            throw new RuntimeException("  Error inesperado durante el contacto con la base de datos\n" + sqle.getMessage());
+            throw new RuntimeException(String.format("  %s:\n%s\n", rb.getString("dao-general-error"), sqle.getMessage()));
         }
     }
 
@@ -236,8 +247,10 @@ public final class UserDerby implements UserDAO {
      * @param currentUser Objeto de usuario con sus datos
      *                    de acceso a la base de datos
      * @param ID          Identificación numérica del usuario
+     * @param rb          Recurso para la localización
+     *                    del texto del programa
      */
-    public User searchUser(User currentUser, int ID) {
+    public User searchUser(User currentUser, int ID, ResourceBundle rb) {
         String query = String.format("SELECT * FROM %s WHERE %s = ?", tableName, field1);
 
         try (Connection con = DriverManager.getConnection(url, currentUser.getName(), currentUser.getPassword());
@@ -251,10 +264,10 @@ public final class UserDerby implements UserDAO {
                 return newUser;
             } else {
                 rs.close();
-                throw new SQLException("No se encuentra usuario con la ID indicada");
+                throw new SQLException(rb.getString("dao-user-error-search-2"));
             }
         } catch (SQLException sqle) {
-            throw new RuntimeException("  Error inesperado durante el contacto con la base de datos\n" + sqle.getMessage());
+            throw new RuntimeException(String.format("  %s:\n%s\n", rb.getString("dao-general-error"), sqle.getMessage()));
         }
     }
 
@@ -263,9 +276,11 @@ public final class UserDerby implements UserDAO {
      *
      * @param currentUser Objeto de usuario con sus datos
      *                    de acceso a la base de datos
+     * @param rb          Recurso para la localización
+     *                    del texto del programa
      */
     @Override
-    public int deleteUser(User currentUser, int ID) {
+    public int deleteUser(User currentUser, int ID, ResourceBundle rb) {
         String setProperty = "CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(";
         String fullAccessUsers = "'derby.database.fullAccessUsers'";
         String query1 = String.format("SELECT %s FROM %s WHERE %s = ?", field2, tableName, field1);
@@ -291,7 +306,7 @@ public final class UserDerby implements UserDAO {
                 rs1.close();
             } else {
                 rs1.close();
-                throw new SQLException("No se encuentra usuario con la ID indicada");
+                throw new SQLException(rb.getString("dao-user-error-search-2"));
             }
 
             pStmt3.setInt(1, ID);
@@ -303,7 +318,7 @@ public final class UserDerby implements UserDAO {
                 }
                 rs2.close();
                 s1.executeUpdate(setProperty + fullAccessUsers + ", '" + listUsers.deleteCharAt(listUsers.length() - 1) + "')");
-                System.out.println("  usuario eliminado con éxito.");
+                System.out.printf("  %s.\n", rb.getString("dao-user-delete"));
                 ResultSet rs4 = stmt4.executeQuery(query4);
                 if (rs4.next()) {
                     int maxIDUser = rs4.getInt(1);
@@ -317,7 +332,7 @@ public final class UserDerby implements UserDAO {
                 throw new SQLException();
             }
         } catch (SQLException sqle) {
-            throw new RuntimeException("  Error inesperado durante el contacto con la base de datos\n" + sqle.getMessage());
+            throw new RuntimeException(String.format("  %s:\n%s\n", rb.getString("dao-general-error"), sqle.getMessage()));
         }
 
     }

@@ -12,6 +12,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.ResourceBundle;
 
 /**
  * Clase principal de métodos de conexión a la base de datos
@@ -77,10 +78,12 @@ public final class LibDBBook implements LibDAO<Book> {
      *
      * @param currentUser Objeto de usuario con sus datos
      *                    de acceso a la base de datos
+     * @param rb          Recurso para la localización
+     *                    del texto del programa
      * @return Número de filas de la tabla de datos
      */
     @Override
-    public int[] countTB(User currentUser) {
+    public int[] countTB(User currentUser, ResourceBundle rb) {
         String query1 = String.format("SELECT COUNT(*) FROM %s", tableName);
         String query2 = String.format("SELECT %s FROM %s WHERE %s = (SELECT max(%s) FROM %s)",
                 field1, tableName, field1, field1, tableName);
@@ -97,7 +100,7 @@ public final class LibDBBook implements LibDAO<Book> {
                 return new int[]{rs1.getInt(1), 0};
             }
         } catch (SQLException sqle) {
-            System.err.println("  Error inesperado durante el contacto con la base de datos\n" + sqle.getMessage());
+            System.err.printf("  %s:\n%s\n", rb.getString("dao-general-error"), sqle.getMessage());
             return null;
         }
     }
@@ -108,9 +111,11 @@ public final class LibDBBook implements LibDAO<Book> {
      * @param currentUser Objeto de usuario con sus datos
      *                    de acceso a la base de datos
      * @param book        Objeto Libro que registrar en la base de datos
+     * @param rb          Recurso para la localización
+     *                    del texto del programa
      */
     @Override
-    public void addTB(User currentUser, Book book) {
+    public void addTB(User currentUser, Book book, ResourceBundle rb) {
         String query1 = String.format("SELECT * FROM %s WHERE LOWER(%s) = LOWER(?) AND LOWER(%s) = LOWER(?)",
                 tableName, field2, field3);
         String query2 = String.format("INSERT INTO %s VALUES (?,?,?,?)", tableName);
@@ -123,7 +128,7 @@ public final class LibDBBook implements LibDAO<Book> {
             ResultSet rs = pStmt1.executeQuery();
             if (rs.next()) {
                 rs.close();
-                throw new SQLException("Libro ya registrado");
+                throw new SQLException(rb.getString("dao-book-error-register"));
             } else {
                 rs.close();
             }
@@ -133,8 +138,8 @@ public final class LibDBBook implements LibDAO<Book> {
             pStmt2.setString(3, book.getAuthor());
             pStmt2.setBoolean(4, book.isLent());
             if (pStmt2.executeUpdate() == 1) {
-                System.out.println("  nuevo libro agregado con éxito.");
-            } else throw new SQLException("Ha habido un problema inesperado\nal intentar agregar el libro");
+                System.out.printf("  %s.\n", rb.getString("dao-book-add"));
+            } else throw new SQLException(rb.getString("dao-book-error-add"));
         } catch (SQLException sqle) {
             throw new RuntimeException(sqle.getMessage());
         }
@@ -145,10 +150,12 @@ public final class LibDBBook implements LibDAO<Book> {
      *
      * @param currentUser Objeto de usuario con sus datos
      *                    de acceso a la base de datos
+     * @param rb          Recurso para la localización
+     *                    del texto del programa
      * @return Lista de objetos Libro por cada entrada de la tabla de datos
      */
     @Override
-    public List<Book> searchTB(User currentUser) {
+    public List<Book> searchTB(User currentUser, ResourceBundle rb) {
         String query = String.format("SELECT * FROM %s", tableName);
         List<Book> listBook = new ArrayList<>();
 
@@ -162,7 +169,7 @@ public final class LibDBBook implements LibDAO<Book> {
                         rs.getBoolean(4)));
             }
         } catch (SQLException sqle) {
-            System.err.println("  Error inesperado durante el contacto con la base de datos\n" + sqle.getMessage());
+            System.err.printf("  %s:\n%s\n", rb.getString("dao-general-error"), sqle.getMessage());
         }
 
         return listBook;
@@ -174,10 +181,12 @@ public final class LibDBBook implements LibDAO<Book> {
      *
      * @param currentUser Objeto de usuario con sus datos
      *                    de acceso a la base de datos
+     * @param rb          Recurso para la localización
+     *                    del texto del programa
      * @return Lista de objetos Libro por cada entrada de la tabla de datos
      */
     @Override
-    public List<Book> searchDetailTB(User currentUser) {
+    public List<Book> searchDetailTB(User currentUser, ResourceBundle rb) {
         return null;
     }
 
@@ -190,9 +199,11 @@ public final class LibDBBook implements LibDAO<Book> {
      *                    de acceso a la base de datos
      * @param opt         Número para indicar la columna de la tabla donde buscar
      * @param seed        Fragmento de texto que buscar en las entradas de la tabla
+     * @param rb          Recurso para la localización
+     *                    del texto del programa
      * @return Lista de objetos Libro que hayan salido de la búsqueda
      */
-    public List<Book> searchTB(User currentUser, int opt, String seed) {
+    public List<Book> searchTB(User currentUser, int opt, String seed, ResourceBundle rb) {
         String query = String.format("SELECT * FROM %s WHERE LOWER(%s) LIKE LOWER(?)",
                 tableName, opt == 2 ? field2 : field3);
 
@@ -209,11 +220,11 @@ public final class LibDBBook implements LibDAO<Book> {
             }
             rs.close();
             if (listBooks.isEmpty()) {
-                throw new SQLException("No se encuentran libros con los parámetros de búsqueda indicados");
+                throw new SQLException(rb.getString("dao-book-error-search-1"));
             }
             return listBooks;
         } catch (SQLException sqle) {
-            throw new RuntimeException("  Error inesperado durante el contacto con la base de datos\n" + sqle.getMessage());
+            throw new RuntimeException(String.format("  %s:\n%s\n", rb.getString("dao-general-error"), sqle.getMessage()));
         }
     }
 
@@ -224,9 +235,11 @@ public final class LibDBBook implements LibDAO<Book> {
      * @param currentUser Objeto de usuario con sus datos
      *                    de acceso a la base de datos
      * @param ID          Identificación numérica de la entrada en la tabla
+     * @param rb          Recurso para la localización
+     *                    del texto del programa
      * @return Objeto Libro con los datos de la entrada encontrada
      */
-    public Book searchTB(User currentUser, int ID) {
+    public Book searchTB(User currentUser, int ID, ResourceBundle rb) {
         String query = String.format("SELECT * FROM %s WHERE %s = ?", tableName, field1);
 
         try (Connection con = DriverManager.getConnection(url, currentUser.getName(), currentUser.getPassword());
@@ -242,10 +255,10 @@ public final class LibDBBook implements LibDAO<Book> {
                 return newBook;
             } else {
                 rs.close();
-                throw new SQLException("No se encuentra libro con la ID indicada");
+                throw new SQLException(rb.getString("dao-book-error-search-2"));
             }
         } catch (SQLException sqle) {
-            throw new RuntimeException("  Error inesperado durante el contacto con la base de datos\n" + sqle.getMessage());
+            throw new RuntimeException(String.format("  %s:\n%s\n", rb.getString("dao-general-error"), sqle.getMessage()));
         }
     }
 
@@ -256,10 +269,12 @@ public final class LibDBBook implements LibDAO<Book> {
      * @param currentUser Objeto de usuario con sus datos
      *                    de acceso a la base de datos
      * @param ID          Identificación numérica de la entrada a eliminar
+     * @param rb          Recurso para la localización
+     *                    del texto del programa
      * @return ID máxima tras la eliminación de la entrada
      */
     @Override
-    public int deleteTB(User currentUser, int ID) {
+    public int deleteTB(User currentUser, int ID, ResourceBundle rb) {
         String query1 = String.format("SELECT %s FROM %s WHERE %s = ?", field4, tableName, field1);
         String query2 = String.format("DELETE FROM %s WHERE %s = ?", tableName, field1);
         String query3 = String.format("SELECT %s FROM %s WHERE %s = (SELECT max(%s) FROM %s)",
@@ -274,17 +289,17 @@ public final class LibDBBook implements LibDAO<Book> {
             if (rs.next()) {
                 if (rs.getBoolean(1)) {
                     rs.close();
-                    throw new SQLException("El libro se encuentra prestado aún");
+                    throw new SQLException(rb.getString("dao-book-error-delete"));
                 }
                 rs.close();
             } else {
                 rs.close();
-                throw new SQLException("No se encuentra libro con la ID indicada");
+                throw new SQLException(rb.getString("dao-book-error-search-2"));
             }
 
             pStmt2.setInt(1, ID);
             if (pStmt2.executeUpdate() == 1) {
-                System.out.println("  entrada de libro eliminada con éxito.");
+                System.out.printf("  %s.\n", rb.getString("dao-book-delete"));
                 ResultSet rs3 = stmt3.executeQuery(query3);
                 if (rs3.next()) {
                     int maxIDLib = rs3.getInt(1);
@@ -298,7 +313,7 @@ public final class LibDBBook implements LibDAO<Book> {
                 throw new SQLException();
             }
         } catch (SQLException sqle) {
-            throw new RuntimeException("  Error inesperado durante el contacto con la base de datos\n" + sqle.getMessage());
+            throw new RuntimeException(String.format("  %s:\n%s\n", rb.getString("dao-general-error"), sqle.getMessage()));
         }
     }
 }

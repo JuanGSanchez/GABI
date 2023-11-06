@@ -121,7 +121,7 @@ public final class LibMenu {
             if (args.length != 0) {
                 if (args.length == 2) {
                     try {
-                        UserDerby.getInstance().tryUser(args[0], args[1].toCharArray());
+                        UserDerby.getInstance().tryUser(args[0], args[1].toCharArray(), rb);
                         currentUser = new User(args[0], args[1]);
                     } catch (RuntimeException re) {
                         System.err.printf("\n  %s: %s\n\n", rb.getString("program-error-intro"), re.getMessage());
@@ -179,7 +179,7 @@ public final class LibMenu {
                 if (password.equals("-1")) {
                     return null;
                 }
-                UserDerby.getInstance().tryUser(name, password.toCharArray());
+                UserDerby.getInstance().tryUser(name, password.toCharArray(), rb);
                 isUser = true;
 //            } catch (IllegalFormatException ife) {
 //                System.err.println("\n" + ife.getMessage() + "\n");
@@ -208,17 +208,17 @@ public final class LibMenu {
         LoanMenu pMenu = new LoanMenu(currentUser, configProps, rb);
 
         do {
-            count = LibDBBook.getInstance().countTB(currentUser);
+            count = LibDBBook.getInstance().countTB(currentUser, rb);
             if (count != null) {
                 nBooks = count[0];
                 idBooks = count[1];
             }
-            count = LibDBMember.getInstance().countTB(currentUser);
+            count = LibDBMember.getInstance().countTB(currentUser, rb);
             if (count != null) {
                 nMembers = count[0];
                 idMembers = count[1];
             }
-            count = LibDBLoan.getInstance().countTB(currentUser);
+            count = LibDBLoan.getInstance().countTB(currentUser, rb);
             if (count != null) {
                 nLoans = count[0];
                 idLoans = count[1];

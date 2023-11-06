@@ -179,7 +179,7 @@ final class BookMenu {
             }
 
             try {
-                LibDBBook.getInstance().addTB(currentUser, new Book(idBook + 1, title, author));
+                LibDBBook.getInstance().addTB(currentUser, new Book(idBook + 1, title, author), rb);
                 nBook++;
                 idBook++;
             } catch (RuntimeException re) {
@@ -213,21 +213,21 @@ final class BookMenu {
 
             switch (opt) {
                 case 1:
-                    arrayBooks = LibDBBook.getInstance().searchTB(currentUser);
+                    arrayBooks = LibDBBook.getInstance().searchTB(currentUser, rb);
                     System.out.printf(rb.getString("program-general-order-selection") + "...\n",
                             rb.getString("program-book-properties-1"));
                     arrayBooks.stream().sorted(Book::compareTo).forEach(System.out::println);
                     isValid = true;
                     break;
                 case 2:
-                    arrayBooks = LibDBBook.getInstance().searchTB(currentUser);
+                    arrayBooks = LibDBBook.getInstance().searchTB(currentUser, rb);
                     System.out.printf(rb.getString("program-general-order-selection") + "...\n",
                             rb.getString("program-book-properties-2"));
                     arrayBooks.stream().sorted(Comparator.comparing(Book::getTitle).thenComparingInt(Book::getIdBook)).forEach(System.out::println);
                     isValid = true;
                     break;
                 case 3:
-                    arrayBooks = LibDBBook.getInstance().searchTB(currentUser);
+                    arrayBooks = LibDBBook.getInstance().searchTB(currentUser, rb);
                     System.out.printf(rb.getString("program-general-order-selection") + "...\n",
                             rb.getString("program-book-properties-3"));
                     arrayBooks.stream().sorted(Comparator.comparing(Book::getAuthor).thenComparing(Book::getTitle)).forEach(System.out::println);
@@ -279,10 +279,10 @@ final class BookMenu {
 
             try {
                 if (opt == 1) {
-                    Book book = LibDBBook.getInstance().searchTB(currentUser, ID);
+                    Book book = LibDBBook.getInstance().searchTB(currentUser, ID, rb);
                     System.out.println(book);
                 } else {
-                    List<Book> books = LibDBBook.getInstance().searchTB(currentUser, opt, fragString);
+                    List<Book> books = LibDBBook.getInstance().searchTB(currentUser, opt, fragString, rb);
                     books.forEach(System.out::println);
                 }
             } catch (RuntimeException re) {
@@ -333,10 +333,10 @@ final class BookMenu {
 
             try {
                 if (opt == 1) {
-                    idBook = LibDBBook.getInstance().deleteTB(currentUser, ID);
+                    idBook = LibDBBook.getInstance().deleteTB(currentUser, ID, rb);
                     nBook--;
                 } else {
-                    List<Book> books = LibDBBook.getInstance().searchTB(currentUser, opt, fragString);
+                    List<Book> books = LibDBBook.getInstance().searchTB(currentUser, opt, fragString, rb);
                     Set<Integer> idbooks = books.stream().map(Book::getIdBook).collect(Collectors.toSet());
                     books.stream().sorted(Book::compareTo).forEach(System.out::println);
                     do {
@@ -350,7 +350,7 @@ final class BookMenu {
                                         rb.getString("program-return-1").toLowerCase());
                                 return new int[]{nBook, idBook};
                             } else if (!idbooks.add(ID)) {
-                                idBook = LibDBBook.getInstance().deleteTB(currentUser, ID);
+                                idBook = LibDBBook.getInstance().deleteTB(currentUser, ID, rb);
                                 nBook--;
                                 isValid = false;
                             } else {
