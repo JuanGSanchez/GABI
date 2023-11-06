@@ -21,28 +21,17 @@ import static utils.Utils.*;
  */
 final class BookMenu {
     /**
+     * Variable para almacenar aparte el texto del menú principal
+     */
+    private final String mainMenu;
+    /**
+     * Variable para almacenar aparte las opciones de submenús
+     */
+    private final String searchMenu;
+    /**
      * Lista con fragmentos de texto según el parámetro usado en la consulta
      */
-    private static final String[] searchVar = {"ID", "título o fragmento", "autor o fragmento"};
-    /**
-     * Método para almacenar aparte el texto del menú principal
-     */
-    private static final String mainMenu = """
-              
-              Seleccione una acción:
-            \t(1) Añadir libro
-            \t(2) Listar libros
-            \t(3) Buscar libros
-            \t(4) Eliminar libro
-            \t(0) Volver al menú principal""";
-    /**
-     * Variable para almacenar las opciones de submenús
-     */
-    private static final String searchMenu = """
-            \t(1) Por ID
-            \t(2) Por título
-            \t(3) Por autor
-            \t(0) Salir""";
+    private final String[] searchVar;
     /**
      * Objeto usuario para almacenar sus datos
      * de acceso a la base de datos
@@ -68,6 +57,27 @@ final class BookMenu {
         this.currentUser = currentUser;
         this.configProps = configProps;
         this.rb = rb;
+        mainMenu = String.format("\n  %s:\n\t(1) " + rb.getString("program-book-menu-1") +
+                                 "\n\t(2) " + rb.getString("program-book-menu-2") +
+                                 "\n\t(3) " + rb.getString("program-book-menu-3") +
+                                 "\n\t(4) " + rb.getString("program-book-menu-4") +
+                                 "\n\t(0) %s",
+                rb.getString("program-general-menu"), rb.getString("program-properties-field-1-singular").toLowerCase(),
+                rb.getString("program-properties-field-1-plural").toLowerCase(),
+                rb.getString("program-properties-field-1-plural").toLowerCase(),
+                rb.getString("program-properties-field-1-singular").toLowerCase(),
+                rb.getString("program-general-exit-menu"));
+        searchMenu = String.format("\n\t(1) " + rb.getString("program-general-order-election") +
+                                   "\n\t(2) " + rb.getString("program-general-order-election") +
+                                   "\n\t(3) " + rb.getString("program-general-order-election") +
+                                   "\n\t(0) %s",
+                rb.getString("program-book-properties-1"),
+                rb.getString("program-book-properties-2"),
+                rb.getString("program-book-properties-3"),
+                rb.getString("program-general-exit-order"));
+        searchVar = new String[]{rb.getString("program-book-properties-1"),
+                String.format(rb.getString("program-general-fragment"), rb.getString("program-book-properties-2")),
+                String.format(rb.getString("program-general-fragment"), rb.getString("program-book-properties-3"))};
     }
 
     /**
@@ -103,7 +113,8 @@ final class BookMenu {
                                 rb.getString("program-properties-field-1-plural").toLowerCase());
                     } else {
                         listBooks(scan);
-                        System.out.println("Total de libros: " + nBook);
+                        System.out.printf(rb.getString("program-general-total") + ": %d\n",
+                                rb.getString("program-properties-field-1-plural").toLowerCase(), nBook);
                     }
                     break;
                 case 3:
@@ -196,26 +207,29 @@ final class BookMenu {
         System.out.printf("    " + rb.getString("program-general-list") + "\n",
                 rb.getString("program-properties-field-1-plural"));
         do {
-            System.out.println("\nSelecciona ordenación de listado -\n" + searchMenu);
+            System.out.printf("\n  %s -%s\n", rb.getString("program-general-order"), searchMenu);
 
             opt = checkOptionInput(scan);
 
             switch (opt) {
                 case 1:
                     arrayBooks = LibDBBook.getInstance().searchTB(currentUser);
-                    System.out.println("Ordenación por ID...");
+                    System.out.printf(rb.getString("program-general-order-selection") + "...\n",
+                            rb.getString("program-book-properties-1"));
                     arrayBooks.stream().sorted(Book::compareTo).forEach(System.out::println);
                     isValid = true;
                     break;
                 case 2:
                     arrayBooks = LibDBBook.getInstance().searchTB(currentUser);
-                    System.out.println("Ordenación por título...");
+                    System.out.printf(rb.getString("program-general-order-selection") + "...\n",
+                            rb.getString("program-book-properties-2"));
                     arrayBooks.stream().sorted(Comparator.comparing(Book::getTitle).thenComparingInt(Book::getIdBook)).forEach(System.out::println);
                     isValid = true;
                     break;
                 case 3:
                     arrayBooks = LibDBBook.getInstance().searchTB(currentUser);
-                    System.out.println("Ordenación por autor...");
+                    System.out.printf(rb.getString("program-general-order-selection") + "...\n",
+                            rb.getString("program-book-properties-3"));
                     arrayBooks.stream().sorted(Comparator.comparing(Book::getAuthor).thenComparing(Book::getTitle)).forEach(System.out::println);
                     isValid = true;
                     break;
@@ -246,7 +260,7 @@ final class BookMenu {
             System.out.printf("    " + rb.getString("program-general-search") + "\n",
                     rb.getString("program-properties-field-1-plural"));
             do {
-                System.out.println("\nSelecciona criterio de búsqueda -\n" + searchMenu);
+                System.out.printf("\n  %s -%s\n", rb.getString("program-general-criteria"), searchMenu);
 
                 opt = checkOptionInput(scan);
 
@@ -300,7 +314,7 @@ final class BookMenu {
             System.out.printf("    " + rb.getString("program-general-delete-1") + "\n",
                     rb.getString("program-properties-field-1-singular"));
             do {
-                System.out.println("\nSelecciona criterio de búsqueda -\n" + searchMenu);
+                System.out.printf("\n  %s -%s\n", rb.getString("program-general-criteria"), searchMenu);
 
                 opt = checkOptionInput(scan);
 

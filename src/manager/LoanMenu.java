@@ -27,53 +27,33 @@ import static utils.Utils.*;
  */
 final class LoanMenu {
     /**
-     * Lista con fragmentos de texto según el parámetro usado en la consulta para libros
-     */
-    private static final String[] searchBookVar = {"ID", "título o fragmento", "autor o fragmento"};
-    /**
-     * Lista con fragmentos de texto según el parámetro usado en la consulta para socios
-     */
-    private static final String[] searchMemberVar = {"ID", "nombre o fragmento", "apellido o fragmento"};
-    /**
-     * Lista con fragmentos de texto según el parámetro usado en la consulta para préstamos
-     */
-    private static final String[] searchVar = {"ID de Préstamo", "ID de Socio", "ID de Libro", "fecha de realización"};
-    /**
      * Método para almacenar aparte el texto del menú principal
      */
-    private static final String mainMenu = """
-                          
-              Seleccione una acción:
-            \t(1) Nuevo préstamo
-            \t(2) Listar préstamos
-            \t(3) Buscar préstamos
-            \t(4) Retirar préstamo
-            \t(0) Volver al menú principal""";
-    /**
-     * Variable para almacenar las opciones de submenús para libros
-     */
-    private static final String searchBookMenu = """
-            \t(1) Por ID
-            \t(2) Por título
-            \t(3) Por autor
-            \t(0) Salir""";
-    /**
-     * Variable para almacenar las opciones de submenús para socios
-     */
-    private static final String searchMemberMenu = """
-            \t(1) Por ID
-            \t(2) Por nombre
-            \t(3) Por apellidos
-            \t(0) Salir""";
+    private final String mainMenu;
     /**
      * Variable para almacenar las opciones de submenús para préstamos
      */
-    private static final String searchMenu = """
-            \t(1) Por ID de Préstamos
-            \t(2) Por ID de Socio
-            \t(3) Por ID de Libro
-            \t(4) Por fecha de realización
-            \t(0) Salir""";
+    private final String searchMenu;
+    /**
+     * Variable para almacenar las opciones de submenús para socios
+     */
+    private final String searchMemberMenu;
+    /**
+     * Variable para almacenar las opciones de submenús para libros
+     */
+    private final String searchBookMenu;
+    /**
+     * Lista con fragmentos de texto según el parámetro usado en la consulta para préstamos
+     */
+    private final String[] searchVar;
+    /**
+     * Lista con fragmentos de texto según el parámetro usado en la consulta para socios
+     */
+    private final String[] searchMemberVar;
+    /**
+     * Lista con fragmentos de texto según el parámetro usado en la consulta para libros
+     */
+    private final String[] searchBookVar;
     /**
      * Objeto usuario para almacenar sus datos
      * de acceso a la base de datos
@@ -99,6 +79,52 @@ final class LoanMenu {
         this.currentUser = currentUser;
         this.configProps = configProps;
         this.rb = rb;
+        mainMenu = String.format("\n  %s:\n\t(1) " + rb.getString("program-loan-menu-1") +
+                                 "\n\t(2) " + rb.getString("program-loan-menu-2") +
+                                 "\n\t(3) " + rb.getString("program-loan-menu-3") +
+                                 "\n\t(4) " + rb.getString("program-loan-menu-4") +
+                                 "\n\t(0) %s",
+                rb.getString("program-general-menu"), rb.getString("program-properties-field-3-singular").toLowerCase(),
+                rb.getString("program-properties-field-3-plural").toLowerCase(),
+                rb.getString("program-properties-field-3-plural").toLowerCase(),
+                rb.getString("program-properties-field-3-singular").toLowerCase(),
+                rb.getString("program-general-exit-menu"));
+        searchMenu = String.format("\n\t(1) " + rb.getString("program-general-order-election") +
+                                   "\n\t(2) " + rb.getString("program-general-order-election") +
+                                   "\n\t(3) " + rb.getString("program-general-order-election") +
+                                   "\n\t(4) " + rb.getString("program-general-order-election") +
+                                   "\n\t(0) %s",
+                rb.getString("program-loan-properties-1"),
+                rb.getString("program-loan-properties-2"),
+                rb.getString("program-loan-properties-3"),
+                rb.getString("program-loan-properties-4"),
+                rb.getString("program-general-exit-order"));
+        searchMemberMenu = String.format("\n  %s -\n\t(1) " + rb.getString("program-general-order-election") +
+                                         "\n\t(2) " + rb.getString("program-general-order-election") +
+                                         "\n\t(3) " + rb.getString("program-general-order-election") +
+                                         "\n\t(0) %s",
+                rb.getString("program-general-order"), rb.getString("program-member-properties-1"),
+                rb.getString("program-member-properties-2"),
+                rb.getString("program-member-properties-3"),
+                rb.getString("program-general-exit-order"));
+        searchBookMenu = String.format("\n  %s -\n\t(1) " + rb.getString("program-general-order-election") +
+                                       "\n\t(2) " + rb.getString("program-general-order-election") +
+                                       "\n\t(3) " + rb.getString("program-general-order-election") +
+                                       "\n\t(0) %s",
+                rb.getString("program-general-order"), rb.getString("program-book-properties-1"),
+                rb.getString("program-book-properties-2"),
+                rb.getString("program-book-properties-3"),
+                rb.getString("program-general-exit-order"));
+        searchVar = new String[]{rb.getString("program-loan-properties-1"),
+                rb.getString("program-loan-properties-2"),
+                rb.getString("program-loan-properties-3"),
+                rb.getString("program-loan-properties-4")};
+        searchMemberVar = new String[]{rb.getString("program-member-properties-1"),
+                String.format(rb.getString("program-general-fragment"), rb.getString("program-member-properties-2")),
+                String.format(rb.getString("program-general-fragment"), rb.getString("program-member-properties-3"))};
+        searchBookVar = new String[]{rb.getString("program-book-properties-1"),
+                String.format(rb.getString("program-general-fragment"), rb.getString("program-book-properties-2")),
+                String.format(rb.getString("program-general-fragment"), rb.getString("program-book-properties-3"))};
     }
 
     /**
@@ -134,7 +160,8 @@ final class LoanMenu {
                                 rb.getString("program-properties-field-3-plural").toLowerCase());
                     } else {
                         listLoans(scan);
-                        System.out.println("Total de préstamos activos: " + nLoan);
+                        System.out.printf(rb.getString("program-general-total") + ": %d\n",
+                                rb.getString("program-properties-field-3-plural").toLowerCase(), nLoan);
                     }
                     break;
                 case 3:
@@ -191,9 +218,9 @@ final class LoanMenu {
                     rb.getString("program-properties-field-3-singular"));
 
             do {
-                System.out.println("Introduce socio receptor del préstamo - ");
+                System.out.printf("%s -\n", rb.getString("program-loan-add-1"));
                 do {
-                    System.out.println("\n  Selecciona criterio de búsqueda:\n" + searchMemberMenu);
+                    System.out.println(searchMemberMenu);
 
                     opt = checkOptionInput(scan);
 
@@ -247,9 +274,9 @@ final class LoanMenu {
             } while (!isPossible);
 
             do {
-                System.out.println("Introduce libro a ser prestado - ");
+                System.out.printf("%s -\n", rb.getString("program-loan-add-2"));
                 do {
-                    System.out.println("\n  Selecciona criterio de búsqueda:\n" + searchBookMenu);
+                    System.out.println(searchBookMenu);
 
                     opt = checkOptionInput(scan);
 
@@ -331,32 +358,36 @@ final class LoanMenu {
         System.out.printf("    " + rb.getString("program-general-list") + "\n",
                 rb.getString("program-properties-field-3-plural"));
         do {
-            System.out.println("\nSelecciona ordenación de listado -\n" + searchMenu);
+            System.out.printf("\n  %s -%s\n", rb.getString("program-general-order"), searchMenu);
 
             opt = checkOptionInput(scan);
 
             switch (opt) {
                 case 1:
                     arrayLoans = loadDataList(scan, currentUser, LibDBLoan.getInstance());
-                    System.out.println("Ordenación por ID del préstamo...");
+                    System.out.printf(rb.getString("program-general-order-selection") + "...\n",
+                            rb.getString("program-loan-properties-1"));
                     arrayLoans.stream().sorted(Loan::compareTo).forEach(System.out::println);
                     isValid = true;
                     break;
                 case 2:
                     arrayLoans = loadDataList(scan, currentUser, LibDBLoan.getInstance());
-                    System.out.println("Ordenación por ID del socio...");
+                    System.out.printf(rb.getString("program-general-order-selection") + "...\n",
+                            rb.getString("program-loan-properties-2"));
                     arrayLoans.stream().sorted(Comparator.comparing(Loan::getIdMember)).forEach(System.out::println);
                     isValid = true;
                     break;
                 case 3:
                     arrayLoans = loadDataList(scan, currentUser, LibDBLoan.getInstance());
-                    System.out.println("Ordenación por ID del libro...");
+                    System.out.printf(rb.getString("program-general-order-selection") + "...\n",
+                            rb.getString("program-loan-properties-3"));
                     arrayLoans.stream().sorted(Comparator.comparing(Loan::getIdBook)).forEach(System.out::println);
                     isValid = true;
                     break;
                 case 4:
                     arrayLoans = loadDataList(scan, currentUser, LibDBLoan.getInstance());
-                    System.out.println("Ordenación por fecha...");
+                    System.out.printf(rb.getString("program-general-order-selection") + "...\n",
+                            rb.getString("program-loan-properties-4"));
                     arrayLoans.stream().sorted(Comparator.comparing(Loan::getDateLoan)).forEach(System.out::println);
                     isValid = true;
                     break;
@@ -387,7 +418,7 @@ final class LoanMenu {
             System.out.printf("    " + rb.getString("program-general-search") + "\n",
                     rb.getString("program-properties-field-3-plural"));
             do {
-                System.out.println("\nSelecciona criterio de búsqueda -\n" + searchMenu);
+                System.out.printf("\n  %s -%s\n", rb.getString("program-general-criteria"), searchMenu);
 
                 opt = checkOptionInput(scan);
 
@@ -441,7 +472,7 @@ final class LoanMenu {
             System.out.printf("    " + rb.getString("program-general-delete-2") + "\n",
                     rb.getString("program-properties-field-3-singular"));
             do {
-                System.out.println("\nSelecciona criterio de búsqueda -\n" + searchMenu);
+                System.out.printf("\n  %s -%s\n", rb.getString("program-general-criteria"), searchMenu);
 
                 opt = checkOptionInput(scan);
 

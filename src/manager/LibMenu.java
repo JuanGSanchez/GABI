@@ -48,7 +48,8 @@ public final class LibMenu {
                                                           "\n  (3) " + rb.getString("program-intro-menu-seed") +
                                                           "\n  (0) %s",
             rb.getString("program-intro-menu"), rb.getString("program-properties-field-1-plural"),
-            rb.getString("program-properties-field-2-plural"), rb.getString("program-properties-field-3-plural"),
+            rb.getString("program-properties-field-2-plural"),
+            rb.getString("program-properties-field-3-plural"),
             rb.getString("program-intro-menu-exit"));
     /**
      * Variable para almacenar aparte el texto del menú principal,
@@ -60,8 +61,10 @@ public final class LibMenu {
                                                           "\n  (4) " + rb.getString("program-intro-menu-seed") +
                                                           "\n  (0) %s",
             rb.getString("program-intro-menu"), rb.getString("program-properties-field-1-plural"),
-            rb.getString("program-properties-field-2-plural"), rb.getString("program-properties-field-3-plural"),
-            rb.getString("program-properties-field-4-plural"), rb.getString("program-intro-menu-exit"));
+            rb.getString("program-properties-field-2-plural"),
+            rb.getString("program-properties-field-3-plural"),
+            rb.getString("program-properties-field-4-plural"),
+            rb.getString("program-intro-menu-exit"));
     /**
      * Número de books guardados dentro de la base de datos
      */

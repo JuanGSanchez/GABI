@@ -21,28 +21,17 @@ import static utils.Utils.*;
  */
 final class MemberMenu {
     /**
-     * Lista con fragmentos de texto según el parámetro usado en la consulta
-     */
-    private static final String[] searchVar = {"ID", "nombre o fragmento", "apellido o fragmento"};
-    /**
      * Método para almacenar aparte el texto del menú principal
      */
-    private static final String mainMenu = """
-              
-              Seleccione una acción:
-            \t(1) Alta socio
-            \t(2) Directorio socios
-            \t(3) Buscar socios
-            \t(4) Baja socio
-            \t(0) Volver al menú principal""";
+    private final String mainMenu;
     /**
      * Variable para almacenar las opciones de submenús
      */
-    private static final String searchMenu = """
-            \t(1) Por ID
-            \t(2) Por nombre
-            \t(3) Por apellidos
-            \t(0) Salir""";
+    private final String searchMenu;
+    /**
+     * Lista con fragmentos de texto según el parámetro usado en la consulta
+     */
+    private final String[] searchVar;
     /**
      * Objeto usuario para almacenar sus datos
      * de acceso a la base de datos
@@ -68,6 +57,27 @@ final class MemberMenu {
         this.currentUser = currentUser;
         this.configProps = configProps;
         this.rb = rb;
+        mainMenu = String.format("\n  %s:\n\t(1) " + rb.getString("program-member-menu-1") +
+                                 "\n\t(2) " + rb.getString("program-member-menu-2") +
+                                 "\n\t(3) " + rb.getString("program-member-menu-3") +
+                                 "\n\t(4) " + rb.getString("program-member-menu-4") +
+                                 "\n\t(0) %s",
+                rb.getString("program-general-menu"), rb.getString("program-properties-field-2-singular").toLowerCase(),
+                rb.getString("program-properties-field-2-plural").toLowerCase(),
+                rb.getString("program-properties-field-2-plural").toLowerCase(),
+                rb.getString("program-properties-field-2-singular").toLowerCase(),
+                rb.getString("program-general-exit-menu"));
+        searchMenu = String.format("\n\t(1) " + rb.getString("program-general-order-election") +
+                                   "\n\t(2) " + rb.getString("program-general-order-election") +
+                                   "\n\t(3) " + rb.getString("program-general-order-election") +
+                                   "\n\t(0) %s",
+                rb.getString("program-member-properties-1"),
+                rb.getString("program-member-properties-2"),
+                rb.getString("program-member-properties-3"),
+                rb.getString("program-general-exit-order"));
+        searchVar = new String[]{rb.getString("program-member-properties-1"),
+                String.format(rb.getString("program-general-fragment"), rb.getString("program-member-properties-2")),
+                String.format(rb.getString("program-general-fragment"), rb.getString("program-member-properties-3"))};
     }
 
     /**
@@ -103,7 +113,8 @@ final class MemberMenu {
                                 rb.getString("program-properties-field-2-plural").toLowerCase());
                     } else {
                         listMembers(scan);
-                        System.out.println("Total de socios: " + nMember);
+                        System.out.printf(rb.getString("program-general-total") + ": %d\n",
+                                rb.getString("program-properties-field-2-plural").toLowerCase(), nMember);
                     }
                     break;
                 case 3:
@@ -196,26 +207,29 @@ final class MemberMenu {
         System.out.printf("    " + rb.getString("program-general-list") + "\n",
                 rb.getString("program-properties-field-2-plural"));
         do {
-            System.out.println("\nSelecciona ordenación de listado -\n" + searchMenu);
+            System.out.printf("\n  %s -%s\n", rb.getString("program-general-order"), searchMenu);
 
             opt = checkOptionInput(scan);
 
             switch (opt) {
                 case 1:
                     arrayMembers = loadDataList(scan, currentUser, LibDBMember.getInstance());
-                    System.out.println("Ordenación por ID...");
+                    System.out.printf(rb.getString("program-general-order-selection") + "...\n",
+                            rb.getString("program-member-properties-1"));
                     arrayMembers.stream().sorted(Member::compareTo).forEach(System.out::println);
                     isValid = true;
                     break;
                 case 2:
                     arrayMembers = loadDataList(scan, currentUser, LibDBMember.getInstance());
-                    System.out.println("Ordenación por nombre...");
+                    System.out.printf(rb.getString("program-general-order-selection") + "...\n",
+                            rb.getString("program-member-properties-2"));
                     arrayMembers.stream().sorted(Comparator.comparing(Member::getName).thenComparing(Member::getSurname)).forEach(System.out::println);
                     isValid = true;
                     break;
                 case 3:
                     arrayMembers = loadDataList(scan, currentUser, LibDBMember.getInstance());
-                    System.out.println("Ordenación por apellidos...");
+                    System.out.printf(rb.getString("program-general-order-selection") + "...\n",
+                            rb.getString("program-member-properties-3"));
                     arrayMembers.stream().sorted(Comparator.comparing(Member::getSurname).thenComparing(Member::getName)).forEach(System.out::println);
                     isValid = true;
                     break;
@@ -246,7 +260,7 @@ final class MemberMenu {
             System.out.printf("    " + rb.getString("program-general-search") + "\n",
                     rb.getString("program-properties-field-2-plural"));
             do {
-                System.out.println("\nSelecciona criterio de búsqueda -\n" + searchMenu);
+                System.out.printf("\n  %s -%s\n", rb.getString("program-general-criteria"), searchMenu);
 
                 opt = checkOptionInput(scan);
 
@@ -300,7 +314,7 @@ final class MemberMenu {
             System.out.printf("    " + rb.getString("program-general-delete-1") + "\n",
                     rb.getString("program-properties-field-2-singular"));
             do {
-                System.out.println("\nSelecciona criterio de búsqueda -\n" + searchMenu);
+                System.out.printf("\n  %s -%s\n", rb.getString("program-general-criteria"), searchMenu);
 
                 opt = checkOptionInput(scan);
 

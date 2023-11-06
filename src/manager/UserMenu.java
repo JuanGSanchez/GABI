@@ -20,27 +20,17 @@ import static utils.Utils.*;
  */
 final class UserMenu {
     /**
-     * Lista con fragmentos de texto según el parámetro usado en la consulta
-     */
-    private static final String[] searchVar = {"ID", "nombre o fragmento"};
-    /**
      * Método para almacenar aparte el texto del menú principal
      */
-    private static final String mainMenu = """
-                          
-              Seleccione una acción:
-            \t(1) Nuevo usuario
-            \t(2) Listar usuarios
-            \t(3) Buscar usuarios
-            \t(4) Eliminar usuario
-            \t(0) Volver al menú principal""";
+    private final String mainMenu;
     /**
      * Variable para almacenar las opciones de submenús para libros
      */
-    private static final String searchMenu = """
-            \t(1) Por ID
-            \t(2) Por nombre
-            \t(0) Salir""";
+    private final String searchMenu;
+    /**
+     * Lista con fragmentos de texto según el parámetro usado en la consulta
+     */
+    private final String[] searchVar;
     /**
      * Objeto usuario para almacenar sus datos
      * de acceso a la base de datos
@@ -66,6 +56,24 @@ final class UserMenu {
         this.currentUser = currentUser;
         this.configProps = configProps;
         this.rb = rb;
+        mainMenu = String.format("\n  %s:\n\t(1) " + rb.getString("program-user-menu-1") +
+                                 "\n\t(2) " + rb.getString("program-user-menu-2") +
+                                 "\n\t(3) " + rb.getString("program-user-menu-3") +
+                                 "\n\t(4) " + rb.getString("program-user-menu-4") +
+                                 "\n\t(0) %s",
+                rb.getString("program-general-menu"), rb.getString("program-properties-field-4-singular").toLowerCase(),
+                rb.getString("program-properties-field-4-plural").toLowerCase(),
+                rb.getString("program-properties-field-4-plural").toLowerCase(),
+                rb.getString("program-properties-field-4-singular").toLowerCase(),
+                rb.getString("program-general-exit-menu"));
+        searchMenu = String.format("\n\t(1) " + rb.getString("program-general-order-election") +
+                                   "\n\t(2) " + rb.getString("program-general-order-election") +
+                                   "\n\t(0) %s",
+                rb.getString("program-user-properties-1"),
+                rb.getString("program-user-properties-2"),
+                rb.getString("program-general-exit-order"));
+        searchVar = new String[]{rb.getString("program-user-properties-1"),
+                String.format(rb.getString("program-general-fragment"), rb.getString("program-user-properties-2"))};
     }
 
     /**
@@ -89,7 +97,7 @@ final class UserMenu {
             nUser = count[0];
             idUser = count[1];
         }
-        System.out.printf("\nHay %d usuarios registrados actualmente\n", nUser);
+        System.out.printf("\n" + rb.getString("program-user-showinfo") + "\n", nUser);
 
         do {
             System.out.println(mainMenu);
@@ -108,7 +116,8 @@ final class UserMenu {
                                 rb.getString("program-properties-field-4-plural").toLowerCase());
                     } else {
                         listUsers(scan);
-                        System.out.println("Total de usuarios: " + nUser);
+                        System.out.printf(rb.getString("program-general-total") + ": %d\n",
+                                rb.getString("program-properties-field-4-plural").toLowerCase(), nUser);
                     }
                     break;
                 case 3:
@@ -200,20 +209,22 @@ final class UserMenu {
         System.out.printf("    " + rb.getString("program-general-list") + "\n",
                 rb.getString("program-properties-field-4-plural"));
         do {
-            System.out.println("\nSelecciona ordenación de listado -\n" + searchMenu);
+            System.out.printf("\n  %s -%s\n", rb.getString("program-general-order"), searchMenu);
 
             opt = checkOptionInput(scan);
 
             switch (opt) {
                 case 1:
                     arrayUsers = UserDerby.getInstance().searchUser(currentUser);
-                    System.out.println("Ordenación por ID...");
+                    System.out.printf(rb.getString("program-general-order-selection") + "...\n",
+                            rb.getString("program-user-properties-1"));
                     arrayUsers.stream().sorted(User::compareTo).forEach(System.out::println);
                     isValid = true;
                     break;
                 case 2:
                     arrayUsers = UserDerby.getInstance().searchUser(currentUser);
-                    System.out.println("Ordenación por nombre...");
+                    System.out.printf(rb.getString("program-general-order-selection") + "...\n",
+                            rb.getString("program-user-properties-2"));
                     arrayUsers.stream().sorted(Comparator.comparing(User::getName).thenComparing(User::getIdUser)).forEach(System.out::println);
                     isValid = true;
                     break;
@@ -244,7 +255,7 @@ final class UserMenu {
             System.out.printf("    " + rb.getString("program-general-search") + "\n",
                     rb.getString("program-properties-field-4-plural"));
             do {
-                System.out.println("\nSelecciona criterio de búsqueda -\n" + searchMenu);
+                System.out.printf("\n  %s -%s\n", rb.getString("program-general-criteria"), searchMenu);
 
                 opt = checkOptionInput(scan);
 
@@ -298,7 +309,7 @@ final class UserMenu {
             System.out.printf("    " + rb.getString("program-general-delete-1") + "\n",
                     rb.getString("program-properties-field-4-singular"));
             do {
-                System.out.println("\nSelecciona criterio de búsqueda -\n" + searchMenu);
+                System.out.printf("\n  %s -%s\n", rb.getString("program-general-criteria"), searchMenu);
 
                 opt = checkOptionInput(scan);
 
