@@ -8,7 +8,6 @@ import sql.reservoirs.LibDAO;
 import tables.User;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.*;
 
@@ -28,12 +27,11 @@ public final class Utils {
             ".*[\\d¡!@#$%&ºª'`*.,:;()_+=|/<>¿?{}\\[\\]~].*",
             ".*[@#$%&ºª'`*_+=|/<>{}\\[\\]~].*"
     };
+    private static ResourceBundle resourceBundle;
     /**
      * Lista de nombres de los campos de texto
      */
-    private static final String[] varName = new String[]{
-            "título", "autor", "nombre", "apellidos", "nombre", "contraseña"
-    };
+    private static String[] varName;
 
     /**
      * Método para la lectura del archivo de propiedades
@@ -45,10 +43,8 @@ public final class Utils {
 
         try (FileInputStream fis = new FileInputStream("src/utils/configuration.properties")) {
             configProps.load(fis);
-        } catch (FileNotFoundException ffe) {
-            System.err.println("  Error, no se encontró el archivo de propiedades del programa");
         } catch (IOException ioe) {
-            System.err.println("  Error leyendo las propiedades del programa: " + ioe.getMessage());
+            System.err.println(ioe.getLocalizedMessage());
         }
 
         return configProps;
@@ -66,7 +62,14 @@ public final class Utils {
     public static ResourceBundle readLanguage(String language, String country) {
         Locale locale = new Locale(language, country);
         Locale.setDefault(locale);
-        return ResourceBundle.getBundle("statements", locale);
+        resourceBundle = ResourceBundle.getBundle("statements", locale);
+        varName = new String[]{resourceBundle.getString("program-book-properties-2"),
+                resourceBundle.getString("program-book-properties-3"),
+                resourceBundle.getString("program-member-properties-2"),
+                resourceBundle.getString("program-member-properties-3"),
+                resourceBundle.getString("program-user-properties-2"),
+                resourceBundle.getString("program-user-properties-3")};
+        return resourceBundle;
     }
 
     /**
@@ -121,17 +124,18 @@ public final class Utils {
         String s = null;
         boolean isValid = false;
         do {
-            System.out.printf("Introduce el campo '%s' %s - ", varName[opt], opt == 1 ? "(nombre[, apellidos])" : "");
+            System.out.printf(resourceBundle.getString("program-utils-enter") + " - ",
+                    varName[opt], opt == 1 ? String.format("(%s)", resourceBundle.getString("program-utils-fullname")) : "");
             try {
                 s = scan.nextLine().trim();
                 if (s.isEmpty()) {
-                    System.err.println("  Entrada vacía");
+                    System.err.printf("  %s\n", resourceBundle.getString("program-error-empty"));
                 } else if (s.equals("-1")) {
                     return null;
                 } else if (s.matches(regex[opt])) {
-                    System.err.printf("  El campo '%s' no puede contener caracteres especiales\n", varName[opt]);
+                    System.err.printf("  " + resourceBundle.getString("program-error-character-special") + "\n", varName[opt]);
                 } else if (s.length() > Integer.parseInt(charLimit)) {
-                    System.err.printf("  El campo '%s' no puede superar los %s caracteres\n", varName[opt], charLimit);
+                    System.err.printf("  " + resourceBundle.getString("program-error-character-limit") + "\n", varName[opt], charLimit);
                 } else {
                     switch (opt) {
                         case 0:
@@ -149,7 +153,7 @@ public final class Utils {
                                     }
                                     s = String.format("%s %s", sArray[0], sArray[1]);
                                 } else {
-                                    System.err.println("  El nombre no sigue la estructura adecuada");
+                                    System.err.printf("  %s\n", resourceBundle.getString("program-error-character-structure"));
                                 }
                             } else {
                                 s = s.substring(0, 1).toUpperCase() + s.substring(1).toLowerCase();
@@ -163,7 +167,7 @@ public final class Utils {
                     isValid = true;
                 }
             } catch (InputMismatchException ime) {
-                System.err.println("  Entrada no válida");
+                System.err.printf("  %s\n", resourceBundle.getString("program-error-entry"));
             }
         } while (!isValid);
 
@@ -184,7 +188,7 @@ public final class Utils {
      * en objetos de la clase T
      */
     public static <T> List<T> loadDataList(Scanner scan, User currentUser, LibDAO<T> libDAO) {
-        System.out.println("\n  Introduce 1 para desplegar más detalles");
+        System.out.printf("\n  %s\n", resourceBundle.getString("program-utils-details"));
         if (scan.nextLine().equals("1")) {
             return libDAO.searchDetailTB(currentUser);
         } else {
