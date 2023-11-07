@@ -5,11 +5,15 @@
 package utils;
 
 import sql.reservoirs.LibDAO;
+import tables.Book;
+import tables.Loan;
+import tables.Member;
 import tables.User;
 
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Clase de utilidades para la entrada de datos por consola
@@ -194,5 +198,58 @@ public final class Utils {
         } else {
             return libDAO.searchTB(currentUser, resourceBundle);
         }
+    }
+
+    /**
+     * Método para componer la descripción localizada
+     * del objeto Book
+     *
+     * @param book Objeto Book a describir
+     * @return Descripción localizada del objeto
+     */
+    public static String BookToString(Book book) {
+        return String.format(book.toString(),
+                resourceBundle.getString("program-properties-field-1-singular"),
+                book.isLent() ? resourceBundle.getString("dao-book-lent-true") : resourceBundle.getString("dao-book-lent-false"));
+    }
+
+    /**
+     * Método para componer la descripción localizada
+     * del objeto Member
+     *
+     * @param member Objeto Member a describir
+     * @return Descripción localizada del objeto
+     */
+    public static String MemberToString(Member member) {
+        String desc = String.format(member.toString(),
+                resourceBundle.getString("program-properties-field-2-singular"));
+        List<Book> listBook = member.getListBook();
+        if (listBook != null) {
+            if (!listBook.isEmpty()) desc += "\n\t";
+            desc += listBook.stream().sorted(Comparator.comparing(Book::getIdBook))
+                    .map(Utils::BookToString).collect(Collectors.joining("\n\t"));
+            desc += "\n\t " + listBook.size() + " " + String.format(resourceBundle.getString("dao-book-lent-total"),
+                    (listBook.size() == 1 ? resourceBundle.getString("dao-book-lent-true-singular") : resourceBundle.getString("dao-book-lent-true-plural")));
+        }
+
+        return desc;
+    }
+
+    /**
+     * Método para componer la descripción localizada
+     * del objeto Loan
+     *
+     * @param loan Objeto Loan a describir
+     * @return Descripción localizada del objeto
+     */
+    public static String LoanToString(Loan loan) {
+        String desc = String.format(loan.toString(),
+                resourceBundle.getString("program-properties-field-3-singular"),
+                resourceBundle.getString("program-properties-field-1-singular"),
+                resourceBundle.getString("dao-loan-desc-1"), resourceBundle.getString("dao-loan-desc-2"));
+        if (loan.getBook() != null) {
+            desc += "\n\t" + Utils.MemberToString(loan.getMember()) + "\n\t" + Utils.BookToString(loan.getBook());
+        }
+        return desc;
     }
 }

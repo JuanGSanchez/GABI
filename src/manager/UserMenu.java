@@ -218,14 +218,18 @@ final class UserMenu {
                     arrayUsers = UserDerby.getInstance().searchUser(currentUser, rb);
                     System.out.printf(rb.getString("program-general-order-selection") + "...\n",
                             rb.getString("program-user-properties-1"));
-                    arrayUsers.stream().sorted(User::compareTo).forEach(System.out::println);
+                    arrayUsers.stream().sorted(User::compareTo)
+                            .forEach(user -> System.out.printf(user + "\n",
+                                    rb.getString("program-properties-field-4-singular")));
                     isValid = true;
                     break;
                 case 2:
                     arrayUsers = UserDerby.getInstance().searchUser(currentUser, rb);
                     System.out.printf(rb.getString("program-general-order-selection") + "...\n",
                             rb.getString("program-user-properties-2"));
-                    arrayUsers.stream().sorted(Comparator.comparing(User::getName).thenComparing(User::getIdUser)).forEach(System.out::println);
+                    arrayUsers.stream().sorted(Comparator.comparing(User::getName).thenComparing(User::getIdUser))
+                            .forEach(user -> System.out.printf(user + "\n",
+                                    rb.getString("program-properties-field-4-singular")));
                     isValid = true;
                     break;
                 case 0:
@@ -333,7 +337,9 @@ final class UserMenu {
                 } else {
                     List<User> users = UserDerby.getInstance().searchUser(currentUser, fragString, rb);
                     Set<Integer> idusers = users.stream().map(User::getIdUser).collect(Collectors.toSet());
-                    users.stream().sorted(User::compareTo).forEach(System.out::println);
+                    users.stream().sorted(User::compareTo)
+                            .forEach(user -> System.out.printf(user + "\n",
+                                    rb.getString("program-properties-field-4-singular")));
                     do {
                         System.out.printf(rb.getString("program-general-enter") + "\n(%s) -\n",
                                 rb.getString("program-properties-field-4-singular").toLowerCase(),

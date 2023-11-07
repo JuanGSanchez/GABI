@@ -5,9 +5,7 @@ package tables;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Clase de la tabla de datos de socios,
@@ -95,7 +93,7 @@ public class Member implements Comparable<Member>, Serializable {
      * @return Lista de libros prestados
      */
     public List<Book> getListBook() {
-        return new ArrayList<>(listBook);
+        return listBook == null ? null : new ArrayList<>(listBook);
     }
 
     /**
@@ -136,15 +134,7 @@ public class Member implements Comparable<Member>, Serializable {
      */
     @Override
     public String toString() {
-        String desc = this.getClass().getSimpleName() + " " + idMember + ":   " + String.format("%-20s", name)
-                      + "   " + String.format("%-40s", surname);
-        if (listBook != null) {
-            if (!listBook.isEmpty()) desc += "\n\t";
-            desc += listBook.stream().sorted(Comparator.comparing(Book::getIdBook)).map(Book::toString).collect(Collectors.joining("\n\t"));
-            desc += "\n\t " + listBook.size() + " " + (listBook.size() == 1 ? "libro prestado" : "libros prestados") + " en total";
-        }
-
-        return desc;
+        return "%s " + idMember + ":  " + String.format("%-20s", name) + "  " + String.format("%-40s", surname);
     }
 
     /**

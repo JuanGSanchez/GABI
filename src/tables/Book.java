@@ -132,8 +132,7 @@ public class Book implements Comparable<Book>, Serializable {
      */
     @Override
     public String toString() {
-        return this.getClass().getSimpleName() + " " + idBook + ":   " + String.format("%-120s", title)
-               + "   ;   " + String.format("%-60s", author) + String.format(" (%s)", lent ? "prestado" : "disponible");
+        return "%s " + idBook + ":  " + String.format("%-120s", title) + "  ;  " + String.format("%-60s", author) + "  (%s)";
     }
 
     /**

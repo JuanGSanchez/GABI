@@ -216,21 +216,24 @@ final class MemberMenu {
                     arrayMembers = loadDataList(scan, currentUser, LibDBMember.getInstance());
                     System.out.printf(rb.getString("program-general-order-selection") + "...\n",
                             rb.getString("program-member-properties-1"));
-                    arrayMembers.stream().sorted(Member::compareTo).forEach(System.out::println);
+                    arrayMembers.stream().sorted(Member::compareTo)
+                            .forEach(member -> System.out.println(MemberToString(member)));
                     isValid = true;
                     break;
                 case 2:
                     arrayMembers = loadDataList(scan, currentUser, LibDBMember.getInstance());
                     System.out.printf(rb.getString("program-general-order-selection") + "...\n",
                             rb.getString("program-member-properties-2"));
-                    arrayMembers.stream().sorted(Comparator.comparing(Member::getName).thenComparing(Member::getSurname)).forEach(System.out::println);
+                    arrayMembers.stream().sorted(Comparator.comparing(Member::getName).thenComparing(Member::getSurname))
+                            .forEach(member -> System.out.println(MemberToString(member)));
                     isValid = true;
                     break;
                 case 3:
                     arrayMembers = loadDataList(scan, currentUser, LibDBMember.getInstance());
                     System.out.printf(rb.getString("program-general-order-selection") + "...\n",
                             rb.getString("program-member-properties-3"));
-                    arrayMembers.stream().sorted(Comparator.comparing(Member::getSurname).thenComparing(Member::getName)).forEach(System.out::println);
+                    arrayMembers.stream().sorted(Comparator.comparing(Member::getSurname).thenComparing(Member::getName))
+                            .forEach(member -> System.out.println(MemberToString(member)));
                     isValid = true;
                     break;
                 case 0:
@@ -338,7 +341,8 @@ final class MemberMenu {
                 } else {
                     List<Member> members = LibDBMember.getInstance().searchTB(currentUser, opt, fragString, rb);
                     Set<Integer> idmembers = members.stream().map(Member::getIdMember).collect(Collectors.toSet());
-                    members.stream().sorted(Member::compareTo).forEach(System.out::println);
+                    members.stream().sorted(Member::compareTo)
+                            .forEach(member -> System.out.println(MemberToString(member)));
                     do {
                         System.out.printf(rb.getString("program-general-enter") + "\n(%s) -\n",
                                 rb.getString("program-properties-field-2-singular").toLowerCase(),

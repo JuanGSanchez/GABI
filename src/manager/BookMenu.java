@@ -216,21 +216,24 @@ final class BookMenu {
                     arrayBooks = LibDBBook.getInstance().searchTB(currentUser, rb);
                     System.out.printf(rb.getString("program-general-order-selection") + "...\n",
                             rb.getString("program-book-properties-1"));
-                    arrayBooks.stream().sorted(Book::compareTo).forEach(System.out::println);
+                    arrayBooks.stream().sorted(Book::compareTo)
+                            .forEach(book -> System.out.println(BookToString(book)));
                     isValid = true;
                     break;
                 case 2:
                     arrayBooks = LibDBBook.getInstance().searchTB(currentUser, rb);
                     System.out.printf(rb.getString("program-general-order-selection") + "...\n",
                             rb.getString("program-book-properties-2"));
-                    arrayBooks.stream().sorted(Comparator.comparing(Book::getTitle).thenComparingInt(Book::getIdBook)).forEach(System.out::println);
+                    arrayBooks.stream().sorted(Comparator.comparing(Book::getTitle).thenComparingInt(Book::getIdBook))
+                            .forEach(book -> System.out.println(BookToString(book)));
                     isValid = true;
                     break;
                 case 3:
                     arrayBooks = LibDBBook.getInstance().searchTB(currentUser, rb);
                     System.out.printf(rb.getString("program-general-order-selection") + "...\n",
                             rb.getString("program-book-properties-3"));
-                    arrayBooks.stream().sorted(Comparator.comparing(Book::getAuthor).thenComparing(Book::getTitle)).forEach(System.out::println);
+                    arrayBooks.stream().sorted(Comparator.comparing(Book::getAuthor).thenComparing(Book::getTitle))
+                            .forEach(book -> System.out.println(BookToString(book)));
                     isValid = true;
                     break;
                 case 0:
@@ -338,7 +341,8 @@ final class BookMenu {
                 } else {
                     List<Book> books = LibDBBook.getInstance().searchTB(currentUser, opt, fragString, rb);
                     Set<Integer> idbooks = books.stream().map(Book::getIdBook).collect(Collectors.toSet());
-                    books.stream().sorted(Book::compareTo).forEach(System.out::println);
+                    books.stream().sorted(Book::compareTo)
+                            .forEach(book -> System.out.println(BookToString(book)));
                     do {
                         System.out.printf(rb.getString("program-general-enter") + "\n(%s) -\n",
                                 rb.getString("program-properties-field-1-singular"),

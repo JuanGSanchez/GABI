@@ -179,12 +179,7 @@ public class Loan implements Comparable<Loan>, Serializable {
      */
     @Override
     public String toString() {
-        String desc = this.getClass().getSimpleName() + " " + idLoan + ": Libro " + idBook + " a Socio " + idMember + " el "
-                      + dateLoan.format(DateTimeFormatter.ISO_LOCAL_DATE);
-        if (book != null) {
-            desc += "\n\t" + member + "\n\t" + book;
-        }
-        return desc;
+        return "%s " + idLoan + ": %s " + idBook + " %s " + idMember + " %s " + dateLoan.format(DateTimeFormatter.ISO_LOCAL_DATE);
     }
 
     /**

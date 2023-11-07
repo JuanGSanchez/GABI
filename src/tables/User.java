@@ -124,7 +124,7 @@ public class User implements Comparable<User> {
      */
     @Override
     public String toString() {
-        return String.format("%s %d: %-10s", this.getClass().getSimpleName(), this.idUser, this.name);
+        return "%s " + String.format("%d: %-10s", this.idUser, this.name);
     }
 
     /**

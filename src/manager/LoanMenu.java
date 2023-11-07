@@ -243,7 +243,8 @@ final class LoanMenu {
                     } else {
                         List<Member> members = LibDBMember.getInstance().searchTB(currentUser, opt, fragString, rb);
                         Set<Integer> idsocs = members.stream().map(Member::getIdMember).collect(Collectors.toSet());
-                        members.stream().sorted(Member::compareTo).forEach(System.out::println);
+                        members.stream().sorted(Member::compareTo)
+                                .forEach(member -> System.out.println(MemberToString(member)));
                         do {
                             System.out.printf(rb.getString("program-general-enter") + "\n(%s) -\n",
                                     rb.getString("program-properties-field-2-singular").toLowerCase(),
@@ -299,7 +300,8 @@ final class LoanMenu {
                     } else {
                         List<Book> books = LibDBBook.getInstance().searchTB(currentUser, opt, fragString, rb);
                         Set<Integer> idlibs = books.stream().map(Book::getIdBook).collect(Collectors.toSet());
-                        books.stream().sorted(Book::compareTo).forEach(System.out::println);
+                        books.stream().sorted(Book::compareTo)
+                                .forEach(book -> System.out.println(BookToString(book)));
                         do {
                             System.out.printf(rb.getString("program-general-enter") + "\n(%s) -\n",
                                     rb.getString("program-properties-field-1-singular").toLowerCase(),
@@ -367,28 +369,32 @@ final class LoanMenu {
                     arrayLoans = loadDataList(scan, currentUser, LibDBLoan.getInstance());
                     System.out.printf(rb.getString("program-general-order-selection") + "...\n",
                             rb.getString("program-loan-properties-1"));
-                    arrayLoans.stream().sorted(Loan::compareTo).forEach(System.out::println);
+                    arrayLoans.stream().sorted(Loan::compareTo)
+                            .forEach(loan -> System.out.println(LoanToString(loan)));
                     isValid = true;
                     break;
                 case 2:
                     arrayLoans = loadDataList(scan, currentUser, LibDBLoan.getInstance());
                     System.out.printf(rb.getString("program-general-order-selection") + "...\n",
                             rb.getString("program-loan-properties-2"));
-                    arrayLoans.stream().sorted(Comparator.comparing(Loan::getIdMember)).forEach(System.out::println);
+                    arrayLoans.stream().sorted(Comparator.comparing(Loan::getIdMember))
+                            .forEach(loan -> System.out.println(LoanToString(loan)));
                     isValid = true;
                     break;
                 case 3:
                     arrayLoans = loadDataList(scan, currentUser, LibDBLoan.getInstance());
                     System.out.printf(rb.getString("program-general-order-selection") + "...\n",
                             rb.getString("program-loan-properties-3"));
-                    arrayLoans.stream().sorted(Comparator.comparing(Loan::getIdBook)).forEach(System.out::println);
+                    arrayLoans.stream().sorted(Comparator.comparing(Loan::getIdBook))
+                            .forEach(loan -> System.out.println(LoanToString(loan)));
                     isValid = true;
                     break;
                 case 4:
                     arrayLoans = loadDataList(scan, currentUser, LibDBLoan.getInstance());
                     System.out.printf(rb.getString("program-general-order-selection") + "...\n",
                             rb.getString("program-loan-properties-4"));
-                    arrayLoans.stream().sorted(Comparator.comparing(Loan::getDateLoan)).forEach(System.out::println);
+                    arrayLoans.stream().sorted(Comparator.comparing(Loan::getDateLoan).thenComparing(Loan::getIdLoan))
+                            .forEach(loan -> System.out.println(LoanToString(loan)));
                     isValid = true;
                     break;
                 case 0:
@@ -501,7 +507,8 @@ final class LoanMenu {
                         loans = LibDBLoan.getInstance().searchTB(currentUser, date, rb);
                     }
                     Set<Integer> idloans = loans.stream().map(Loan::getIdLoan).collect(Collectors.toSet());
-                    loans.stream().sorted(Loan::compareTo).forEach(System.out::println);
+                    loans.stream().sorted(Loan::compareTo)
+                            .forEach(loan -> System.out.println(LoanToString(loan)));
                     do {
                         System.out.printf(rb.getString("program-general-enter") + "\n(%s) -\n",
                                 rb.getString("program-properties-field-3-singular").toLowerCase(),
