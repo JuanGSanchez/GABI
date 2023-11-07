@@ -224,7 +224,7 @@ final class BookMenu {
                     arrayBooks = LibDBBook.getInstance().searchTB(currentUser, rb);
                     System.out.printf(rb.getString("program-general-order-selection") + "...\n",
                             rb.getString("program-book-properties-2"));
-                    arrayBooks.stream().sorted(Comparator.comparing(Book::getTitle).thenComparingInt(Book::getIdBook))
+                    arrayBooks.stream().sorted(Comparator.comparing(Book::getTitle).thenComparingInt(Book::getID))
                             .forEach(book -> System.out.println(BookToString(book)));
                     isValid = true;
                     break;
@@ -340,7 +340,7 @@ final class BookMenu {
                     nBook--;
                 } else {
                     List<Book> books = LibDBBook.getInstance().searchTB(currentUser, opt, fragString, rb);
-                    Set<Integer> idbooks = books.stream().map(Book::getIdBook).collect(Collectors.toSet());
+                    Set<Integer> idbooks = books.stream().map(Book::getID).collect(Collectors.toSet());
                     books.stream().sorted(Book::compareTo)
                             .forEach(book -> System.out.println(BookToString(book)));
                     do {

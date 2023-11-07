@@ -3,7 +3,7 @@
  */
 package tables;
 
-import java.io.Serializable;
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,11 +14,12 @@ import java.util.List;
  * @author JuanGS
  * @version 1.0
  */
-public class Member implements Comparable<Member>, Serializable {
+public final class Member extends Entity implements Comparable<Member> {
     /**
-     * ID del socio
+     * Identificador de clase para serialización
      */
-    private final int idMember;
+    @Serial
+    private static final long serialVersionUID = 2311070003L;
     /**
      * Nombre del socio
      */
@@ -36,37 +37,28 @@ public class Member implements Comparable<Member>, Serializable {
      * Constructor completo de la clase
      * designado para creación de entrada
      *
-     * @param idMember     ID del socio
+     * @param ID      ID del socio
      * @param name    Nombre del socio
      * @param surname Apellidos del socio
      */
-    public Member(int idMember, String name, String surname) {
-        this(idMember, name, surname, null);
+    public Member(int ID, String name, String surname) {
+        this(ID, name, surname, null);
     }
 
     /**
      * Constructor completo de la clase
      * designado para recolección de entrada
      *
-     * @param idMember     ID del socio
-     * @param name    Nombre del socio
-     * @param surname Apellidos del socio
-     * @param listBook  Lista de libros prestados
+     * @param ID       ID del socio
+     * @param name     Nombre del socio
+     * @param surname  Apellidos del socio
+     * @param listBook Lista de libros prestados
      */
-    public Member(int idMember, String name, String surname, List<Book> listBook) {
-        this.idMember = idMember;
+    public Member(int ID, String name, String surname, List<Book> listBook) {
+        super(ID);
         this.name = name;
         this.surname = surname;
         this.listBook = listBook;
-    }
-
-    /**
-     * Método getter de la variable ID
-     *
-     * @return ID del socio
-     */
-    public final int getIdMember() {
-        return idMember;
     }
 
     /**
@@ -74,7 +66,7 @@ public class Member implements Comparable<Member>, Serializable {
      *
      * @return Nombre del socio
      */
-    public final String getName() {
+    public String getName() {
         return name;
     }
 
@@ -83,7 +75,7 @@ public class Member implements Comparable<Member>, Serializable {
      *
      * @return Apellidos del socio
      */
-    public final String getSurname() {
+    public String getSurname() {
         return surname;
     }
 
@@ -134,7 +126,7 @@ public class Member implements Comparable<Member>, Serializable {
      */
     @Override
     public String toString() {
-        return "%s " + idMember + ":  " + String.format("%-20s", name) + "  " + String.format("%-40s", surname);
+        return super.toString() + String.format("%-20s", name) + "  " + String.format("%-40s", surname);
     }
 
     /**
@@ -146,6 +138,6 @@ public class Member implements Comparable<Member>, Serializable {
      */
     @Override
     public int compareTo(Member otherMember) {
-        return this.idMember - otherMember.getIdMember();
+        return this.getID() - otherMember.getID();
     }
 }

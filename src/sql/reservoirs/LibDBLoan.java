@@ -163,7 +163,7 @@ public class LibDBLoan implements LibDAO<Loan> {
                 throw new SQLException(rb.getString("dao-loan-error-location-book"));
             }
 
-            pStmt4.setInt(1, loan.getIdLoan());
+            pStmt4.setInt(1, loan.getID());
             pStmt4.setInt(2, loan.getIdMember());
             pStmt4.setInt(3, loan.getIdBook());
             pStmt4.setDate(4, Date.valueOf(loan.getDateLoan()));

@@ -3,6 +3,8 @@
  */
 package tables;
 
+import java.io.Serial;
+
 /**
  * Clase de la tabla de datos de usuarios
  * permitidos en la base de datos
@@ -10,17 +12,18 @@ package tables;
  * @author JuanGS
  * @version 1.0
  */
-public class User implements Comparable<User> {
+public final class User extends Entity implements Comparable<User> {
     /**
-     * ID de usuario en la tabla de datos
+     * Identificador de clase para serialización
      */
-    private final int idUser;
+    @Serial
+    private static final long serialVersionUID = 2311070005L;
     /**
      * Nombre de usuario
      */
     private final String name;
     /**
-     * Constraseña del usuario
+     * Contraseña del usuario
      */
     private final String password;
 
@@ -28,11 +31,11 @@ public class User implements Comparable<User> {
      * Constructor de la clase para devolver
      * el objeto sin contraseña
      *
-     * @param idUser ID de usuario en la tabla de datos
-     * @param name   Nombre de usuario
+     * @param ID   ID de usuario en la tabla de datos
+     * @param name Nombre de usuario
      */
-    public User(int idUser, String name) {
-        this(idUser, name, "");
+    public User(int ID, String name) {
+        this(ID, name, "");
     }
 
     /**
@@ -41,7 +44,7 @@ public class User implements Comparable<User> {
      * por el programa
      *
      * @param name     Nombre de usuario
-     * @param password Constraseña del usuario
+     * @param password Contraseña del usuario
      */
     public User(String name, String password) {
         this(0, name, password);
@@ -51,23 +54,14 @@ public class User implements Comparable<User> {
      * Constructor completo de la clase
      * para la entrada de datos
      *
-     * @param idUser   ID de usuario en la tabla de datos
+     * @param ID       ID de usuario en la tabla de datos
      * @param name     Nombre de usuario
-     * @param password Constraseña del usuario
+     * @param password Contraseña del usuario
      */
-    public User(int idUser, String name, String password) {
-        this.idUser = idUser;
+    public User(int ID, String name, String password) {
+        super(ID);
         this.name = name;
         this.password = password;
-    }
-
-    /**
-     * Método getter de la ID del usuario
-     *
-     * @return ID de usuario en la tabla de datos
-     */
-    public final int getIdUser() {
-        return idUser;
     }
 
     /**
@@ -75,7 +69,7 @@ public class User implements Comparable<User> {
      *
      * @return Nombre de usuario
      */
-    public final String getName() {
+    public String getName() {
         return name;
     }
 
@@ -83,9 +77,9 @@ public class User implements Comparable<User> {
      * Método getter de la contraseña,
      * para pasarlo a la base de datos
      *
-     * @return Constraseña del usuario
+     * @return Contraseña del usuario
      */
-    public final String getPassword() {
+    public String getPassword() {
         return password;
     }
 
@@ -118,13 +112,13 @@ public class User implements Comparable<User> {
     }
 
     /**
-     * Método de descripción del ojeto
+     * Método sobreescrito de verbalización del objeto instanciado
      *
-     * @return Texto de descripción del objeto
+     * @return Información del usuario
      */
     @Override
     public String toString() {
-        return "%s " + String.format("%d: %-10s", this.idUser, this.name);
+        return super.toString() + String.format("%-10s", this.name);
     }
 
     /**
@@ -136,6 +130,6 @@ public class User implements Comparable<User> {
      */
     @Override
     public int compareTo(User otherUser) {
-        return this.idUser - otherUser.getIdUser();
+        return this.getID() - otherUser.getID();
     }
 }

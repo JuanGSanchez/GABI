@@ -227,7 +227,7 @@ final class UserMenu {
                     arrayUsers = UserDerby.getInstance().searchUser(currentUser, rb);
                     System.out.printf(rb.getString("program-general-order-selection") + "...\n",
                             rb.getString("program-user-properties-2"));
-                    arrayUsers.stream().sorted(Comparator.comparing(User::getName).thenComparing(User::getIdUser))
+                    arrayUsers.stream().sorted(Comparator.comparing(User::getName).thenComparing(User::getID))
                             .forEach(user -> System.out.printf(user + "\n",
                                     rb.getString("program-properties-field-4-singular")));
                     isValid = true;
@@ -336,7 +336,7 @@ final class UserMenu {
                     nUser--;
                 } else {
                     List<User> users = UserDerby.getInstance().searchUser(currentUser, fragString, rb);
-                    Set<Integer> idusers = users.stream().map(User::getIdUser).collect(Collectors.toSet());
+                    Set<Integer> idusers = users.stream().map(User::getID).collect(Collectors.toSet());
                     users.stream().sorted(User::compareTo)
                             .forEach(user -> System.out.printf(user + "\n",
                                     rb.getString("program-properties-field-4-singular")));

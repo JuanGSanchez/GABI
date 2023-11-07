@@ -242,7 +242,7 @@ final class LoanMenu {
                         LibDBMember.getInstance().searchTB(currentUser, idMember, rb);
                     } else {
                         List<Member> members = LibDBMember.getInstance().searchTB(currentUser, opt, fragString, rb);
-                        Set<Integer> idsocs = members.stream().map(Member::getIdMember).collect(Collectors.toSet());
+                        Set<Integer> idsocs = members.stream().map(Member::getID).collect(Collectors.toSet());
                         members.stream().sorted(Member::compareTo)
                                 .forEach(member -> System.out.println(MemberToString(member)));
                         do {
@@ -299,7 +299,7 @@ final class LoanMenu {
                         LibDBBook.getInstance().searchTB(currentUser, idBook, rb);
                     } else {
                         List<Book> books = LibDBBook.getInstance().searchTB(currentUser, opt, fragString, rb);
-                        Set<Integer> idlibs = books.stream().map(Book::getIdBook).collect(Collectors.toSet());
+                        Set<Integer> idlibs = books.stream().map(Book::getID).collect(Collectors.toSet());
                         books.stream().sorted(Book::compareTo)
                                 .forEach(book -> System.out.println(BookToString(book)));
                         do {
@@ -393,7 +393,7 @@ final class LoanMenu {
                     arrayLoans = loadDataList(scan, currentUser, LibDBLoan.getInstance());
                     System.out.printf(rb.getString("program-general-order-selection") + "...\n",
                             rb.getString("program-loan-properties-4"));
-                    arrayLoans.stream().sorted(Comparator.comparing(Loan::getDateLoan).thenComparing(Loan::getIdLoan))
+                    arrayLoans.stream().sorted(Comparator.comparing(Loan::getDateLoan).thenComparing(Loan::getID))
                             .forEach(loan -> System.out.println(LoanToString(loan)));
                     isValid = true;
                     break;
@@ -506,7 +506,7 @@ final class LoanMenu {
                     } else {
                         loans = LibDBLoan.getInstance().searchTB(currentUser, date, rb);
                     }
-                    Set<Integer> idloans = loans.stream().map(Loan::getIdLoan).collect(Collectors.toSet());
+                    Set<Integer> idloans = loans.stream().map(Loan::getID).collect(Collectors.toSet());
                     loans.stream().sorted(Loan::compareTo)
                             .forEach(loan -> System.out.println(LoanToString(loan)));
                     do {

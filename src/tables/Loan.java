@@ -3,7 +3,7 @@
  */
 package tables;
 
-import java.io.Serializable;
+import java.io.Serial;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
@@ -14,11 +14,12 @@ import java.time.format.DateTimeFormatter;
  * @author JuanGS
  * @version 1.0
  */
-public class Loan implements Comparable<Loan>, Serializable {
+public final class Loan extends Entity implements Comparable<Loan> {
     /**
-     * ID del préstamo
+     * Identificador de clase para serialización
      */
-    private final int idLoan;
+    @Serial
+    private static final long serialVersionUID = 2311070004L;
     /**
      * ID del socio
      */
@@ -44,40 +45,40 @@ public class Loan implements Comparable<Loan>, Serializable {
      * Constructor completo de la clase,
      * designado para creación de entrada
      *
-     * @param idLoan   ID del préstamo
+     * @param ID   ID del préstamo
      * @param idMember ID del socio
      * @param idBook   ID del libro
      */
-    public Loan(int idLoan, int idMember, int idBook) {
-        this(idLoan, idMember, idBook, LocalDate.now());
+    public Loan(int ID, int idMember, int idBook) {
+        this(ID, idMember, idBook, LocalDate.now());
     }
 
     /**
      * Constructor completo de la clase,
      * designado para recolección de entrada
      *
-     * @param idLoan   ID del préstamo
+     * @param ID   ID del préstamo
      * @param idMember ID del socio
      * @param idBook   ID del libro
      * @param dateLoan fecha del préstamo
      */
-    public Loan(int idLoan, int idMember, int idBook, LocalDate dateLoan) {
-        this(idLoan, idMember, idBook, dateLoan, null, null);
+    public Loan(int ID, int idMember, int idBook, LocalDate dateLoan) {
+        this(ID, idMember, idBook, dateLoan, null, null);
     }
 
     /**
      * Constructor completo de la clase,
      * designado para recolección de entrada con más detalle
      *
-     * @param idLoan   ID del préstamo
+     * @param ID   ID del préstamo
      * @param idMember ID del socio
      * @param idBook   ID del libro
      * @param dateLoan fecha del préstamo
      * @param member   Socio asociado al préstamo
      * @param book     Libro asociado al préstamo
      */
-    public Loan(int idLoan, int idMember, int idBook, LocalDate dateLoan, Member member, Book book) {
-        this.idLoan = idLoan;
+    public Loan(int ID, int idMember, int idBook, LocalDate dateLoan, Member member, Book book) {
+        super(ID);
         this.idMember = idMember;
         this.idBook = idBook;
         this.dateLoan = dateLoan;
@@ -86,20 +87,11 @@ public class Loan implements Comparable<Loan>, Serializable {
     }
 
     /**
-     * Método getter del ID del préstamo
-     *
-     * @return ID del préstamo
-     */
-    public final int getIdLoan() {
-        return idLoan;
-    }
-
-    /**
      * Método getter del ID del socio
      *
      * @return ID del socio
      */
-    public final int getIdMember() {
+    public int getIdMember() {
         return idMember;
     }
 
@@ -108,7 +100,7 @@ public class Loan implements Comparable<Loan>, Serializable {
      *
      * @return ID del libro
      */
-    public final int getIdBook() {
+    public int getIdBook() {
         return idBook;
     }
 
@@ -117,7 +109,7 @@ public class Loan implements Comparable<Loan>, Serializable {
      *
      * @return Fecha del préstamo
      */
-    public final LocalDate getDateLoan() {
+    public LocalDate getDateLoan() {
         return dateLoan;
     }
 
@@ -179,7 +171,7 @@ public class Loan implements Comparable<Loan>, Serializable {
      */
     @Override
     public String toString() {
-        return "%s " + idLoan + ": %s " + idBook + " %s " + idMember + " %s " + dateLoan.format(DateTimeFormatter.ISO_LOCAL_DATE);
+        return super.toString() + "%s " + idBook + " %s " + idMember + " %s " + dateLoan.format(DateTimeFormatter.ISO_LOCAL_DATE);
     }
 
     /**
@@ -191,6 +183,6 @@ public class Loan implements Comparable<Loan>, Serializable {
      */
     @Override
     public int compareTo(Loan otherLoan) {
-        return this.idLoan - otherLoan.getIdLoan();
+        return this.getID() - otherLoan.getID();
     }
 }

@@ -340,7 +340,7 @@ final class MemberMenu {
                     nMember--;
                 } else {
                     List<Member> members = LibDBMember.getInstance().searchTB(currentUser, opt, fragString, rb);
-                    Set<Integer> idmembers = members.stream().map(Member::getIdMember).collect(Collectors.toSet());
+                    Set<Integer> idmembers = members.stream().map(Member::getID).collect(Collectors.toSet());
                     members.stream().sorted(Member::compareTo)
                             .forEach(member -> System.out.println(MemberToString(member)));
                     do {

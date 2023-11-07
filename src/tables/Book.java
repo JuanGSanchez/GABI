@@ -3,7 +3,7 @@
  */
 package tables;
 
-import java.io.Serializable;
+import java.io.Serial;
 
 /**
  * Clase de la tabla de datos de libros,
@@ -12,11 +12,12 @@ import java.io.Serializable;
  * @author JuanGS
  * @version 1.0
  */
-public class Book implements Comparable<Book>, Serializable {
+public final class Book extends Entity implements Comparable<Book> {
     /**
-     * ID del libro
+     * Identificador de clase para serialización
      */
-    private final int idBook;
+    @Serial
+    private static final long serialVersionUID = 2311070002L;
     /**
      * Título del libro
      */
@@ -34,37 +35,28 @@ public class Book implements Comparable<Book>, Serializable {
      * Constructor completo de la clase,
      * designado para creación de entrada
      *
-     * @param idBook ID del libro
+     * @param ID     ID del libro
      * @param title  Título del libro
      * @param author Autor (principal) del libro
      */
-    public Book(int idBook, String title, String author) {
-        this(idBook, title, author, false);
+    public Book(int ID, String title, String author) {
+        this(ID, title, author, false);
     }
 
     /**
      * Constructor completo de la clase,
      * designado para recolección de entrada
      *
-     * @param idBook ID del libro
+     * @param ID     ID del libro
      * @param title  Título del libro
      * @param author Autor (principal) del libro
      * @param lent   Estado de disponibilidad del libro
      */
-    public Book(int idBook, String title, String author, boolean lent) {
-        this.idBook = idBook;
+    public Book(int ID, String title, String author, boolean lent) {
+        super(ID);
         this.title = title;
         this.author = author;
         this.lent = lent;
-    }
-
-    /**
-     * Método getter de la variable ID
-     *
-     * @return ID del libro
-     */
-    public final int getIdBook() {
-        return idBook;
     }
 
     /**
@@ -72,7 +64,7 @@ public class Book implements Comparable<Book>, Serializable {
      *
      * @return Título del libro
      */
-    public final String getTitle() {
+    public String getTitle() {
         return title;
     }
 
@@ -81,7 +73,7 @@ public class Book implements Comparable<Book>, Serializable {
      *
      * @return Autor (principal) del libro
      */
-    public final String getAuthor() {
+    public String getAuthor() {
         return author;
     }
 
@@ -90,7 +82,7 @@ public class Book implements Comparable<Book>, Serializable {
      *
      * @return estado "prestado" del libro
      */
-    public final boolean isLent() {
+    public boolean isLent() {
         return lent;
     }
 
@@ -132,7 +124,7 @@ public class Book implements Comparable<Book>, Serializable {
      */
     @Override
     public String toString() {
-        return "%s " + idBook + ":  " + String.format("%-120s", title) + "  ;  " + String.format("%-60s", author) + "  (%s)";
+        return super.toString() + String.format("%-120s", title) + "  ;  " + String.format("%-60s", author) + "  (%s)";
     }
 
     /**
@@ -144,6 +136,6 @@ public class Book implements Comparable<Book>, Serializable {
      */
     @Override
     public int compareTo(Book otherBook) {
-        return this.idBook - otherBook.getIdBook();
+        return this.getID() - otherBook.getID();
     }
 }

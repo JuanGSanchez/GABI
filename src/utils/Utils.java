@@ -226,7 +226,7 @@ public final class Utils {
         List<Book> listBook = member.getListBook();
         if (listBook != null) {
             if (!listBook.isEmpty()) desc += "\n\t";
-            desc += listBook.stream().sorted(Comparator.comparing(Book::getIdBook))
+            desc += listBook.stream().sorted(Comparator.comparing(Book::getID))
                     .map(Utils::BookToString).collect(Collectors.joining("\n\t"));
             desc += "\n\t " + listBook.size() + " " + String.format(resourceBundle.getString("dao-book-lent-total"),
                     (listBook.size() == 1 ? resourceBundle.getString("dao-book-lent-true-singular") : resourceBundle.getString("dao-book-lent-true-plural")));

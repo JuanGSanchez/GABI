@@ -138,7 +138,7 @@ public final class LibDBMember implements LibDAO<Member> {
                 rs2.close();
             }
 
-            pStmt3.setInt(1, member.getIdMember());
+            pStmt3.setInt(1, member.getID());
             pStmt3.setString(2, member.getName());
             pStmt3.setString(3, member.getSurname());
             if (pStmt3.executeUpdate() == 1) {

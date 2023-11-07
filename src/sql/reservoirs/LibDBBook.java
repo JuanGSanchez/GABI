@@ -133,7 +133,7 @@ public final class LibDBBook implements LibDAO<Book> {
                 rs.close();
             }
 
-            pStmt2.setInt(1, book.getIdBook());
+            pStmt2.setInt(1, book.getID());
             pStmt2.setString(2, book.getTitle());
             pStmt2.setString(3, book.getAuthor());
             pStmt2.setBoolean(4, book.isLent());

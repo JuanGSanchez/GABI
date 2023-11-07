@@ -171,7 +171,7 @@ public final class UserDerby implements UserDAO {
                 s2.executeUpdate("GRANT ALL PRIVILEGES ON TABLE " + configProps.getProperty("database-name") +
                                  "." + configProps.getProperty("database-table-" + i) + " TO " + newUser.getName());
             }
-            pStmt2.setInt(1, newUser.getIdUser());
+            pStmt2.setInt(1, newUser.getID());
             pStmt2.setString(2, newUser.getName());
             if (pStmt2.executeUpdate() == 1) {
                 System.out.printf("  %s.\n", rb.getString("dao-user-add"));
