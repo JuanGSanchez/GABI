@@ -25,7 +25,7 @@ import static utils.Utils.*;
  * @version 1.0
  * @since 07-2023
  */
-final class LoanMenu {
+final class LoanMenu extends EntityMenu {
     /**
      * Método para almacenar aparte el texto del menú principal
      */
@@ -136,6 +136,7 @@ final class LoanMenu {
      * @param idLoan Máxima ID de préstamos dentro de la base de datos
      * @return Valores actualizados de nLoan y idLoan
      */
+    @Override
     int[] selectionMenu(Scanner scan, int nLoan, int idLoan) {
         boolean checkMenu = true;
         int optionMenu;
@@ -244,7 +245,7 @@ final class LoanMenu {
                         List<Member> members = LibDBMember.getInstance().searchTB(currentUser, opt, fragString, rb);
                         Set<Integer> idsocs = members.stream().map(Member::getID).collect(Collectors.toSet());
                         members.stream().sorted(Member::compareTo)
-                                .forEach(member -> System.out.println(MemberToString(member)));
+                                .forEach(member -> System.out.println(memberToString(member)));
                         do {
                             System.out.printf(rb.getString("program-general-enter") + "\n(%s) -\n",
                                     rb.getString("program-properties-field-2-singular").toLowerCase(),
@@ -301,7 +302,7 @@ final class LoanMenu {
                         List<Book> books = LibDBBook.getInstance().searchTB(currentUser, opt, fragString, rb);
                         Set<Integer> idlibs = books.stream().map(Book::getID).collect(Collectors.toSet());
                         books.stream().sorted(Book::compareTo)
-                                .forEach(book -> System.out.println(BookToString(book)));
+                                .forEach(book -> System.out.println(bookToString(book)));
                         do {
                             System.out.printf(rb.getString("program-general-enter") + "\n(%s) -\n",
                                     rb.getString("program-properties-field-1-singular").toLowerCase(),
@@ -370,7 +371,7 @@ final class LoanMenu {
                     System.out.printf(rb.getString("program-general-order-selection") + "...\n",
                             rb.getString("program-loan-properties-1"));
                     arrayLoans.stream().sorted(Loan::compareTo)
-                            .forEach(loan -> System.out.println(LoanToString(loan)));
+                            .forEach(loan -> System.out.println(loanToString(loan)));
                     isValid = true;
                     break;
                 case 2:
@@ -378,7 +379,7 @@ final class LoanMenu {
                     System.out.printf(rb.getString("program-general-order-selection") + "...\n",
                             rb.getString("program-loan-properties-2"));
                     arrayLoans.stream().sorted(Comparator.comparing(Loan::getIdMember))
-                            .forEach(loan -> System.out.println(LoanToString(loan)));
+                            .forEach(loan -> System.out.println(loanToString(loan)));
                     isValid = true;
                     break;
                 case 3:
@@ -386,7 +387,7 @@ final class LoanMenu {
                     System.out.printf(rb.getString("program-general-order-selection") + "...\n",
                             rb.getString("program-loan-properties-3"));
                     arrayLoans.stream().sorted(Comparator.comparing(Loan::getIdBook))
-                            .forEach(loan -> System.out.println(LoanToString(loan)));
+                            .forEach(loan -> System.out.println(loanToString(loan)));
                     isValid = true;
                     break;
                 case 4:
@@ -394,7 +395,7 @@ final class LoanMenu {
                     System.out.printf(rb.getString("program-general-order-selection") + "...\n",
                             rb.getString("program-loan-properties-4"));
                     arrayLoans.stream().sorted(Comparator.comparing(Loan::getDateLoan).thenComparing(Loan::getID))
-                            .forEach(loan -> System.out.println(LoanToString(loan)));
+                            .forEach(loan -> System.out.println(loanToString(loan)));
                     isValid = true;
                     break;
                 case 0:
@@ -508,7 +509,7 @@ final class LoanMenu {
                     }
                     Set<Integer> idloans = loans.stream().map(Loan::getID).collect(Collectors.toSet());
                     loans.stream().sorted(Loan::compareTo)
-                            .forEach(loan -> System.out.println(LoanToString(loan)));
+                            .forEach(loan -> System.out.println(loanToString(loan)));
                     do {
                         System.out.printf(rb.getString("program-general-enter") + "\n(%s) -\n",
                                 rb.getString("program-properties-field-3-singular").toLowerCase(),

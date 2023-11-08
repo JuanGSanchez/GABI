@@ -207,7 +207,7 @@ public final class Utils {
      * @param book Objeto Book a describir
      * @return Descripción localizada del objeto
      */
-    public static String BookToString(Book book) {
+    public static String bookToString(Book book) {
         return String.format(book.toString(),
                 resourceBundle.getString("program-properties-field-1-singular"),
                 book.isLent() ? resourceBundle.getString("dao-book-lent-true") : resourceBundle.getString("dao-book-lent-false"));
@@ -220,14 +220,14 @@ public final class Utils {
      * @param member Objeto Member a describir
      * @return Descripción localizada del objeto
      */
-    public static String MemberToString(Member member) {
+    public static String memberToString(Member member) {
         String desc = String.format(member.toString(),
                 resourceBundle.getString("program-properties-field-2-singular"));
         List<Book> listBook = member.getListBook();
         if (listBook != null) {
             if (!listBook.isEmpty()) desc += "\n\t";
             desc += listBook.stream().sorted(Comparator.comparing(Book::getID))
-                    .map(Utils::BookToString).collect(Collectors.joining("\n\t"));
+                    .map(Utils::bookToString).collect(Collectors.joining("\n\t"));
             desc += "\n\t " + listBook.size() + " " + String.format(resourceBundle.getString("dao-book-lent-total"),
                     (listBook.size() == 1 ? resourceBundle.getString("dao-book-lent-true-singular") : resourceBundle.getString("dao-book-lent-true-plural")));
         }
@@ -242,14 +242,26 @@ public final class Utils {
      * @param loan Objeto Loan a describir
      * @return Descripción localizada del objeto
      */
-    public static String LoanToString(Loan loan) {
+    public static String loanToString(Loan loan) {
         String desc = String.format(loan.toString(),
                 resourceBundle.getString("program-properties-field-3-singular"),
                 resourceBundle.getString("program-properties-field-1-singular"),
                 resourceBundle.getString("dao-loan-desc-1"), resourceBundle.getString("dao-loan-desc-2"));
         if (loan.getBook() != null) {
-            desc += "\n\t" + Utils.MemberToString(loan.getMember()) + "\n\t" + Utils.BookToString(loan.getBook());
+            desc += "\n\t" + Utils.memberToString(loan.getMember()) + "\n\t" + Utils.bookToString(loan.getBook());
         }
         return desc;
+    }
+
+    /**
+     * Método para componer la descripción localizada
+     * del objeto User
+     *
+     * @param user Objeto User a describir
+     * @return Descripción localizada del objeto
+     */
+    public static String userToString(User user) {
+        return String.format(user.toString(),
+                resourceBundle.getString("program-properties-field-4-singular"));
     }
 }

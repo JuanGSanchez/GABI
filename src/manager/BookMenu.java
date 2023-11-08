@@ -19,7 +19,7 @@ import static utils.Utils.*;
  * @version 1.0
  * @since 07-2023
  */
-final class BookMenu {
+final class BookMenu extends EntityMenu {
     /**
      * Variable para almacenar aparte el texto del menú principal
      */
@@ -85,10 +85,11 @@ final class BookMenu {
      * a las acciones disponibles
      *
      * @param scan   Entrada de datos por teclado
-     * @param nBook  Número de books guardados dentro de la base de datos
-     * @param idBook Máxima ID de books dentro de la base de datos
+     * @param nBook  Número de libros guardados dentro de la base de datos
+     * @param idBook Máxima ID de libros dentro de la base de datos
      * @return Valores actualizados de nBook y idBook
      */
+    @Override
     int[] selectionMenu(Scanner scan, int nBook, int idBook) {
         boolean checkMenu = true;
         int optionMenu;
@@ -217,7 +218,7 @@ final class BookMenu {
                     System.out.printf(rb.getString("program-general-order-selection") + "...\n",
                             rb.getString("program-book-properties-1"));
                     arrayBooks.stream().sorted(Book::compareTo)
-                            .forEach(book -> System.out.println(BookToString(book)));
+                            .forEach(book -> System.out.println(bookToString(book)));
                     isValid = true;
                     break;
                 case 2:
@@ -225,7 +226,7 @@ final class BookMenu {
                     System.out.printf(rb.getString("program-general-order-selection") + "...\n",
                             rb.getString("program-book-properties-2"));
                     arrayBooks.stream().sorted(Comparator.comparing(Book::getTitle).thenComparingInt(Book::getID))
-                            .forEach(book -> System.out.println(BookToString(book)));
+                            .forEach(book -> System.out.println(bookToString(book)));
                     isValid = true;
                     break;
                 case 3:
@@ -233,7 +234,7 @@ final class BookMenu {
                     System.out.printf(rb.getString("program-general-order-selection") + "...\n",
                             rb.getString("program-book-properties-3"));
                     arrayBooks.stream().sorted(Comparator.comparing(Book::getAuthor).thenComparing(Book::getTitle))
-                            .forEach(book -> System.out.println(BookToString(book)));
+                            .forEach(book -> System.out.println(bookToString(book)));
                     isValid = true;
                     break;
                 case 0:
@@ -342,10 +343,10 @@ final class BookMenu {
                     List<Book> books = LibDBBook.getInstance().searchTB(currentUser, opt, fragString, rb);
                     Set<Integer> idbooks = books.stream().map(Book::getID).collect(Collectors.toSet());
                     books.stream().sorted(Book::compareTo)
-                            .forEach(book -> System.out.println(BookToString(book)));
+                            .forEach(book -> System.out.println(bookToString(book)));
                     do {
                         System.out.printf(rb.getString("program-general-enter") + "\n(%s) -\n",
-                                rb.getString("program-properties-field-1-singular"),
+                                rb.getString("program-properties-field-1-singular").toLowerCase(),
                                 rb.getString("program-general-cancel"));
                         try {
                             ID = scan.nextInt();

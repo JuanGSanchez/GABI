@@ -18,7 +18,7 @@ import static utils.Utils.*;
  * @version 1.0
  * @since 10-2023
  */
-final class UserMenu {
+final class UserMenu extends EntityMenu {
     /**
      * Método para almacenar aparte el texto del menú principal
      */
@@ -80,9 +80,12 @@ final class UserMenu {
      * Método del menú principal del gestor de users, desde el cual se acceden
      * a las acciones disponibles
      *
-     * @param scan Entrada de datos por teclado
+     * @param scan    Entrada de datos por teclado
+     * @param nDummy  Número de socios registrados dentro de la base de datos (sin uso)
+     * @param idDummy Máxima ID de socios dentro de la base de datos (sin uso)
      */
-    void selectionMenu(Scanner scan) {
+    @Override
+    int[] selectionMenu(Scanner scan, int nDummy, int idDummy) {
         boolean checkMenu = true;
         int optionMenu;
         int nUser = 0;
@@ -147,6 +150,7 @@ final class UserMenu {
             }
         } while (checkMenu);
 
+        return new int[]{nUser, idUser};
     }
 
     /**
@@ -219,8 +223,7 @@ final class UserMenu {
                     System.out.printf(rb.getString("program-general-order-selection") + "...\n",
                             rb.getString("program-user-properties-1"));
                     arrayUsers.stream().sorted(User::compareTo)
-                            .forEach(user -> System.out.printf(user + "\n",
-                                    rb.getString("program-properties-field-4-singular")));
+                            .forEach(user -> System.out.println(userToString(user)));
                     isValid = true;
                     break;
                 case 2:
@@ -228,8 +231,7 @@ final class UserMenu {
                     System.out.printf(rb.getString("program-general-order-selection") + "...\n",
                             rb.getString("program-user-properties-2"));
                     arrayUsers.stream().sorted(Comparator.comparing(User::getName).thenComparing(User::getID))
-                            .forEach(user -> System.out.printf(user + "\n",
-                                    rb.getString("program-properties-field-4-singular")));
+                            .forEach(user -> System.out.println(userToString(user)));
                     isValid = true;
                     break;
                 case 0:
@@ -338,8 +340,7 @@ final class UserMenu {
                     List<User> users = UserDerby.getInstance().searchUser(currentUser, fragString, rb);
                     Set<Integer> idusers = users.stream().map(User::getID).collect(Collectors.toSet());
                     users.stream().sorted(User::compareTo)
-                            .forEach(user -> System.out.printf(user + "\n",
-                                    rb.getString("program-properties-field-4-singular")));
+                            .forEach(user -> System.out.println(userToString(user)));
                     do {
                         System.out.printf(rb.getString("program-general-enter") + "\n(%s) -\n",
                                 rb.getString("program-properties-field-4-singular").toLowerCase(),

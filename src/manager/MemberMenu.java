@@ -19,7 +19,7 @@ import static utils.Utils.*;
  * @version 1.0
  * @since 07-2023
  */
-final class MemberMenu {
+final class MemberMenu extends EntityMenu {
     /**
      * Método para almacenar aparte el texto del menú principal
      */
@@ -85,10 +85,11 @@ final class MemberMenu {
      * se acceden a las acciones disponibles
      *
      * @param scan     Entrada de datos por teclado
-     * @param nMember  Número de members registrados dentro de la base de datos
-     * @param idMember Máxima ID de members dentro de la base de datos
+     * @param nMember  Número de socios registrados dentro de la base de datos
+     * @param idMember Máxima ID de socios dentro de la base de datos
      * @return Valores actualizados de nMember y idMember
      */
+    @Override
     int[] selectionMenu(Scanner scan, int nMember, int idMember) {
         boolean checkMenu = true;
         int optionMenu;
@@ -217,7 +218,7 @@ final class MemberMenu {
                     System.out.printf(rb.getString("program-general-order-selection") + "...\n",
                             rb.getString("program-member-properties-1"));
                     arrayMembers.stream().sorted(Member::compareTo)
-                            .forEach(member -> System.out.println(MemberToString(member)));
+                            .forEach(member -> System.out.println(memberToString(member)));
                     isValid = true;
                     break;
                 case 2:
@@ -225,7 +226,7 @@ final class MemberMenu {
                     System.out.printf(rb.getString("program-general-order-selection") + "...\n",
                             rb.getString("program-member-properties-2"));
                     arrayMembers.stream().sorted(Comparator.comparing(Member::getName).thenComparing(Member::getSurname))
-                            .forEach(member -> System.out.println(MemberToString(member)));
+                            .forEach(member -> System.out.println(memberToString(member)));
                     isValid = true;
                     break;
                 case 3:
@@ -233,7 +234,7 @@ final class MemberMenu {
                     System.out.printf(rb.getString("program-general-order-selection") + "...\n",
                             rb.getString("program-member-properties-3"));
                     arrayMembers.stream().sorted(Comparator.comparing(Member::getSurname).thenComparing(Member::getName))
-                            .forEach(member -> System.out.println(MemberToString(member)));
+                            .forEach(member -> System.out.println(memberToString(member)));
                     isValid = true;
                     break;
                 case 0:
@@ -342,7 +343,7 @@ final class MemberMenu {
                     List<Member> members = LibDBMember.getInstance().searchTB(currentUser, opt, fragString, rb);
                     Set<Integer> idmembers = members.stream().map(Member::getID).collect(Collectors.toSet());
                     members.stream().sorted(Member::compareTo)
-                            .forEach(member -> System.out.println(MemberToString(member)));
+                            .forEach(member -> System.out.println(memberToString(member)));
                     do {
                         System.out.printf(rb.getString("program-general-enter") + "\n(%s) -\n",
                                 rb.getString("program-properties-field-2-singular").toLowerCase(),

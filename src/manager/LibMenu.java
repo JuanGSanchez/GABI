@@ -203,9 +203,9 @@ public final class LibMenu {
         int optionMenu;
         int[] count;
 
-        BookMenu lMenu = new BookMenu(currentUser, configProps, rb);
-        MemberMenu sMenu = new MemberMenu(currentUser, configProps, rb);
-        LoanMenu pMenu = new LoanMenu(currentUser, configProps, rb);
+        EntityMenu lMenu = new BookMenu(currentUser, configProps, rb);
+        EntityMenu sMenu = new MemberMenu(currentUser, configProps, rb);
+        EntityMenu pMenu = new LoanMenu(currentUser, configProps, rb);
 
         do {
             count = LibDBBook.getInstance().countTB(currentUser, rb);
@@ -247,8 +247,8 @@ public final class LibMenu {
                     break;
                 case 4:
                     if (currentUser.getName().equals(configProps.getProperty("database-name"))) {
-                        UserMenu uMenu = new UserMenu(currentUser, configProps, rb);
-                        uMenu.selectionMenu(scanMenu);
+                        EntityMenu uMenu = new UserMenu(currentUser, configProps, rb);
+                        uMenu.selectionMenu(scanMenu, 0, 0);
                     } else {
                         System.err.printf("  %s\n", rb.getString("program-error-entry"));
                     }
