@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 import static utils.Utils.*;
 
 /**
- * Clase del menú del gestor de users en el programa
+ * Clase del menú del gestor de usuarios en el programa
  *
  * @author JuanGS
  * @version 1.0
@@ -77,7 +77,7 @@ final class UserMenu extends EntityMenu {
     }
 
     /**
-     * Método del menú principal del gestor de users, desde el cual se acceden
+     * Método del menú principal del gestor de usuarios, desde el cual se acceden
      * a las acciones disponibles
      *
      * @param scan    Entrada de datos por teclado
@@ -244,7 +244,7 @@ final class UserMenu extends EntityMenu {
     }
 
     /**
-     * Método para buscar users en la base de datos
+     * Método para buscar usuarios en la base de datos
      * según ciertos criterios
      *
      * @param scan Entrada de datos por teclado
@@ -299,8 +299,8 @@ final class UserMenu extends EntityMenu {
      * Método para eliminar usuarios de la base de datos
      *
      * @param scan   Entrada de datos por teclado
-     * @param nUser  Número de users registrados en la base de datos
-     * @param idUser Máxima ID de user dentro de la base de datos
+     * @param nUser  Número de usuarios registrados en la base de datos
+     * @param idUser Máxima ID de usuario dentro de la base de datos
      * @return Valores actualizados de nUser y idUser
      */
     private int[] deleteUser(Scanner scan, int nUser, int idUser) {

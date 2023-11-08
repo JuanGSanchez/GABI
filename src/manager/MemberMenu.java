@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 import static utils.Utils.*;
 
 /**
- * Clase del menú del gestor de members en el programa
+ * Clase del menú del gestor de socios en el programa
  *
  * @author JuanGS
  * @version 1.0
@@ -81,7 +81,7 @@ final class MemberMenu extends EntityMenu {
     }
 
     /**
-     * Método del menú principal del gestor de members, desde el cual
+     * Método del menú principal del gestor de socios, desde el cual
      * se acceden a las acciones disponibles
      *
      * @param scan     Entrada de datos por teclado
@@ -247,7 +247,7 @@ final class MemberMenu extends EntityMenu {
     }
 
     /**
-     * Método para buscar members en la base de datos
+     * Método para buscar socios en la base de datos
      * según ciertos criterios
      *
      * @param scan Entrada de datos por teclado
@@ -302,8 +302,8 @@ final class MemberMenu extends EntityMenu {
      * Método para dar de baja socios de la base de datos
      *
      * @param scan     Entrada de datos por teclado
-     * @param nMember  Número de members registrados dentro de la base de datos
-     * @param idMember Máxima ID de members dentro de la base de datos
+     * @param nMember  Número de socios registrados dentro de la base de datos
+     * @param idMember Máxima ID de socios dentro de la base de datos
      * @return Valores actualizados de nMember y idMember
      */
     private int[] deleteMember(Scanner scan, int nMember, int idMember) {

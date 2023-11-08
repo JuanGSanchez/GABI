@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 import static utils.Utils.*;
 
 /**
- * Clase del menú del gestor de books en el programa
+ * Clase del menú del gestor de libros en el programa
  *
  * @author JuanGS
  * @version 1.0
@@ -81,7 +81,7 @@ final class BookMenu extends EntityMenu {
     }
 
     /**
-     * Método del menú principal del gestor de books, desde el cual se acceden
+     * Método del menú principal del gestor de libros, desde el cual se acceden
      * a las acciones disponibles
      *
      * @param scan   Entrada de datos por teclado
@@ -247,7 +247,7 @@ final class BookMenu extends EntityMenu {
     }
 
     /**
-     * Método para buscar books en la base de datos
+     * Método para buscar libros en la base de datos
      * según ciertos criterios
      *
      * @param scan Entrada de datos por teclado
@@ -302,8 +302,8 @@ final class BookMenu extends EntityMenu {
      * Método para eliminar libros de la base de datos
      *
      * @param scan   Entrada de datos por teclado
-     * @param nBook  Número de books guardados dentro de la base de datos
-     * @param idBook Máxima ID de books dentro de la base de datos
+     * @param nBook  Número de libros guardados dentro de la base de datos
+     * @param idBook Máxima ID de libros dentro de la base de datos
      * @return Valores actualizados de nBook y idBook
      */
     private int[] deleteBook(Scanner scan, int nBook, int idBook) {
