@@ -95,7 +95,7 @@ final class UserMenu extends EntityMenu {
         System.out.println("\n\t" + String.format(rb.getString("program-intro-menu-seed"),
                 rb.getString("program-properties-field-4-plural")).toUpperCase());
 
-        count = UserDerby.getInstance().countUser(currentUser, rb);
+        count = UserDerby.getInstance().countDB(currentUser, rb);
         if (count != null) {
             nUser = count[0];
             idUser = count[1];
@@ -185,7 +185,7 @@ final class UserMenu extends EntityMenu {
             }
 
             try {
-                UserDerby.getInstance().addUser(currentUser, new User(idUser + 1, name, password), rb);
+                UserDerby.getInstance().addDb(currentUser, new User(idUser + 1, name, password), rb);
                 nUser++;
                 idUser++;
             } catch (RuntimeException re) {
@@ -219,7 +219,7 @@ final class UserMenu extends EntityMenu {
 
             switch (opt) {
                 case 1:
-                    arrayUsers = UserDerby.getInstance().searchUser(currentUser, rb);
+                    arrayUsers = UserDerby.getInstance().searchDB(currentUser, rb);
                     System.out.printf(rb.getString("program-general-order-selection") + "...\n",
                             rb.getString("program-user-properties-1"));
                     arrayUsers.stream().sorted(User::compareTo)
@@ -227,7 +227,7 @@ final class UserMenu extends EntityMenu {
                     isValid = true;
                     break;
                 case 2:
-                    arrayUsers = UserDerby.getInstance().searchUser(currentUser, rb);
+                    arrayUsers = UserDerby.getInstance().searchDB(currentUser, rb);
                     System.out.printf(rb.getString("program-general-order-selection") + "...\n",
                             rb.getString("program-user-properties-2"));
                     arrayUsers.stream().sorted(Comparator.comparing(User::getName).thenComparing(User::getID))
@@ -334,7 +334,7 @@ final class UserMenu extends EntityMenu {
 
             try {
                 if (opt == 1) {
-                    idUser = UserDerby.getInstance().deleteUser(currentUser, ID, rb);
+                    idUser = UserDerby.getInstance().deleteDB(currentUser, ID, rb);
                     nUser--;
                 } else {
                     List<User> users = UserDerby.getInstance().searchUser(currentUser, fragString, rb);
@@ -352,7 +352,7 @@ final class UserMenu extends EntityMenu {
                                         rb.getString("program-return-1").toLowerCase());
                                 return new int[]{nUser, idUser};
                             } else if (!idusers.add(ID)) {
-                                idUser = UserDerby.getInstance().deleteUser(currentUser, ID, rb);
+                                idUser = UserDerby.getInstance().deleteDB(currentUser, ID, rb);
                                 nUser--;
                                 isValid = false;
                             } else {

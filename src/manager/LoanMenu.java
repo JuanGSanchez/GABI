@@ -333,7 +333,7 @@ final class LoanMenu extends EntityMenu {
             } while (!isPossible);
 
             try {
-                LibDBLoan.getInstance().addTB(currentUser, new Loan(idLoan + 1, idMember, idBook), rb);
+                LibDBLoan.getInstance().addDb(currentUser, new Loan(idLoan + 1, idMember, idBook), rb);
                 nLoan++;
                 idLoan++;
             } catch (RuntimeException re) {
@@ -498,7 +498,7 @@ final class LoanMenu extends EntityMenu {
 
             try {
                 if (opt == 1) {
-                    idLoan = LibDBLoan.getInstance().deleteTB(currentUser, ID, rb);
+                    idLoan = LibDBLoan.getInstance().deleteDB(currentUser, ID, rb);
                     nLoan--;
                 } else {
                     List<Loan> loans;
@@ -521,7 +521,7 @@ final class LoanMenu extends EntityMenu {
                                         rb.getString("program-return-1").toLowerCase());
                                 return new int[]{nLoan, idLoan};
                             } else if (!idloans.add(ID)) {
-                                idLoan = LibDBBook.getInstance().deleteTB(currentUser, ID, rb);
+                                idLoan = LibDBBook.getInstance().deleteDB(currentUser, ID, rb);
                                 nLoan--;
                                 isValid = false;
                             } else {

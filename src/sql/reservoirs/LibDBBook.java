@@ -83,7 +83,7 @@ public final class LibDBBook implements LibDAO<Book> {
      * @return Número de filas de la tabla de datos
      */
     @Override
-    public int[] countTB(User currentUser, ResourceBundle rb) {
+    public int[] countDB(User currentUser, ResourceBundle rb) {
         String query1 = String.format("SELECT COUNT(*) FROM %s", tableName);
         String query2 = String.format("SELECT %s FROM %s WHERE %s = (SELECT max(%s) FROM %s)",
                 field1, tableName, field1, field1, tableName);
@@ -115,7 +115,7 @@ public final class LibDBBook implements LibDAO<Book> {
      *                    del texto del programa
      */
     @Override
-    public void addTB(User currentUser, Book book, ResourceBundle rb) {
+    public void addDb(User currentUser, Book book, ResourceBundle rb) {
         String query1 = String.format("SELECT * FROM %s WHERE LOWER(%s) = LOWER(?) AND LOWER(%s) = LOWER(?)",
                 tableName, field2, field3);
         String query2 = String.format("INSERT INTO %s VALUES (?,?,?,?)", tableName);
@@ -155,7 +155,7 @@ public final class LibDBBook implements LibDAO<Book> {
      * @return Lista de objetos Libro por cada entrada de la tabla de datos
      */
     @Override
-    public List<Book> searchTB(User currentUser, ResourceBundle rb) {
+    public List<Book> searchDB(User currentUser, ResourceBundle rb) {
         String query = String.format("SELECT * FROM %s", tableName);
         List<Book> listBook = new ArrayList<>();
 
@@ -186,7 +186,7 @@ public final class LibDBBook implements LibDAO<Book> {
      * @return Lista de objetos Libro por cada entrada de la tabla de datos
      */
     @Override
-    public List<Book> searchDetailTB(User currentUser, ResourceBundle rb) {
+    public List<Book> searchDetailDB(User currentUser, ResourceBundle rb) {
         return null;
     }
 
@@ -274,7 +274,7 @@ public final class LibDBBook implements LibDAO<Book> {
      * @return ID máxima tras la eliminación de la entrada
      */
     @Override
-    public int deleteTB(User currentUser, int ID, ResourceBundle rb) {
+    public int deleteDB(User currentUser, int ID, ResourceBundle rb) {
         String query1 = String.format("SELECT %s FROM %s WHERE %s = ?", field4, tableName, field1);
         String query2 = String.format("DELETE FROM %s WHERE %s = ?", tableName, field1);
         String query3 = String.format("SELECT %s FROM %s WHERE %s = (SELECT max(%s) FROM %s)",

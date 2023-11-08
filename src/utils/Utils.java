@@ -194,9 +194,9 @@ public final class Utils {
     public static <T> List<T> loadDataList(Scanner scan, User currentUser, LibDAO<T> libDAO) {
         System.out.printf("\n  %s\n", resourceBundle.getString("program-utils-details"));
         if (scan.nextLine().equals("1")) {
-            return libDAO.searchDetailTB(currentUser, resourceBundle);
+            return libDAO.searchDetailDB(currentUser, resourceBundle);
         } else {
-            return libDAO.searchTB(currentUser, resourceBundle);
+            return libDAO.searchDB(currentUser, resourceBundle);
         }
     }
 

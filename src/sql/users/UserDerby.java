@@ -74,7 +74,7 @@ public final class UserDerby implements UserDAO {
      *                    del texto del programa
      */
     @Override
-    public void tryUser(String user, char[] password, ResourceBundle rb) {
+    public void tryDB(String user, char[] password, ResourceBundle rb) {
         try (Connection con = DriverManager.getConnection(url, user, String.valueOf(password))) {
             con.isReadOnly();
             System.out.printf("  %s %s\n", rb.getString("dao-user-id"), user);
@@ -93,7 +93,7 @@ public final class UserDerby implements UserDAO {
      *                    del texto del programa
      */
     @Override
-    public int[] countUser(User currentUser, ResourceBundle rb) {
+    public int[] countDB(User currentUser, ResourceBundle rb) {
         String query1 = String.format("SELECT COUNT(*) FROM %s", tableName);
         String query2 = String.format("SELECT %s FROM %s WHERE %s = (SELECT max(%s) FROM %s)",
                 field1, tableName, field1, field1, tableName);
@@ -124,7 +124,7 @@ public final class UserDerby implements UserDAO {
      *                    del texto del programa
      */
     @Override
-    public void addUser(User currentUser, User newUser, ResourceBundle rb) {
+    public void addDb(User currentUser, User newUser, ResourceBundle rb) {
         String setProperty = "CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(";
         String fullAccessUsers = "'derby.database.fullAccessUsers'";
         String query1 = String.format("SELECT COUNT(*) FROM %s", tableName);
@@ -188,9 +188,10 @@ public final class UserDerby implements UserDAO {
      *                    de acceso a la base de datos
      * @param rb          Recurso para la localización
      *                    del texto del programa
+     * @return Lista de usuarios recuperados de la base de datos
      */
     @Override
-    public List<User> searchUser(User currentUser, ResourceBundle rb) {
+    public List<User> searchDB(User currentUser, ResourceBundle rb) {
         String query = String.format("SELECT * FROM %s", tableName);
         List<User> listUser = new ArrayList<>();
 
@@ -209,6 +210,20 @@ public final class UserDerby implements UserDAO {
     }
 
     /**
+     * Método de búsqueda de usuarios, añadiendo más detalles
+     *
+     * @param currentUser Objeto de usuario con sus datos
+     *                    de acceso a la base de datos
+     * @param rb          Recurso para la localización
+     *                    del texto del programa
+     * @return Lista de usuarios recuperados de la base de datos
+     */
+    @Override
+    public List<User> searchDetailDB(User currentUser, ResourceBundle rb) {
+        return null;
+    }
+
+    /**
      * Método para buscar usuarios de la base de datos
      * según su nombre o un fragmento de éste
      *
@@ -217,6 +232,7 @@ public final class UserDerby implements UserDAO {
      * @param seed        Fragmento de texto a buscar entre los nombres
      * @param rb          Recurso para la localización
      *                    del texto del programa
+     * @return Lista de usuarios recuperados de la base de datos
      */
     public List<User> searchUser(User currentUser, String seed, ResourceBundle rb) {
         String query = String.format("SELECT * FROM %s WHERE LOWER(%s) LIKE LOWER(?)", tableName, field2);
@@ -249,6 +265,7 @@ public final class UserDerby implements UserDAO {
      * @param ID          Identificación numérica del usuario
      * @param rb          Recurso para la localización
      *                    del texto del programa
+     * @return Usuario recuperado de la base de datos
      */
     public User searchUser(User currentUser, int ID, ResourceBundle rb) {
         String query = String.format("SELECT * FROM %s WHERE %s = ?", tableName, field1);
@@ -280,7 +297,7 @@ public final class UserDerby implements UserDAO {
      *                    del texto del programa
      */
     @Override
-    public int deleteUser(User currentUser, int ID, ResourceBundle rb) {
+    public int deleteDB(User currentUser, int ID, ResourceBundle rb) {
         String setProperty = "CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(";
         String fullAccessUsers = "'derby.database.fullAccessUsers'";
         String query1 = String.format("SELECT %s FROM %s WHERE %s = ?", field2, tableName, field1);

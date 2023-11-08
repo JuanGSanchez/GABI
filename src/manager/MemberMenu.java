@@ -180,7 +180,7 @@ final class MemberMenu extends EntityMenu {
             }
 
             try {
-                LibDBMember.getInstance().addTB(currentUser, new Member(nMember + 1, name, surname), rb);
+                LibDBMember.getInstance().addDb(currentUser, new Member(nMember + 1, name, surname), rb);
                 nMember++;
                 idMember++;
             } catch (RuntimeException re) {
@@ -337,7 +337,7 @@ final class MemberMenu extends EntityMenu {
 
             try {
                 if (opt == 1) {
-                    idMember = LibDBMember.getInstance().deleteTB(currentUser, ID, rb);
+                    idMember = LibDBMember.getInstance().deleteDB(currentUser, ID, rb);
                     nMember--;
                 } else {
                     List<Member> members = LibDBMember.getInstance().searchTB(currentUser, opt, fragString, rb);
@@ -355,7 +355,7 @@ final class MemberMenu extends EntityMenu {
                                         rb.getString("program-return-1").toLowerCase());
                                 return new int[]{nMember, idMember};
                             } else if (!idmembers.add(ID)) {
-                                idMember = LibDBMember.getInstance().deleteTB(currentUser, ID, rb);
+                                idMember = LibDBMember.getInstance().deleteDB(currentUser, ID, rb);
                                 nMember--;
                                 isValid = false;
                             } else {

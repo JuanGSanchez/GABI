@@ -180,7 +180,7 @@ final class BookMenu extends EntityMenu {
             }
 
             try {
-                LibDBBook.getInstance().addTB(currentUser, new Book(idBook + 1, title, author), rb);
+                LibDBBook.getInstance().addDb(currentUser, new Book(idBook + 1, title, author), rb);
                 nBook++;
                 idBook++;
             } catch (RuntimeException re) {
@@ -214,7 +214,7 @@ final class BookMenu extends EntityMenu {
 
             switch (opt) {
                 case 1:
-                    arrayBooks = LibDBBook.getInstance().searchTB(currentUser, rb);
+                    arrayBooks = LibDBBook.getInstance().searchDB(currentUser, rb);
                     System.out.printf(rb.getString("program-general-order-selection") + "...\n",
                             rb.getString("program-book-properties-1"));
                     arrayBooks.stream().sorted(Book::compareTo)
@@ -222,7 +222,7 @@ final class BookMenu extends EntityMenu {
                     isValid = true;
                     break;
                 case 2:
-                    arrayBooks = LibDBBook.getInstance().searchTB(currentUser, rb);
+                    arrayBooks = LibDBBook.getInstance().searchDB(currentUser, rb);
                     System.out.printf(rb.getString("program-general-order-selection") + "...\n",
                             rb.getString("program-book-properties-2"));
                     arrayBooks.stream().sorted(Comparator.comparing(Book::getTitle).thenComparingInt(Book::getID))
@@ -230,7 +230,7 @@ final class BookMenu extends EntityMenu {
                     isValid = true;
                     break;
                 case 3:
-                    arrayBooks = LibDBBook.getInstance().searchTB(currentUser, rb);
+                    arrayBooks = LibDBBook.getInstance().searchDB(currentUser, rb);
                     System.out.printf(rb.getString("program-general-order-selection") + "...\n",
                             rb.getString("program-book-properties-3"));
                     arrayBooks.stream().sorted(Comparator.comparing(Book::getAuthor).thenComparing(Book::getTitle))
@@ -337,7 +337,7 @@ final class BookMenu extends EntityMenu {
 
             try {
                 if (opt == 1) {
-                    idBook = LibDBBook.getInstance().deleteTB(currentUser, ID, rb);
+                    idBook = LibDBBook.getInstance().deleteDB(currentUser, ID, rb);
                     nBook--;
                 } else {
                     List<Book> books = LibDBBook.getInstance().searchTB(currentUser, opt, fragString, rb);
@@ -355,7 +355,7 @@ final class BookMenu extends EntityMenu {
                                         rb.getString("program-return-1").toLowerCase());
                                 return new int[]{nBook, idBook};
                             } else if (!idbooks.add(ID)) {
-                                idBook = LibDBBook.getInstance().deleteTB(currentUser, ID, rb);
+                                idBook = LibDBBook.getInstance().deleteDB(currentUser, ID, rb);
                                 nBook--;
                                 isValid = false;
                             } else {

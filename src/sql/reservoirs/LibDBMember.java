@@ -80,7 +80,7 @@ public final class LibDBMember implements LibDAO<Member> {
      * @return Número de filas de la tabla de datos
      */
     @Override
-    public int[] countTB(User currentUser, ResourceBundle rb) {
+    public int[] countDB(User currentUser, ResourceBundle rb) {
         String query1 = String.format("SELECT COUNT(*) FROM %s", tableName);
         String query2 = String.format("SELECT %s FROM %s WHERE %s = (SELECT max(%s) FROM %s)",
                 field1, tableName, field1, field1, tableName);
@@ -112,7 +112,7 @@ public final class LibDBMember implements LibDAO<Member> {
      *                    del texto del programa
      */
     @Override
-    public void addTB(User currentUser, Member member, ResourceBundle rb) {
+    public void addDb(User currentUser, Member member, ResourceBundle rb) {
         String query1 = String.format("SELECT COUNT(*) FROM %s", tableName);
         String query2 = String.format("SELECT * FROM %s WHERE LOWER(%s) = LOWER(?) AND LOWER(%s) = LOWER(?)",
                 tableName, field2, field3);
@@ -159,7 +159,7 @@ public final class LibDBMember implements LibDAO<Member> {
      * @return Lista de objetos Socio por cada entrada de la tabla de datos
      */
     @Override
-    public List<Member> searchTB(User currentUser, ResourceBundle rb) {
+    public List<Member> searchDB(User currentUser, ResourceBundle rb) {
         String query = String.format("SELECT * FROM %s", tableName);
         List<Member> listMember = new ArrayList<>();
 
@@ -189,7 +189,7 @@ public final class LibDBMember implements LibDAO<Member> {
      * @return Lista de objetos Socio por cada entrada de la tabla de datos
      */
     @Override
-    public List<Member> searchDetailTB(User currentUser, ResourceBundle rb) {
+    public List<Member> searchDetailDB(User currentUser, ResourceBundle rb) {
         String query1 = String.format("SELECT * FROM %s", tableName);
         String query2 = String.format("SELECT %s FROM %s WHERE %s = ?", configProps.getProperty("database-table-1-field-1"),
                 configProps.getProperty("database-name") + "." + configProps.getProperty("database-table-3"), field1);
@@ -313,7 +313,7 @@ public final class LibDBMember implements LibDAO<Member> {
      * @return ID máxima tras la eliminación de la entrada
      */
     @Override
-    public int deleteTB(User currentUser, int ID, ResourceBundle rb) {
+    public int deleteDB(User currentUser, int ID, ResourceBundle rb) {
         String query1 = String.format("SELECT %s FROM %s WHERE %s = ?",
                 field1, configProps.getProperty("database-name") + "." + configProps.getProperty("database-table-3"), field1);
         String query2 = String.format("DELETE FROM %s WHERE %s = ?", tableName, field1);

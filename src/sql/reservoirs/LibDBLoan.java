@@ -86,7 +86,7 @@ public class LibDBLoan implements LibDAO<Loan> {
      * @return Número de filas de la tabla de datos
      */
     @Override
-    public int[] countTB(User currentUser, ResourceBundle rb) {
+    public int[] countDB(User currentUser, ResourceBundle rb) {
         String query1 = String.format("SELECT COUNT(*) FROM %s", tableName);
         String query2 = String.format("SELECT %s FROM %s WHERE %s = (SELECT max(%s) FROM %s)",
                 field1, tableName, field1, field1, tableName);
@@ -118,7 +118,7 @@ public class LibDBLoan implements LibDAO<Loan> {
      *                    del texto del programa
      */
     @Override
-    public void addTB(User currentUser, Loan loan, ResourceBundle rb) {
+    public void addDb(User currentUser, Loan loan, ResourceBundle rb) {
         String query1 = String.format("SELECT COUNT(*) FROM %s WHERE %s = ?", tableName, field2);
         String query2 = String.format("SELECT %s FROM %s WHERE %s = ?",
                 configProps.getProperty("database-table-1-field-4"),
@@ -186,7 +186,7 @@ public class LibDBLoan implements LibDAO<Loan> {
      * @return Lista de objetos Préstamo por cada entrada de la tabla de datos
      */
     @Override
-    public List<Loan> searchTB(User currentUser, ResourceBundle rb) {
+    public List<Loan> searchDB(User currentUser, ResourceBundle rb) {
         String query = String.format("SELECT * FROM %s", tableName);
         List<Loan> listLoan = new ArrayList<>();
 
@@ -217,7 +217,7 @@ public class LibDBLoan implements LibDAO<Loan> {
      * @return Lista de objetos Préstamo por cada entrada de la tabla de datos
      */
     @Override
-    public List<Loan> searchDetailTB(User currentUser, ResourceBundle rb) {
+    public List<Loan> searchDetailDB(User currentUser, ResourceBundle rb) {
         String query1 = String.format("SELECT * FROM %s", tableName);
         String query2 = String.format("SELECT * FROM %s WHERE %s = ?",
                 configProps.getProperty("database-name") + "." + configProps.getProperty("database-table-2"), field2);
@@ -339,7 +339,7 @@ public class LibDBLoan implements LibDAO<Loan> {
      * @return ID máxima tras la eliminación de la entrada
      */
     @Override
-    public int deleteTB(User currentUser, int ID, ResourceBundle rb) {
+    public int deleteDB(User currentUser, int ID, ResourceBundle rb) {
         String query1 = String.format("SELECT %s FROM %s WHERE %s = ?",
                 field3, tableName, field1);
         String query2 = String.format("UPDATE %s SET %s = ? WHERE %s = ?",
