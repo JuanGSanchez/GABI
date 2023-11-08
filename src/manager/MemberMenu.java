@@ -218,7 +218,7 @@ final class MemberMenu extends EntityMenu {
                     System.out.printf(rb.getString("program-general-order-selection") + "...\n",
                             rb.getString("program-member-properties-1"));
                     arrayMembers.stream().sorted(Member::compareTo)
-                            .forEach(member -> System.out.println(memberToString(member)));
+                            .forEach(member -> System.out.println(entityToString(member)));
                     isValid = true;
                     break;
                 case 2:
@@ -226,7 +226,7 @@ final class MemberMenu extends EntityMenu {
                     System.out.printf(rb.getString("program-general-order-selection") + "...\n",
                             rb.getString("program-member-properties-2"));
                     arrayMembers.stream().sorted(Comparator.comparing(Member::getName).thenComparing(Member::getSurname))
-                            .forEach(member -> System.out.println(memberToString(member)));
+                            .forEach(member -> System.out.println(entityToString(member)));
                     isValid = true;
                     break;
                 case 3:
@@ -234,7 +234,7 @@ final class MemberMenu extends EntityMenu {
                     System.out.printf(rb.getString("program-general-order-selection") + "...\n",
                             rb.getString("program-member-properties-3"));
                     arrayMembers.stream().sorted(Comparator.comparing(Member::getSurname).thenComparing(Member::getName))
-                            .forEach(member -> System.out.println(memberToString(member)));
+                            .forEach(member -> System.out.println(entityToString(member)));
                     isValid = true;
                     break;
                 case 0:
@@ -287,7 +287,7 @@ final class MemberMenu extends EntityMenu {
                     System.out.println(member);
                 } else {
                     List<Member> members = LibDBMember.getInstance().searchTB(currentUser, opt, fragString, rb);
-                    members.forEach(System.out::println);
+                    members.forEach(member -> System.out.println(entityToString(member)));
                 }
             } catch (RuntimeException re) {
                 System.err.println(re.getMessage());
@@ -343,7 +343,7 @@ final class MemberMenu extends EntityMenu {
                     List<Member> members = LibDBMember.getInstance().searchTB(currentUser, opt, fragString, rb);
                     Set<Integer> idmembers = members.stream().map(Member::getID).collect(Collectors.toSet());
                     members.stream().sorted(Member::compareTo)
-                            .forEach(member -> System.out.println(memberToString(member)));
+                            .forEach(member -> System.out.println(entityToString(member)));
                     do {
                         System.out.printf(rb.getString("program-general-enter") + "\n(%s) -\n",
                                 rb.getString("program-properties-field-2-singular").toLowerCase(),

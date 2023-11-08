@@ -218,7 +218,7 @@ final class BookMenu extends EntityMenu {
                     System.out.printf(rb.getString("program-general-order-selection") + "...\n",
                             rb.getString("program-book-properties-1"));
                     arrayBooks.stream().sorted(Book::compareTo)
-                            .forEach(book -> System.out.println(bookToString(book)));
+                            .forEach(book -> System.out.println(entityToString(book)));
                     isValid = true;
                     break;
                 case 2:
@@ -226,7 +226,7 @@ final class BookMenu extends EntityMenu {
                     System.out.printf(rb.getString("program-general-order-selection") + "...\n",
                             rb.getString("program-book-properties-2"));
                     arrayBooks.stream().sorted(Comparator.comparing(Book::getTitle).thenComparingInt(Book::getID))
-                            .forEach(book -> System.out.println(bookToString(book)));
+                            .forEach(book -> System.out.println(entityToString(book)));
                     isValid = true;
                     break;
                 case 3:
@@ -234,7 +234,7 @@ final class BookMenu extends EntityMenu {
                     System.out.printf(rb.getString("program-general-order-selection") + "...\n",
                             rb.getString("program-book-properties-3"));
                     arrayBooks.stream().sorted(Comparator.comparing(Book::getAuthor).thenComparing(Book::getTitle))
-                            .forEach(book -> System.out.println(bookToString(book)));
+                            .forEach(book -> System.out.println(entityToString(book)));
                     isValid = true;
                     break;
                 case 0:
@@ -284,10 +284,10 @@ final class BookMenu extends EntityMenu {
             try {
                 if (opt == 1) {
                     Book book = LibDBBook.getInstance().searchTB(currentUser, ID, rb);
-                    System.out.println(book);
+                    System.out.println(entityToString(book));
                 } else {
                     List<Book> books = LibDBBook.getInstance().searchTB(currentUser, opt, fragString, rb);
-                    books.forEach(System.out::println);
+                    books.forEach(book -> System.out.println(entityToString(book)));
                 }
             } catch (RuntimeException re) {
                 System.err.println(re.getMessage());
@@ -343,7 +343,7 @@ final class BookMenu extends EntityMenu {
                     List<Book> books = LibDBBook.getInstance().searchTB(currentUser, opt, fragString, rb);
                     Set<Integer> idbooks = books.stream().map(Book::getID).collect(Collectors.toSet());
                     books.stream().sorted(Book::compareTo)
-                            .forEach(book -> System.out.println(bookToString(book)));
+                            .forEach(book -> System.out.println(entityToString(book)));
                     do {
                         System.out.printf(rb.getString("program-general-enter") + "\n(%s) -\n",
                                 rb.getString("program-properties-field-1-singular").toLowerCase(),

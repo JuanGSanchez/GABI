@@ -223,7 +223,7 @@ final class UserMenu extends EntityMenu {
                     System.out.printf(rb.getString("program-general-order-selection") + "...\n",
                             rb.getString("program-user-properties-1"));
                     arrayUsers.stream().sorted(User::compareTo)
-                            .forEach(user -> System.out.println(userToString(user)));
+                            .forEach(user -> System.out.println(entityToString(user)));
                     isValid = true;
                     break;
                 case 2:
@@ -231,7 +231,7 @@ final class UserMenu extends EntityMenu {
                     System.out.printf(rb.getString("program-general-order-selection") + "...\n",
                             rb.getString("program-user-properties-2"));
                     arrayUsers.stream().sorted(Comparator.comparing(User::getName).thenComparing(User::getID))
-                            .forEach(user -> System.out.println(userToString(user)));
+                            .forEach(user -> System.out.println(entityToString(user)));
                     isValid = true;
                     break;
                 case 0:
@@ -281,10 +281,10 @@ final class UserMenu extends EntityMenu {
             try {
                 if (opt == 1) {
                     User user = UserDerby.getInstance().searchUser(currentUser, ID, rb);
-                    System.out.println(user);
+                    System.out.println(entityToString(user));
                 } else {
                     List<User> users = UserDerby.getInstance().searchUser(currentUser, fragString, rb);
-                    users.forEach(System.out::println);
+                    users.forEach(user -> System.out.println(entityToString(user)));
                 }
             } catch (RuntimeException re) {
                 System.err.println(re.getMessage());
@@ -340,7 +340,7 @@ final class UserMenu extends EntityMenu {
                     List<User> users = UserDerby.getInstance().searchUser(currentUser, fragString, rb);
                     Set<Integer> idusers = users.stream().map(User::getID).collect(Collectors.toSet());
                     users.stream().sorted(User::compareTo)
-                            .forEach(user -> System.out.println(userToString(user)));
+                            .forEach(user -> System.out.println(entityToString(user)));
                     do {
                         System.out.printf(rb.getString("program-general-enter") + "\n(%s) -\n",
                                 rb.getString("program-properties-field-4-singular").toLowerCase(),

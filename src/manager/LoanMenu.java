@@ -245,7 +245,7 @@ final class LoanMenu extends EntityMenu {
                         List<Member> members = LibDBMember.getInstance().searchTB(currentUser, opt, fragString, rb);
                         Set<Integer> idsocs = members.stream().map(Member::getID).collect(Collectors.toSet());
                         members.stream().sorted(Member::compareTo)
-                                .forEach(member -> System.out.println(memberToString(member)));
+                                .forEach(member -> System.out.println(entityToString(member)));
                         do {
                             System.out.printf(rb.getString("program-general-enter") + "\n(%s) -\n",
                                     rb.getString("program-properties-field-2-singular").toLowerCase(),
@@ -302,7 +302,7 @@ final class LoanMenu extends EntityMenu {
                         List<Book> books = LibDBBook.getInstance().searchTB(currentUser, opt, fragString, rb);
                         Set<Integer> idlibs = books.stream().map(Book::getID).collect(Collectors.toSet());
                         books.stream().sorted(Book::compareTo)
-                                .forEach(book -> System.out.println(bookToString(book)));
+                                .forEach(book -> System.out.println(entityToString(book)));
                         do {
                             System.out.printf(rb.getString("program-general-enter") + "\n(%s) -\n",
                                     rb.getString("program-properties-field-1-singular").toLowerCase(),
@@ -371,7 +371,7 @@ final class LoanMenu extends EntityMenu {
                     System.out.printf(rb.getString("program-general-order-selection") + "...\n",
                             rb.getString("program-loan-properties-1"));
                     arrayLoans.stream().sorted(Loan::compareTo)
-                            .forEach(loan -> System.out.println(loanToString(loan)));
+                            .forEach(loan -> System.out.println(entityToString(loan)));
                     isValid = true;
                     break;
                 case 2:
@@ -379,7 +379,7 @@ final class LoanMenu extends EntityMenu {
                     System.out.printf(rb.getString("program-general-order-selection") + "...\n",
                             rb.getString("program-loan-properties-2"));
                     arrayLoans.stream().sorted(Comparator.comparing(Loan::getIdMember))
-                            .forEach(loan -> System.out.println(loanToString(loan)));
+                            .forEach(loan -> System.out.println(entityToString(loan)));
                     isValid = true;
                     break;
                 case 3:
@@ -387,7 +387,7 @@ final class LoanMenu extends EntityMenu {
                     System.out.printf(rb.getString("program-general-order-selection") + "...\n",
                             rb.getString("program-loan-properties-3"));
                     arrayLoans.stream().sorted(Comparator.comparing(Loan::getIdBook))
-                            .forEach(loan -> System.out.println(loanToString(loan)));
+                            .forEach(loan -> System.out.println(entityToString(loan)));
                     isValid = true;
                     break;
                 case 4:
@@ -395,7 +395,7 @@ final class LoanMenu extends EntityMenu {
                     System.out.printf(rb.getString("program-general-order-selection") + "...\n",
                             rb.getString("program-loan-properties-4"));
                     arrayLoans.stream().sorted(Comparator.comparing(Loan::getDateLoan).thenComparing(Loan::getID))
-                            .forEach(loan -> System.out.println(loanToString(loan)));
+                            .forEach(loan -> System.out.println(entityToString(loan)));
                     isValid = true;
                     break;
                 case 0:
@@ -449,7 +449,7 @@ final class LoanMenu extends EntityMenu {
                 } else {
                     loans = LibDBLoan.getInstance().searchTB(currentUser, date, rb);
                 }
-                loans.forEach(System.out::println);
+                loans.forEach(loan -> System.out.println(entityToString(loan)));
             } catch (RuntimeException re) {
                 System.err.println(re.getMessage());
             }
@@ -509,7 +509,7 @@ final class LoanMenu extends EntityMenu {
                     }
                     Set<Integer> idloans = loans.stream().map(Loan::getID).collect(Collectors.toSet());
                     loans.stream().sorted(Loan::compareTo)
-                            .forEach(loan -> System.out.println(loanToString(loan)));
+                            .forEach(loan -> System.out.println(entityToString(loan)));
                     do {
                         System.out.printf(rb.getString("program-general-enter") + "\n(%s) -\n",
                                 rb.getString("program-properties-field-3-singular").toLowerCase(),
