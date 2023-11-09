@@ -106,7 +106,7 @@ public final class LibMenu {
         User currentUser = null;
 
         if (configProps.getProperty("database-isbuilt").equals("false")) {
-            DatabaseBuilder.sqlExecuter(configProps);
+            DatabaseBuilder.sqlExecuter(configProps, rb);
             configProps.setProperty("database-isbuilt", "true");
             try (FileOutputStream fos = new FileOutputStream("src/utils/configuration.properties")) {
                 configProps.store(fos, rb.getString("program-properties"));

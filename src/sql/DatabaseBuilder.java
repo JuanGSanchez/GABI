@@ -2,6 +2,7 @@ package sql;
 
 import java.sql.*;
 import java.util.Properties;
+import java.util.ResourceBundle;
 
 /**
  * Código base para definir permisos y usuarios de la base de datos,
@@ -20,7 +21,7 @@ public class DatabaseBuilder {
      * Método de ejecuciones para la creación
      * de la base de datos
      */
-    public static void sqlExecuter(Properties configProps) {
+    public static void sqlExecuter(Properties configProps, ResourceBundle rb) {
 
         String setProperty = "CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(";
         String getProperty = "VALUES SYSCS_UTIL.SYSCS_GET_DATABASE_PROPERTY(";
@@ -41,7 +42,7 @@ public class DatabaseBuilder {
                                                            ";password=" + configProps.getProperty("database-password") +
                                                            ";create=true");
              Statement s = conn.createStatement()) {
-            System.out.println("Montando la base de datos '" + configProps.getProperty("database") + "'...");
+            System.out.printf("%s '%s'...\n", rb.getString("builder-setup"), configProps.getProperty("database"));
 
 // Stablish admin user
             s.executeUpdate(setProperty + "'derby.user." + configProps.getProperty("database-name") +
@@ -65,10 +66,10 @@ public class DatabaseBuilder {
 // Confirm full-access users
             ResultSet rs = s.executeQuery(getProperty + fullAccessUsers + ")");
             rs.next();
-            System.out.println("  El administrador de la base de datos es " + rs.getString(1));
+            System.out.printf("  %s %s\n", rb.getString("builder-admin"), rs.getString(1));
             rs.close();
 
-            System.out.println("  (re)construyendo tablas...");
+            System.out.printf("  %s...\n", rb.getString("builder-building"));
 //            Delete tables and schema if they already exists
             try {
                 s.executeUpdate(String.format("DROP TABLE %s.%s", configProps.getProperty("database-name"), configProps.getProperty("database-table-3")));
@@ -76,9 +77,9 @@ public class DatabaseBuilder {
                 s.executeUpdate(String.format("DROP TABLE %s.%s", configProps.getProperty("database-name"), configProps.getProperty("database-table-2")));
                 s.executeUpdate(String.format("DROP TABLE %s.%s", configProps.getProperty("database-name"), configProps.getProperty("database-table-4")));
                 s.executeUpdate(String.format("DROP SCHEMA %s RESTRICT", configProps.getProperty("database-name")));
-                System.out.println("  limpieza de la base de datos completada");
+                System.out.printf("  %s\n", rb.getString("builder-cleanup"));
             } catch (SQLException sqle) {
-                System.out.println("  base de datos ya vacía");
+                System.out.printf("  %s\n", rb.getString("builder-empty"));
             }
 //            Create schema and tables from scratch
             s.executeUpdate(String.format("CREATE SCHEMA %s", configProps.getProperty("database-name")));
@@ -116,9 +117,9 @@ public class DatabaseBuilder {
 // if we accidentally paint ourselves into a corner.
             s.executeUpdate(setProperty + propertiesOnly + ", 'true')");
 
-            System.out.println("  Montaje de la base de datos finalizado con éxito");
+            System.out.printf("  %s.\n", rb.getString("builder-finish"));
         } catch (SQLException sqle) {
-            System.err.println("  Error montando la base de datos: " + sqle.getMessage());
+            System.err.printf("  %s: %s", rb.getString("builder-error"), sqle.getMessage());
         }
     }
 
