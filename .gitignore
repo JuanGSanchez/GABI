@@ -22,3 +22,33 @@
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 replay_pid*
+
+# Maven build output
+target/
+
+# IntelliJ IDEA project files — these were the "untracked local changes" flagged by the orchestrator.
+# The .idea/scala_compiler.xml is an empty default IntelliJ stub (GABI is NOT Scala/Kotlin).
+.idea/
+*.iml
+
+# IntelliJ build output
+out/
+
+# OS noise
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# External GABI config (written by Utils after DB initialization — contains user-specific state)
+# ~/.gabi/ is outside the repo; this entry covers any accidentally placed local config
+*.gabi-local.properties
+
+# Environment / secrets — never commit
+.env
+*.env.local
+
+# jpackage build output — the produced app-image and installer binaries are large
+# and platform-specific; do not track them. The build scripts in packaging/ ARE tracked.
+packaging/bin/
+# jpackage work directory (created alongside --dest when building installers)
+packaging/work/

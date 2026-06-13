@@ -1,0 +1,113 @@
+# GABI — application configuration
+# Workstream (b): Spring Boot bootstrapping + Spring AI RAG provider config.
+#
+# === Credential security (D-3 fix) ===
+# DB and API credentials are read from ENVIRONMENT VARIABLES ONLY.
+# The placeholder syntax ${ENV_VAR:default} is used throughout.
+# NEVER commit real credentials to this file.
+#
+# Required env vars for production use:
+#   DB_USER          — Derby database username
+#   DB_PASSWORD      — Derby database password
+#   DB_URL           — (optional) override the Derby URL
+#   OPENAI_API_KEY   — required only when spring.profiles.active=openai
+#   ANTHROPIC_API_KEY— required only when spring.profiles.active=anthropic
+#   OLLAMA_BASE_URL  — optional Ollama server URL (default: http://localhost:11434)
+#   GABI_VECTORSTORE_FILE — optional path for vector store JSON persistence
+#
+# === Provider selection (workstream b) ===
+# Default (no profile): Ollama local — no API key, runs offline.
+# Override: -Dspring.profiles.active=openai  (OpenAI cloud, OPENAI_API_KEY required)
+#           -Dspring.profiles.active=anthropic (Anthropic chat + Ollama embeddings)
+#
+# === CLI invocation (preserved) ===
+#   java -jar gabi-1.0.0-exec.jar admin 1234
+#   DB_USER=myuser DB_PASSWORD=secret java -jar gabi-1.0.0-exec.jar
+# ============================================================
+
+spring:
+  application:
+    name: gabi
+
+  main:
+    # Default mode: CLI (no embedded web server).
+    # Activate the 'server' profile to start MCP + REST:
+    #   java -jar gabi-1.0.0-exec.jar --spring.profiles.active=server
+    web-application-type: none
+    # Allow the Spring context to start even when no AI model is reachable.
+    # The NoOpRagService gracefully handles missing model beans.
+    allow-bean-definition-overriding: true
+
+  # Disable Spring Boot auto-configuration of a DataSource from spring.datasource.*
+  # because we use our own GabiDataSourceConfig bean (gabi.db.* properties).
+  # Also suppress Flyway/Liquibase since DB schema is managed by DatabaseBuilder.
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+      - org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration
+
+  # ============================================================
+  # Spring AI MCP Server (workstream c)
+  # Active regardless of profile; transport is STREAMABLE-HTTP
+  # when the server profile is active (web stack is servlet).
+  # STDIO mode is also enabled so CLI/agent clients can launch
+  # the app with:  java -jar gabi-1.0.0-exec.jar --spring.ai.mcp.server.stdio=true
+  # ============================================================
+  ai:
+    mcp:
+      server:
+        name: gabi-library-mcp
+        version: 1.0.0
+        # Streamable-HTTP (replaces deprecated SSE, MCP spec 2025-11-25).
+        # Endpoint: POST /mcp  (remote MCP clients point here).
+        protocol: STREAMABLE
+        # Enable STDIO transport for CLI/agent clients that launch the jar directly.
+        stdio: true
+        type: SYNC
+        annotation-scanner:
+          enabled: true
+
+# ============================================================
+# GABI database connection (headless core DataSource)
+# Credentials: set DB_USER / DB_PASSWORD environment variables.
+# ============================================================
+gabi:
+  db:
+    url: ${DB_URL:jdbc:derby://localhost:1527/LibraryDB}
+    # Credentials — NEVER set defaults here; read from environment variables only.
+    user: ${DB_USER:}
+    password: ${DB_PASSWORD:}
+
+  # Vector store file path for RAG persistence.
+  # Default: empty = in-memory only (lost on restart, good for demos/CI).
+  # Set to e.g. ~/.gabi/vectorstore.json for durable between-restart persistence.
+  vectorstore:
+    file: ${GABI_VECTORSTORE_FILE:}
+
+# ============================================================
+# Spring AI — Ollama (DEFAULT provider, no profile needed)
+# Start Ollama with: ollama run llama3.2 && ollama pull nomic-embed-text
+# ============================================================
+spring:
+  ai:
+    ollama:
+      base-url: ${OLLAMA_BASE_URL:http://localhost:11434}
+      chat:
+        options:
+          model: ${OLLAMA_CHAT_MODEL:llama3.2}
+      embedding:
+        options:
+          model: ${OLLAMA_EMBED_MODEL:nomic-embed-text}
+
+# ============================================================
+# Logging
+# ============================================================
+logging:
+  level:
+    root: WARN
+    manager: INFO
+    sql: INFO
+    core: INFO
+    rag: INFO
+    GabiApplication: INFO
+    GabiCliRunner: INFO
