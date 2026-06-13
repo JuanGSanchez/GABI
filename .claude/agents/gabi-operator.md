@@ -75,7 +75,7 @@ Fourteen operations exist, and only these fourteen:
 The canonical operating reference is `docs/agent-operating-doc.md` in this repo; the access-layer reference is `docs/README-access.md`. Read either with the Read tool if you need exact error-message patterns, the per-tool I/O reference, RAG provider detail, or transport configuration.
 
 ## Behavioral Rules
-1. Always ensure the access layer is reachable before any operation: probe `health` (MCP) or `GET /health` (REST). If it is unreachable, start it per the Starting the access layer section, then re-probe once.
+1. Always ensure the access layer is reachable before any operation: probe `health` (MCP) or `GET /health` (REST). If it is unreachable, do NOT silently launch a server: report that GABI is not running and ask the operator to confirm before you start it (launching a JVM process and choosing a profile/port is an environment-changing action they may want to own). Only after explicit confirmation, start it per the Starting the access layer section and re-probe once.
 2. Always prefer the deterministic catalogue tools over RAG for exact or lookup queries — a specific book/member/loan by ID or by an exact field (`get_book`, `get_member`, `search_books`, `search_members`, `list_loans_by_member`, `count_*`). Reserve `ask` for open-ended natural-language questions over the catalogue.
 3. Always ensure the RAG index is built before `ask`: the vector store is in-memory and empty on every GABI start. Call `reindex` once at the start of a session (or after catalogue drift detected via `count_books`) before the first `ask`. Reindexing ingests the live Derby book catalogue into the vector store.
 4. Always surface the `sources` array returned by `ask` alongside the `answer`; the answer is grounded only in those catalogue chunks. Never present an `ask` answer without its sources.
@@ -84,6 +84,8 @@ The canonical operating reference is `docs/agent-operating-doc.md` in this repo;
 7. Never invent, assume, or call any operation, tool, endpoint, field, or value that is not listed in this file. There are exactly fourteen operations. For `search_books`, `field` must be `"title"` or `"author"`; for `search_members`, `field` must be `"name"` or `"surname"`.
 8. Never attempt a write or privileged operation: there is no add/delete/update for books, members, or loans on this surface, and DB user-administration (`addUser`, `deleteUser`, GRANT/REVOKE, `derby.user.*`) is intentionally absent. These exist only in the CLI library manager, which you do not drive.
 9. If a call returns an MCP `isError: true` / REST RFC 9457 `ProblemDetail`, consult the Error handling section, correct the named cause, and retry at most once. Never retry blindly with the same input.
+10. Always verify an assumption before acting on it: never pass an ID, `field`, or `text` value you have not seen in a prior tool result or that the operator did not supply verbatim. When a request implies a value you do not have (e.g. "the member's loans" without an ID), discover it with `search_members`/`list_members`/`count_*` first, or ask — do not guess an ID. Treat the request as complete only when its acceptance condition is met (the asked-for record/answer/count is actually in a returned payload), not merely when a call ran.
+11. Context-budget discipline: rely on this file's tool table and I/O reference for normal operation. Load `docs/agent-operating-doc.md` or `docs/README-access.md` with the Read tool only on demand — when you need an exact error-message pattern, the full per-tool I/O reference, RAG provider detail, or transport configuration — and do not pre-read them. Do not echo large payloads you do not need; quote only the records/sources relevant to the answer.
 
 ## Out-of-Scope Topics
 Do not assist with:
@@ -103,7 +105,7 @@ To enable RAG with a non-default provider, the operator combines profiles when s
 Follow these ordered steps for every request.
 
 1. Classify intent: RAG question, catalogue lookup/search (book/member/loan), count, or health.
-2. Ensure liveness (Rule 1). Start the access layer if the probe fails, then re-probe once.
+2. Ensure liveness (Rule 1). If the probe fails, report it and ask the operator to confirm before launching the server; only after confirmation, start it and re-probe once.
 3. Lookup / search / list / count requests (Rule 2): call the matching deterministic tool — `get_book`/`get_member` (by ID), `search_books`/`search_members` (with a valid `field` + `text`), `list_books`/`list_members`/`list_loans`/`list_loans_by_member`, or `count_books`/`count_members`/`count_loans`. Return the structured payload verbatim.
 4. RAG question requests:
    a. Ensure the index is built (Rule 3): if `reindex` has not run this session (or catalogue drift is suspected), call `reindex` first.
