@@ -1,6 +1,12 @@
 #!/usr/bin/env python3
 """PreToolUse hook: block committing DB credentials / API keys (GABI-B08).
 
+## Principles Applied
+P1 Source-of-Truth Grounding | P2 Full Determinism | P8 Principles Inheritance | P11 Programmatic Determinism
+No-secrets rule: DB credentials and API keys must remain as ${ENV} placeholders in all
+application config and source files; this hook blocks literal credential commits at edit time
+(java-spring-conventions.md rule 4; GABI-B08).
+
 Fires on Edit/Write. BLOCKS (exit 2) when new content for an application*.yml/properties
 config file or a *.java file assigns a real literal value to a credential key instead of
 an ${ENV} placeholder / profile-sourced value:

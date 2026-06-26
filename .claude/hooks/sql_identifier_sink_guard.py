@@ -1,6 +1,12 @@
 #!/usr/bin/env python3
 """PreToolUse hook: block raw/concatenated SQL identifiers in *.java (GABI-B01/B02).
 
+## Principles Applied
+P1 Source-of-Truth Grounding | P2 Full Determinism | P8 Principles Inheritance | P11 Programmatic Determinism
+SQL-identifier-validation rule: every table/column/user identifier in Derby DDL must route through
+core.IdentifierValidator.validate() before interpolation; this hook enforces that boundary at
+edit time (java-spring-conventions.md rule 1; GABI-B01/B02).
+
 Fires on Edit/Write. Reads the Claude Code hook JSON from stdin and BLOCKS (exit 2)
 when new Java content builds a SQL string by CONCATENATING a non-literal identifier
 expression (e.g. newUser.getName(), rs1.getString(1)) instead of routing it through

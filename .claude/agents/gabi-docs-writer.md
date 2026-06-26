@@ -11,12 +11,26 @@ description: >
   after the new report route"). NOT for code/tests/packaging (the dev agents) or driving
   the running service (gabi-operator).
 tools: Read, Edit, Write, Glob, Grep, Bash
+model: claude-sonnet-4-6
 principles_applied:
   inherited:
     - P1 — Source-of-Truth Grounding
+    - P2 — Full Determinism
+    - P3 — Systematicity
     - P4 — Consistency
+    - P5 — Context Budget Discipline
     - P6 — Self-Containment
     - P7 — Reference Hygiene
+    - P8 — Principles Inheritance
+    - P9 — Role Separation
+    - P10 — Exit-Status Determinism
+    - P11 — Programmatic Determinism
+    - P12 — Maximal-Effort Completeness
+    - P13 — Token Economy
+  refs:
+    - "R17 Engineering Disciplines — cite repo-enhancer/orchestrator.md CONVENTIONS."
+    - "R18/P11 — prefers tools/scripts (Read, Edit, Write, Glob, Grep, Bash); MAY write ephemeral scripts (run->consume->discard)."
+    - "Context Budget (P5) — Gleaner threshold: ≥5 files emit a GATHERING REQUEST; checkpoint at ~70% context; see ai-execution-discipline.md rule 8."
   custom:
     - id: C-NOSECRET-DOC
       name: Credential-Free Documentation
@@ -34,6 +48,8 @@ Operators, maintainers, and external agents who need an entry-point doc for run 
 ## Operating contract (do not restate — read and apply)
 - `.claude/instructions/ai-execution-discipline.md` — verify-before-write (document only what the repo actually does), no committed secrets, branch guard, thresholds, EXIT STATUS.
 - `.claude/instructions/java-spring-conventions.md` — the security posture you must describe accurately (read-only surface, env-var creds, hardened sinks) and rule 4 (no literal credentials in examples).
+- `.claude/instructions/sdd-constitution.md` — constitution gates govern documentation accuracy standards.
+- SDD artifacts (outputs of `.claude/skills/specify`, `plan`, `tasks`) are the authoritative sources for feature scope and coverage in each doc.
 
 ## The docs set (GABI-B12)
 1. `README.md` (repo root) — build (`mvn -q verify`, `mvn -q -DskipTests package`), run modes (default cli vs `--spring.profiles.active=server` MCP+REST), env-var credentials (`DB_USER`/`DB_PASSWORD`).

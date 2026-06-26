@@ -1,6 +1,12 @@
 #!/usr/bin/env python3
 """PreToolUse hook: keep privileged Derby user-admin OFF the exposed MCP/REST surface.
 
+## Principles Applied
+P2 Full Determinism | P8 Principles Inheritance | P9 Role Separation | P11 Programmatic Determinism
+Role-separation rule: privileged Derby user-admin (addUser/deleteUser/GRANT/REVOKE/derby.user.*)
+must stay off the MCP @Tool / REST surface; this hook enforces the admin-vs-operator boundary
+at edit time (java-spring-conventions.md rule 3; review D-3/D-4).
+
 Fires on Edit/Write. BLOCKS (exit 2) when new content for a file on the EXPOSED agent
 surface introduces a privileged Derby user-admin operation. The exposed surface is the
 MCP @Tool facade and the REST controllers:

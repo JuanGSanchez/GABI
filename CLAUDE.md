@@ -7,13 +7,25 @@ greenfield RAG Q&A capability, exposed headlessly over a Spring AI MCP + REST ac
 
 Inherited:
 - P1 — Source-of-Truth Grounding (every claim below traces to the cited file)
+- P2 — Full Determinism
+- P3 — Systematicity
 - P4 — Consistency (same invariants the in-repo agents enforce)
+- P5 — Context Budget Discipline
 - P6 — Self-Containment (paths/commands resolve in this repo)
 - P7 — Reference Hygiene (every referenced path exists on the enhancement branch)
-(P2/P3/P5 are n/a for a prose guide.)
+- P8 — Principles Inheritance
+- P9 — Role Separation
+- P10 — Exit-Status Determinism
+- P11 — Programmatic Determinism
+- P12 — Maximal-Effort Completeness
+- P13 — Token Economy
 
 Custom:
 - C1 — Invariant Authority: this file is the single in-repo statement of GABI's security invariants and gate commands; the `gabi-maintainer` and `gabi-operator` agents enforce them, this file records them. (Rationale: one source of truth prevents drift between the agents and ad-hoc sessions.)
+
+Engineering disciplines: R17 (prompt/context/harness) + R18/P11 (Programmatic Determinism) — cite repo-enhancer/orchestrator.md CONVENTIONS; do not restate the three layers.
+Deployment: deployment_target: claude_code (real deployed .claude/ tree). This file is the orchestration/operating-contract carrier (no orchestrator agent).
+SessionStart contract: relies on the user-level global hook $HOME\.claude\hooks\claude-orchestration-contract.py; no per-project copy created or required.
 
 ## Stack
 - Java 17 (baseline — do not bump). Apache Derby 10.16.1.1 (last Java-17 line — do not bump).
@@ -49,9 +61,24 @@ Custom:
 - Branch off `main` to an enhancement branch; never commit on `main`/`master`.
 - Backlog: `docs/BACKLOG.md` (item IDs `GABI-B01`…`GABI-I13`). To IMPLEMENT a backlog item, use the `gabi-maintainer` subagent. To DRIVE the running catalogue/RAG service (ask questions, search, count), use the `gabi-operator` subagent.
 
+## SDD Pipeline (CLAUDE.md is the coordination point — no orchestrator agent)
+CLAUDE.md sequences the SDD pipeline for every change: `specify` → `clarify` → `plan` → `tasks` → `analyze` → implement → `checklist` (skills at `.claude/skills/`).
+Constitution gates: `.claude/instructions/sdd-constitution.md`. Best-practices instructions: `.claude/instructions/java-spring-conventions.md`, `.claude/instructions/spring-boot-best-practices.md`.
+
 ## In-repo Claude agents
-- `.claude/agents/gabi-maintainer.md` — edit-capable maintainer/evolution engineer (implements backlog items, enforces the invariants above, holds the core gate).
+
+Active:
+- `.claude/agents/gabi-core-dev.md` — headless-core/Derby DAO/config developer.
+- `.claude/agents/gabi-access-dev.md` — MCP @Tool + REST access-layer developer.
+- `.claude/agents/gabi-rag-dev.md` — Spring AI RAG pipeline developer.
+- `.claude/agents/gabi-test-author.md` — JUnit 5 test author and JaCoCo core-gate custodian.
+- `.claude/agents/gabi-packaging-builder.md` — jpackage/Maven packaging engineer.
+- `.claude/agents/gabi-docs-writer.md` — documentation author.
+- `.claude/agents/gabi-security-reviewer.md` — read-only PASS/FAIL security gate.
 - `.claude/agents/gabi-operator.md` — read-only operator driving the MCP/REST access layer.
+
+Retired:
+- `.claude/agents/gabi-maintainer.md` — RETIRED; superseded by the specialist agents above.
 
 ## Sources
 - `docs/review-gabi.md` (B-1…B-8, security section C, severity tally), `docs/backlog-gabi.md` / in-repo `docs/BACKLOG.md` (item IDs + acceptance criteria), `docs/understanding-gabi.md` (stack/layout), `docs/agent-operating-doc.md` (access-layer ops), and the cited `src/`/`pom.xml`/`application*.yml` files. The two in-repo agent assets enforce these invariants at runtime; this file records them.

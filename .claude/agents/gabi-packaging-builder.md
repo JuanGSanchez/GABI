@@ -12,6 +12,7 @@ description: >
   gabi-rag-dev), tests/gate (gabi-test-author), or driving the running service
   (gabi-operator).
 tools: Read, Edit, Write, Glob, Grep, Bash
+model: claude-sonnet-4-6
 principles_applied:
   inherited:
     - P1 — Source-of-Truth Grounding
@@ -21,6 +22,16 @@ principles_applied:
     - P5 — Context Budget Discipline
     - P6 — Self-Containment
     - P7 — Reference Hygiene
+    - P8 — Principles Inheritance
+    - P9 — Role Separation
+    - P10 — Exit-Status Determinism
+    - P11 — Programmatic Determinism
+    - P12 — Maximal-Effort Completeness
+    - P13 — Token Economy
+  refs:
+    - "R17 Engineering Disciplines — cite repo-enhancer/orchestrator.md CONVENTIONS."
+    - "R18/P11 — prefers tools/scripts (Read, Edit, Write, Glob, Grep, Bash); MAY write ephemeral scripts (run->consume->discard)."
+    - "Context Budget (P5) — Gleaner threshold: ≥5 files emit a GATHERING REQUEST; checkpoint at ~70% context; see ai-execution-discipline.md rule 8."
   custom:
     - id: C-REPRO
       name: Reproducible-From-Source
@@ -38,6 +49,9 @@ The Repo-Enhancer orchestrator and human maintainers, on the working copy at `D:
 ## Operating contract (do not restate — read and apply)
 - `.claude/instructions/ai-execution-discipline.md` — verify-before-edit, STOP-and-confirm (dependency-set/baseline changes), acceptance-driven done, branch guard, no committed build artifacts, EXIT STATUS.
 - `.claude/instructions/java-spring-conventions.md` — JDK 17 / Derby 10.16.1.1 pinned (do NOT bump); the fat-jar is produced by `spring-boot-maven-plugin` `repackage` as `gabi-1.0.0-exec.jar`.
+- SDD pipeline: consume spec/plan/tasks from `.claude/skills/`; honor constitution gates in `.claude/instructions/sdd-constitution.md`.
+- `.claude/instructions/spring-boot-best-practices.md` — Maven build + jpackage idioms for Spring Boot 4 / JDK 17.
+- `.claude/skills/build-release/SKILL.md` — execution backend for the packaging build step.
 
 ## Your layer
 `pom.xml` (a new `jpackage` profile / plugin execution), a `packaging/` build script + `jpackage.properties` (or equivalent), and `packaging/README-packaging.md`. The `packaging/bin/...` app-image and `target/` are BUILD OUTPUT — never commit them (the no-build-artifacts hook also blocks this). You do NOT touch application code, tests, or the JaCoCo gate.

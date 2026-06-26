@@ -1,6 +1,12 @@
 #!/usr/bin/env python3
 """PostToolUse hook: remind to run the JaCoCo core coverage gate (>=0.90) (GABI-B05).
 
+## Principles Applied
+P2 Full Determinism | P8 Principles Inheritance | P11 Programmatic Determinism | P12 Maximal-Effort Completeness
+Coverage-gate reminder: after editing the core package or test tree, the >=0.90
+LINE/INSTRUCTION gate (bound to verify) must be confirmed before claiming done;
+this hook surfaces that reminder non-blockingly (java-spring-conventions.md rule 7; GABI-B05).
+
 Fires AFTER Edit/Write. Non-blocking: when the edited file is under the core package
 (src/main/java/core/) or under the test tree (src/test/java/), it emits a reminder
 (exit 0 with JSON additionalContext) to run the JaCoCo gate and READ the result before

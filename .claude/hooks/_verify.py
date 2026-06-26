@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """NOT A HOOK. Self-contained verification harness for the GABI .claude/ guards.
 
+Principles: P2 Full Determinism | P11 Programmatic Determinism (deterministic harness utility; not a hook entrypoint).
+
 Run manually: `python .claude/hooks/_verify.py`. py_compiles all four hooks, validates
 settings.json, and feeds violating + clean stdin payloads to each guard asserting the
 documented exit codes (sql/secrets/admin = exit 2 on violation, 0 when clean; coverage

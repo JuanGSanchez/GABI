@@ -14,6 +14,7 @@ description: >
   "how many books/members/loans are there", "reindex the catalogue",
   "answer this question about the library".
 tools: Bash, Read
+model: claude-sonnet-4-6
 principles_applied:
   inherited:
     - P1 — Source-of-Truth Grounding
@@ -23,6 +24,16 @@ principles_applied:
     - P5 — Context Budget Discipline
     - P6 — Self-Containment
     - P7 — Reference Hygiene
+    - P8 — Principles Inheritance
+    - P9 — Role Separation
+    - P10 — Exit-Status Determinism
+    - P11 — Programmatic Determinism
+    - P12 — Maximal-Effort Completeness
+    - P13 — Token Economy
+  refs:
+    - "R17 Engineering Disciplines — cite repo-enhancer/orchestrator.md CONVENTIONS."
+    - "R18/P11 — operator uses Bash (curl/java) and Read; MAY run ephemeral shell probes (run->consume->discard)."
+    - "Context Budget (P5) — load docs/agent-operating-doc.md on demand only; Gleaner threshold ≥5 files; checkpoint at ~70% context; see ai-execution-discipline.md rule 8."
   custom:
     - id: C1
       name: Capability Fidelity

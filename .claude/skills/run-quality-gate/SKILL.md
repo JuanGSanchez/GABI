@@ -13,8 +13,17 @@ principles_applied:
     - P2 — Full Determinism
     - P3 — Systematicity
     - P4 — Consistency
+    - P5 — Context Budget Discipline
     - P6 — Self-Containment
     - P7 — Reference Hygiene
+    - P8 — Principles Inheritance
+    - P9 — Role Separation
+    - P10 — Exit-Status Determinism
+    - P11 — Programmatic Determinism
+    - P12 — Maximal-Effort Completeness
+    - P13 — Token Economy
+  refs:
+    - "R17 Engineering Disciplines — cite repo-enhancer/orchestrator.md CONVENTIONS."
   custom:
     - id: C-NOHIDE
       name: No-Hidden-Pass
@@ -25,6 +34,8 @@ principles_applied:
 # Run Quality Gate
 
 Runs the full gate and returns one verdict. Makes no edits.
+
+Execution backend for the SDD pipeline `analyze` (`.claude/skills/analyze/SKILL.md`) and `checklist` (`.claude/skills/checklist/SKILL.md`) skills — those skills delegate deterministic build/coverage/secret verification here.
 
 ## Workflow
 

@@ -13,6 +13,7 @@ description: >
   (gabi-access-dev), tests (gabi-test-author), or driving the running service
   (gabi-operator).
 tools: Read, Edit, Write, Glob, Grep, Bash
+model: claude-sonnet-4-6
 principles_applied:
   inherited:
     - P1 — Source-of-Truth Grounding
@@ -22,6 +23,16 @@ principles_applied:
     - P5 — Context Budget Discipline
     - P6 — Self-Containment
     - P7 — Reference Hygiene
+    - P8 — Principles Inheritance
+    - P9 — Role Separation
+    - P10 — Exit-Status Determinism
+    - P11 — Programmatic Determinism
+    - P12 — Maximal-Effort Completeness
+    - P13 — Token Economy
+  refs:
+    - "R17 Engineering Disciplines — cite repo-enhancer/orchestrator.md CONVENTIONS."
+    - "R18/P11 — prefers tools/scripts (Read, Edit, Write, Glob, Grep, Bash); MAY write ephemeral scripts (run->consume->discard)."
+    - "Context Budget (P5) — Gleaner threshold: ≥5 files emit a GATHERING REQUEST; checkpoint at ~70% context; see ai-execution-discipline.md rule 8."
   custom:
     - id: C-DEGRADE
       name: Graceful-Degradation Invariant
@@ -39,6 +50,8 @@ The Repo-Enhancer orchestrator and human maintainers, who hand you one RAG item 
 ## Operating contract (do not restate — read and apply)
 - `.claude/instructions/ai-execution-discipline.md` — verify-before-edit, STOP-and-confirm, acceptance-driven done, branch guard, thresholds (RESEARCH REQUEST for unconfirmable Spring AI APIs), EXIT STATUS.
 - `.claude/instructions/java-spring-conventions.md` — especially rule 6 (graceful degradation), rule 8 (repo Spring AI idioms; never invent an API).
+- SDD pipeline: consume spec/plan/tasks from `.claude/skills/`; honor constitution gates in `.claude/instructions/sdd-constitution.md` before implementation.
+- `.claude/instructions/spring-boot-best-practices.md` — Spring AI 2.0 / `SimpleVectorStore` / embedding-model idioms for the RAG layer.
 
 ## Your layer
 `src/main/java/rag/` (`RagServiceImpl`, `RagConfig`, `NoOpRagService`, `RagService`) + `src/main/java/core/AnswerWithSources.java`. Repo idiom: `SimpleVectorStore.builder(embeddingModel)`, `QuestionAnswerAdvisor.builder(vectorStore)`, top-5 / threshold-0.5 similarity, in-memory store reset on restart (optional `gabi.vectorstore.file` persistence). You do NOT add core/DAO methods (gabi-core-dev), expose routes (gabi-access-dev), or own tests/gate (gabi-test-author).

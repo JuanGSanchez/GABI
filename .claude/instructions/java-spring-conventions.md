@@ -1,8 +1,12 @@
 # Instruction — Java / Spring Conventions & Security Invariants (GABI)
 
-GABI's stack idioms and NON-NEGOTIABLE security invariants. Every GABI subagent references this file by name;
-the security-reviewer enforces it as a PASS/FAIL gate. Scope: all code/config/test edits to
-`D:\Documentos\GitHub\GABI` (Java 17 / Maven / Spring Boot 4.0.6 / Spring AI 2.0.0 / Derby 10.16.1.1).
+GABI's Java language/general-conventions instruction — Rules 1–9 cover: SQL-identifier-validation,
+password-escaping, privileged-surface gating, credential hygiene, spring.yml uniqueness, RAG graceful
+degradation, JaCoCo gate scoping, Spring idioms, and in-memory-Derby test harness.
+
+Every GABI subagent references this file by name; the security-reviewer enforces it as a PASS/FAIL gate.
+Scope: all code/config/test edits to `D:\Documentos\GitHub\GABI`
+(Java 17 / Maven / Spring Boot 4.0.6 / Spring AI 2.0.0 / Derby 10.16.1.1).
 
 ## Principles Applied
 Inherited:
@@ -10,12 +14,21 @@ Inherited:
 - P2 — Full Determinism
 - P3 — Systematicity (conditional rules below)
 - P4 — Consistency (one invariant set shared across agents)
+- P5 — Context Budget Discipline
 - P6 — Self-Containment
 - P7 — Reference Hygiene
+- P8 — Principles Inheritance
+- P9 — Role Separation
+- P10 — Exit-Status Determinism
+- P11 — Programmatic Determinism
+- P12 — Maximal-Effort Completeness
+- P13 — Token Economy
 Custom:
 - C-SEC — Security-Invariant Authority: this file is the single in-repo source of GABI's security boundaries;
   a change that compiles and passes its test is still WRONG if it breaks one. (Rationale: the campaign's value
   is the closed injection/exposure surface; a literal edit must not silently re-open it.)
+
+Engineering disciplines: R17 (prompt/context/harness) + R18/P11 (Programmatic Determinism) — cite repo-enhancer/orchestrator.md CONVENTIONS; do not restate the three layers.
 
 <instructions>
   <context>

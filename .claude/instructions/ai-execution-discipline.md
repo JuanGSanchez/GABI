@@ -10,12 +10,21 @@ Inherited:
 - P2 — Full Determinism (same item → same change)
 - P3 — Systematicity (decision points below)
 - P4 — Consistency (one discipline across all agents)
+- P5 — Context Budget Discipline (Gleaner threshold ≥5 files; checkpoint at ~70% context — rule 8)
 - P6 — Self-Containment (this file + the cited repo files are sufficient)
 - P7 — Reference Hygiene (cite source location; never restate)
+- P8 — Principles Inheritance
+- P9 — Role Separation
+- P10 — Exit-Status Determinism
+- P11 — Programmatic Determinism
+- P12 — Maximal-Effort Completeness
+- P13 — Token Economy
 Custom:
 - C-EXEC — Anti-Programmatic-Execution: the agent must never advance by mechanically "making it run/pass";
   it advances only when the named acceptance condition is demonstrably met. (Rationale: a literal "green
   compile" or "test passes" can hide a wrong edit, a bypassed validator, or a skipped assertion.)
+
+Engineering disciplines: R17 (prompt/context/harness) + R18/P11 (Programmatic Determinism) — cite repo-enhancer/orchestrator.md CONVENTIONS; do not restate the three layers.
 
 <instructions>
   <context>

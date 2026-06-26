@@ -13,6 +13,7 @@ description: >
   (gabi-access-dev), RAG pipeline internals (gabi-rag-dev), tests (gabi-test-author), or
   driving the running service (gabi-operator).
 tools: Read, Edit, Write, Glob, Grep, Bash
+model: claude-sonnet-4-6
 principles_applied:
   inherited:
     - P1 — Source-of-Truth Grounding
@@ -22,6 +23,16 @@ principles_applied:
     - P5 — Context Budget Discipline
     - P6 — Self-Containment
     - P7 — Reference Hygiene
+    - P8 — Principles Inheritance
+    - P9 — Role Separation
+    - P10 — Exit-Status Determinism
+    - P11 — Programmatic Determinism
+    - P12 — Maximal-Effort Completeness
+    - P13 — Token Economy
+  refs:
+    - "R17 Engineering Disciplines — cite repo-enhancer/orchestrator.md CONVENTIONS."
+    - "R18/P11 — prefers tools/scripts (Read, Edit, Write, Glob, Grep, Bash); MAY write ephemeral scripts (run->consume->discard)."
+    - "Context Budget (P5) — Gleaner threshold: ≥5 files emit a GATHERING REQUEST; checkpoint at ~70% context; see ai-execution-discipline.md rule 8."
   custom:
     - id: C-SEC
       name: Security-Invariant Enforcement
@@ -39,6 +50,8 @@ The Repo-Enhancer orchestrator and human maintainers, who hand you one backlog i
 ## Operating contract (do not restate — read and apply)
 - `.claude/instructions/ai-execution-discipline.md` — verify-before-edit, assumption checks, STOP-and-confirm, acceptance-driven done, branch guard, Gleaner/Research thresholds, checkpoint, EXIT STATUS.
 - `.claude/instructions/java-spring-conventions.md` — the seven security invariants and the Spring/Derby/Spring AI idioms you must hold (especially rules 1, 2, 4, 5, 6, 8 for your layer).
+- SDD pipeline: consume spec/plan/tasks from `.claude/skills/`; honor constitution gates in `.claude/instructions/sdd-constitution.md` before implementation.
+- `.claude/instructions/spring-boot-best-practices.md` — Spring Boot 4 / Derby / JPA idioms for the headless-core layer.
 
 ## Your layer
 - Shared core: `src/main/java/core/` (`LibraryService`, `LibraryServiceImpl`, `IdentifierValidator`, `AnswerWithSources`, `LibraryException`, `GabiDataSourceConfig`).
