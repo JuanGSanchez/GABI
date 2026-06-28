@@ -4,6 +4,7 @@
  */
 package sql.users;
 
+import core.IdentifierValidator;
 import tables.User;
 import utils.Utils;
 
@@ -125,6 +126,18 @@ public final class UserDerby implements UserDAO {
      */
     @Override
     public void addDb(User currentUser, User newUser, ResourceBundle rb) {
+        // SPEC-R03: validate every identifier reaching a DDL/admin statement fail-fast
+        // (before any connection/SQL) and escape the password before it is interpolated
+        // into Derby SET PROPERTY. Reuses the single core.IdentifierValidator.
+        final String newName = IdentifierValidator.validate(newUser.getName(), "username");
+        final String dbName  = IdentifierValidator.validate(configProps.getProperty("database-name"), "database-name");
+        final String[] grantTables = {
+                IdentifierValidator.validate(configProps.getProperty("database-table-1"), "database-table-1"),
+                IdentifierValidator.validate(configProps.getProperty("database-table-2"), "database-table-2"),
+                IdentifierValidator.validate(configProps.getProperty("database-table-3"), "database-table-3")
+        };
+        final String escapedPassword = newUser.getPassword().replace("'", "''");
+
         String setProperty = "CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(";
         String fullAccessUsers = "'derby.database.fullAccessUsers'";
         String query1 = String.format("SELECT COUNT(*) FROM %s", tableName);
@@ -161,15 +174,15 @@ public final class UserDerby implements UserDAO {
                 pRs1.close();
             }
 
-            s2.executeUpdate(setProperty + "'derby.user." + newUser.getName() + "', '" + newUser.getPassword() + "')");
-            StringBuilder listUsers = new StringBuilder(configProps.getProperty("database-name") + ",");
+            s2.executeUpdate(setProperty + "'derby.user." + newName + "', '" + escapedPassword + "')");
+            StringBuilder listUsers = new StringBuilder(dbName + ",");
             while (rs3.next()) {
                 listUsers.append(rs3.getString(1)).append(",");
             }
-            s2.executeUpdate(setProperty + fullAccessUsers + ", '" + listUsers + newUser.getName() + "')");
+            s2.executeUpdate(setProperty + fullAccessUsers + ", '" + listUsers + newName + "')");
             for (int i = 1; i < 4; i++) {
-                s2.executeUpdate("GRANT ALL PRIVILEGES ON TABLE " + configProps.getProperty("database-name") +
-                                 "." + configProps.getProperty("database-table-" + i) + " TO " + newUser.getName());
+                s2.executeUpdate("GRANT ALL PRIVILEGES ON TABLE " + dbName +
+                                 "." + grantTables[i - 1] + " TO " + newName);
             }
             pStmt2.setInt(1, newUser.getID());
             pStmt2.setString(2, newUser.getName());
@@ -298,6 +311,14 @@ public final class UserDerby implements UserDAO {
      */
     @Override
     public int deleteDB(User currentUser, int ID, ResourceBundle rb) {
+        // SPEC-R03: validate every identifier reaching a DDL/admin statement fail-fast.
+        final String dbName = IdentifierValidator.validate(configProps.getProperty("database-name"), "database-name");
+        final String[] revokeTables = {
+                IdentifierValidator.validate(configProps.getProperty("database-table-1"), "database-table-1"),
+                IdentifierValidator.validate(configProps.getProperty("database-table-2"), "database-table-2"),
+                IdentifierValidator.validate(configProps.getProperty("database-table-3"), "database-table-3")
+        };
+
         String setProperty = "CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(";
         String fullAccessUsers = "'derby.database.fullAccessUsers'";
         String query1 = String.format("SELECT %s FROM %s WHERE %s = ?", field2, tableName, field1);
@@ -315,10 +336,11 @@ public final class UserDerby implements UserDAO {
             pStmt1.setInt(1, ID);
             ResultSet rs1 = pStmt1.executeQuery();
             if (rs1.next()) {
-                s1.executeUpdate(setProperty + "'derby.user." + rs1.getString(1) + "', null)");
+                String deletedName = IdentifierValidator.validate(rs1.getString(1), "username");
+                s1.executeUpdate(setProperty + "'derby.user." + deletedName + "', null)");
                 for (int i = 1; i < 4; i++) {
-                    s2.executeUpdate("REVOKE ALL PRIVILEGES ON TABLE " + configProps.getProperty("database-name") +
-                                     "." + configProps.getProperty("database-table-" + i) + " FROM " + rs1.getString(1));
+                    s2.executeUpdate("REVOKE ALL PRIVILEGES ON TABLE " + dbName +
+                                     "." + revokeTables[i - 1] + " FROM " + deletedName);
                 }
                 rs1.close();
             } else {
@@ -328,7 +350,7 @@ public final class UserDerby implements UserDAO {
 
             pStmt3.setInt(1, ID);
             if (pStmt3.executeUpdate() == 1) {
-                StringBuilder listUsers = new StringBuilder(configProps.getProperty("database-name") + ",");
+                StringBuilder listUsers = new StringBuilder(dbName + ",");
                 ResultSet rs2 = s2.executeQuery(query2);
                 while (rs2.next()) {
                     listUsers.append(rs2.getString(1)).append(",");
