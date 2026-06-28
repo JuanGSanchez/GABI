@@ -1,0 +1,45 @@
+# Test configuration for GABI — in-memory Derby, no live Ollama, no network services.
+# Activated via @ActiveProfiles("test") on test classes.
+#
+# Key points:
+#   - DataSource points at jdbc:derby:memory:gabiTest;create=true (embedded Derby)
+#   - Web application type = none (no Tomcat for unit/integration tests)
+#   - Spring AI model auto-configurations are explicitly disabled so no model server is needed
+#   - allow-bean-definition-overriding: true so TestRagConfig can replace RagServiceImpl
+
+spring:
+  main:
+    web-application-type: none
+    allow-bean-definition-overriding: true
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+      - org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration
+      # Disable all AI model auto-configurations — no live model required in tests
+      - org.springframework.ai.autoconfigure.ollama.OllamaAutoConfiguration
+      - org.springframework.ai.autoconfigure.openai.OpenAiAutoConfiguration
+      - org.springframework.ai.autoconfigure.anthropic.AnthropicAutoConfiguration
+      - org.springframework.ai.autoconfigure.vectorstore.simple.SimpleVectorStoreAutoConfiguration
+      - org.springframework.ai.mcp.server.boot.autoconfigure.McpServerAutoConfiguration
+  ai:
+    mcp:
+      server:
+        enabled: false
+    ollama:
+      base-url: http://localhost:11434
+      init:
+        pull-model-strategy: never
+
+gabi:
+  db:
+    url: jdbc:derby:memory:gabiTest;create=true
+    user: ""
+    password: ""
+  vectorstore:
+    file: ""
+
+logging:
+  level:
+    root: WARN
+    core: DEBUG
+    rag: DEBUG

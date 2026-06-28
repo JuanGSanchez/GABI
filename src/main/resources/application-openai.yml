@@ -1,0 +1,30 @@
+# GABI — OpenAI profile configuration
+# Activate with: -Dspring.profiles.active=openai
+# Required env var: OPENAI_API_KEY
+#
+# This profile enables OpenAI chat + embeddings as the RAG provider.
+# The Ollama starter is still on the classpath but will not create conflicting
+# beans because Spring AI auto-config gates beans on configured properties.
+#
+# SECURITY: NEVER commit a real OPENAI_API_KEY to this file.
+# Set the environment variable instead:
+#   export OPENAI_API_KEY=sk-...
+#   java -Dspring.profiles.active=openai -jar gabi-1.0.0-exec.jar
+# ============================================================
+
+spring:
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY}
+      chat:
+        options:
+          model: ${OPENAI_CHAT_MODEL:gpt-4o-mini}
+      embedding:
+        options:
+          model: ${OPENAI_EMBED_MODEL:text-embedding-3-small}
+    # Disable Ollama auto-config when using OpenAI to avoid duplicate model beans
+    ollama:
+      chat:
+        enabled: false
+      embedding:
+        enabled: false

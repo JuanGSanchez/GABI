@@ -1,0 +1,363 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <!--
+        GABI — Gestor Autónomo de Biblioteca Interactivo
+        Build system introduced in workstream (a); enhancement branch.
+
+        Key decisions (pinned by research-gabi.md):
+        - JDK 17 (stays on 17; Spring AI 2.0 / Boot 4.0 baseline = Java 17).
+        - Spring Boot parent 4.0.x manages Boot + Spring Framework 7 + test deps.
+        - Spring AI BOM 2.0.0 imported in dependencyManagement (workstreams b/c will add starters).
+        - Apache Derby 10.16.1.1 — the LAST Java-17-compatible line; 10.17.x requires Java 21.
+        - spring-boot-maven-plugin: repackage produces the runnable fat-jar for jpackage.
+        - jacoco-maven-plugin 0.8.12 wired now; the 90% check rule is added by the testing agent.
+        - maven-surefire-plugin: JUnit 5 ready (Boot BOM manages the version).
+    -->
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>4.0.6</version>
+        <relativePath/>
+    </parent>
+
+    <groupId>com.github.juangs</groupId>
+    <artifactId>gabi</artifactId>
+    <version>1.0.0</version>
+    <packaging>jar</packaging>
+    <name>GABI</name>
+    <description>Gestor Autónomo de Biblioteca Interactivo — CLI library manager with Derby DB</description>
+
+    <properties>
+        <!-- JDK: stay on 17 (Spring AI 2.0 / Boot 4.0 minimum = Java 17) -->
+        <java.version>17</java.version>
+        <maven.compiler.release>17</maven.compiler.release>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+        <!-- Dependency versions -->
+        <!-- Derby 10.16.1.1: last Java-17-compatible line. DO NOT upgrade to 10.17.x (requires Java 21). -->
+        <derby.version>10.16.1.1</derby.version>
+        <!-- Spring AI BOM — imported in dependencyManagement; workstreams b/c add AI starters -->
+        <spring-ai.version>2.0.0</spring-ai.version>
+        <!-- JaCoCo — 90% core coverage gate wired by testing agent in verify phase -->
+        <jacoco.version>0.8.12</jacoco.version>
+
+        <!-- Main class — GabiApplication is the Spring Boot entry point (workstream b).
+             It drives the CLI via GabiCliRunner (CommandLineRunner). -->
+        <start-class>GabiApplication</start-class>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <!--
+                Spring AI 2.0.0 BOM: imported here so workstreams b/c can add AI starters
+                (spring-ai-starter-model-ollama, spring-ai-starter-mcp-server-webmvc, etc.)
+                without specifying versions. NOT adding AI starters in this workstream (a).
+            -->
+            <dependency>
+                <groupId>org.springframework.ai</groupId>
+                <artifactId>spring-ai-bom</artifactId>
+                <version>${spring-ai.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+        <!--
+            Apache Derby Network Client driver — replaces the machine-local C:/Derby/lib/derbyclient.jar
+            reference in GABI.iml / .idea/libraries/derbyclient.xml (defect D-1).
+            PIN: 10.16.1.1 (Java-17 line). NOT 10.17.x (that requires Java 21).
+        -->
+        <dependency>
+            <groupId>org.apache.derby</groupId>
+            <artifactId>derbyclient</artifactId>
+            <version>${derby.version}</version>
+        </dependency>
+
+        <!--
+            Spring Boot Starter — brings in Spring context, auto-configuration, and logging (SLF4J/Logback).
+            @SpringBootApplication entry point is in GabiApplication (workstream b).
+            The CLI (manager.LibMenu) is driven by GabiCliRunner (CommandLineRunner).
+        -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
+        </dependency>
+
+        <!--
+            Spring Boot JDBC Starter — provides Spring-managed DataSource (HikariCP connection pool)
+            used by LibraryServiceImpl (headless core, D-7 fix). Boot auto-configures DataSource
+            from gabi.db.* properties; GabiDataSourceConfig overrides the bean with the Derby driver.
+        -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-jdbc</artifactId>
+        </dependency>
+
+        <!--
+            ===== SPRING AI MODEL STARTERS (workstream b — RAG pipeline) =====
+            All versions are managed by the spring-ai-bom imported in dependencyManagement.
+            Provider selection: activate via Spring profiles (see application.yml + profile ymls).
+
+            Default (no profile): Ollama — local, no API key.
+            Opt-in: openai  -> activate profile 'openai'  + set OPENAI_API_KEY env var.
+            Opt-in: anthropic -> activate profile 'anthropic' + set ANTHROPIC_API_KEY env var.
+                 (Anthropic: chat only; embeddings stay on Ollama or OpenAI.)
+
+            SECURITY: API keys are read ONLY from environment variables via ${OPENAI_API_KEY}
+            and ${ANTHROPIC_API_KEY} in the profile yml files. Do NOT commit real keys.
+        -->
+        <!-- Ollama: local chat (llama3.2) + embeddings (nomic-embed-text). Default provider. -->
+        <dependency>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-starter-model-ollama</artifactId>
+        </dependency>
+        <!-- OpenAI: cloud chat + embeddings (opt-in via 'openai' profile + OPENAI_API_KEY). -->
+        <dependency>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-starter-model-openai</artifactId>
+        </dependency>
+        <!-- Anthropic: cloud chat only (opt-in via 'anthropic' profile + ANTHROPIC_API_KEY).
+             Embeddings for the anthropic profile must come from Ollama or OpenAI (L4 in research). -->
+        <dependency>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-starter-model-anthropic</artifactId>
+        </dependency>
+
+        <!--
+            Spring AI Vector Store core — provides SimpleVectorStore and SearchRequest.
+            SimpleVectorStore: in-process in-memory VectorStore backed by EmbeddingModel;
+            optional JSON file persistence via save(File)/load(File).
+            Artifact: spring-ai-vector-store (BOM-managed version = 2.0.0).
+        -->
+        <dependency>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-vector-store</artifactId>
+        </dependency>
+        <!--
+            Spring AI Vector Store Advisor — provides QuestionAnswerAdvisor
+            (org.springframework.ai.chat.client.advisor.vectorstore) for RAG pipeline.
+            Artifact: spring-ai-vector-store-advisor (BOM-managed version = 2.0.0).
+        -->
+        <dependency>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-vector-store-advisor</artifactId>
+        </dependency>
+
+        <!--
+            ===== WORKSTREAM (c) — MCP + REST ACCESS LAYER =====
+
+            Spring Boot Web Starter — embeds Tomcat, enables Spring WebMVC REST controllers.
+            Active when the 'server' profile is used (web-application-type: servlet).
+            In CLI mode (default) the web stack is not started even though this dep is on
+            the classpath (spring.main.web-application-type=none in application.yml).
+        -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <!--
+            Spring AI MCP Server Starter (WebMVC / Streamable-HTTP variant).
+            Wraps MCP Java SDK 2.0.0 (BOM-pinned; do not add a separate sdk dep).
+            Activates the /mcp Streamable-HTTP endpoint when the web stack is servlet.
+            Version: BOM-managed (spring-ai-bom 2.0.0).
+            Replaces the deprecated spring-ai-starter-mcp-server (SSE) starter.
+        -->
+        <dependency>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-starter-mcp-server-webmvc</artifactId>
+        </dependency>
+
+        <!-- TEST dependencies -->
+        <!--
+            Spring Boot Test starter: JUnit 5 (Jupiter), AssertJ, Mockito — all managed by Boot BOM.
+        -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!--
+            Derby embedded engine for in-memory tests (jdbc:derby:memory:gabiTest;create=true).
+            Eliminates the need for a live network Derby server on :1527 in CI (strategy R-G mitigation).
+            PIN: 10.16.1.1 — same Java-17 line as the network client above.
+        -->
+        <dependency>
+            <groupId>org.apache.derby</groupId>
+            <artifactId>derby</artifactId>
+            <version>${derby.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.derby</groupId>
+            <artifactId>derbyshared</artifactId>
+            <version>${derby.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.derby</groupId>
+            <artifactId>derbytools</artifactId>
+            <version>${derby.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!--
+                Spring Boot Maven Plugin — repackage produces the runnable fat-jar that jpackage (d)
+                will later consume. The explicit <mainClass> is set so the fat-jar's MANIFEST.MF
+                points at manager.LibMenu; when workstream (b) introduces a @SpringBootApplication
+                class this can be updated.
+
+                NOTE on plain CLI packaging: spring-boot-maven-plugin repackage embeds all deps in the
+                fat-jar and sets Main-Class in the manifest. The plain CLI app works because
+                LibMenu.main() needs only the classpath (derbyclient + resources) — no Spring context
+                auto-starts on launch, as there is no @SpringBootApplication in this workstream.
+                `mvn -q -DskipTests package` succeeds and produces a runnable gabi-1.0.0.jar.
+            -->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <mainClass>${start-class}</mainClass>
+                    <!-- classifier=exec: the repackaged fat-jar is gabi-1.0.0-exec.jar;
+                         the plain jar (gabi-1.0.0.jar) remains for jpackage (workstream d). -->
+                    <classifier>exec</classifier>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!--
+                Maven Compiler Plugin — explicit source/target for JDK 17.
+                Managed version from spring-boot-starter-parent; release flag enforces API baseline.
+            -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <release>${java.version}</release>
+                    <encoding>UTF-8</encoding>
+                </configuration>
+            </plugin>
+
+            <!--
+                Maven Surefire Plugin — JUnit 5 (Jupiter) ready.
+                Boot BOM manages the version (≥3.2.x); JUnit Platform auto-detected.
+                The testing agent (workstream e) will add test class patterns and
+                JaCoCo argLine injection here.
+            -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <useModulePath>false</useModulePath>
+                    <!--
+                        argLine is set by jacoco:prepare-agent to inject the JaCoCo
+                        instrumentation agent. The @{argLine} late-binding syntax
+                        ensures this value is resolved AFTER prepare-agent runs.
+                    -->
+                    <argLine>@{argLine}</argLine>
+                </configuration>
+            </plugin>
+
+            <!--
+                JaCoCo Maven Plugin — prepare-agent + report wired now.
+                The testing agent (workstream e) adds the <check> execution with the
+                ≥90% LINE/COVEREDRATIO rule scoped to the core package.
+            -->
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>${jacoco.version}</version>
+                <executions>
+                    <execution>
+                        <id>prepare-agent</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>report</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                    <!--
+                        COVERAGE CHECK (workstream e — testing agent):
+                        ≥90% LINE coverage on the core package (the campaign gate).
+                        Scoped to: core/** (LibraryServiceImpl, IdentifierValidator,
+                        LibraryException, AnswerWithSources, GabiDataSourceConfig).
+                        Excluded from the gate:
+                          - manager/** (console UI — Scanner/System.out, not headless-testable)
+                          - sql/**     (legacy DAO scaffold — not exercised by the headless core tests)
+                          - *Application / *CliRunner (Spring Boot bootstrap)
+                          - access/mcp/McpToolsConfig (Spring MCP bootstrap config)
+                        The rag/** and access/** packages are NOT excluded — their tests
+                        contribute to overall coverage but any shortfall there does NOT
+                        fail the core gate; only the core/** BUNDLE element is checked.
+                    -->
+                    <execution>
+                        <id>check</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <rule>
+                                    <element>BUNDLE</element>
+                                    <includes>
+                                        <!-- The headless core — this is what the gate measures.
+                                             core/* matches all classes directly in the core package
+                                             (LibraryServiceImpl, IdentifierValidator, etc.).
+                                             GabiDataSourceConfig is excluded from the gate as a
+                                             Spring boot infrastructure class not exercised headlessly. -->
+                                        <include>core/*</include>
+                                    </includes>
+                                    <excludes>
+                                        <!-- Exclude the Spring DataSource config bean — it is
+                                             Bootstrap/infrastructure code that requires the full
+                                             Spring context to instantiate and is not headless-testable. -->
+                                        <exclude>core/GabiDataSourceConfig</exclude>
+                                    </excludes>
+                                    <limits>
+                                        <limit>
+                                            <counter>LINE</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>0.90</minimum>
+                                        </limit>
+                                    </limits>
+                                </rule>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+
+        <resources>
+            <!-- Main resources: properties bundles, application.yml, config -->
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>false</filtering>
+            </resource>
+        </resources>
+    </build>
+
+</project>

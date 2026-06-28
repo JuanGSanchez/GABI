@@ -1,0 +1,38 @@
+# GABI — 'server' Spring profile
+# Activates the MCP + REST access layer (workstream c).
+#
+# Run with:
+#   java -jar gabi-1.0.0-exec.jar --spring.profiles.active=server
+#
+# In server mode the embedded Tomcat starts and serves:
+#   MCP (Streamable-HTTP): POST  http://localhost:8080/mcp
+#   REST catalogue:         GET   http://localhost:8080/api/books
+#   REST RAG:               POST  http://localhost:8080/api/ask
+#   Health:                 GET   http://localhost:8080/health
+#
+# The CLI (GabiCliRunner) is suppressed in server mode — the CommandLineRunner
+# is conditional on the 'cli' profile (or no active web profile).
+#
+# === MCP client config (Claude Desktop / agent) ===
+# Add to your mcpServers config:
+#   "gabi": {
+#     "url": "http://localhost:8080/mcp",
+#     "transport": "streamable-http"
+#   }
+#
+# For STDIO mode (no HTTP server, agent drives via stdin/stdout):
+#   "gabi": {
+#     "command": "java",
+#     "args": ["-jar", "/path/to/gabi-1.0.0-exec.jar",
+#              "--spring.ai.mcp.server.stdio=true",
+#              "--spring.main.web-application-type=none"]
+#   }
+# ============================================================
+
+spring:
+  main:
+    # Switch to servlet (Tomcat) for the MCP + REST endpoints.
+    web-application-type: servlet
+
+server:
+  port: ${SERVER_PORT:8080}
