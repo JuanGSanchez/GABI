@@ -95,6 +95,26 @@ public class FakeLibraryService implements LibraryService {
                         .toLowerCase().contains(text.toLowerCase())).toList();
     }
 
+    @Override public core.search.Page<Member> searchMembersPaged(String query, int page, int size,
+                                                                 String sortField, boolean ascending) {
+        String q = query == null ? "" : query.toLowerCase();
+        java.util.Comparator<Member> cmp = switch (sortField == null ? "id" : sortField.toLowerCase()) {
+            case "name" -> java.util.Comparator.comparing(Member::getName);
+            case "surname" -> java.util.Comparator.comparing(Member::getSurname);
+            default -> java.util.Comparator.comparingInt(Member::getID);
+        };
+        if (!ascending) {
+            cmp = cmp.reversed();
+        }
+        List<Member> matches = new java.util.ArrayList<>(members.stream()
+                .filter(m -> m.getName().toLowerCase().contains(q) || m.getSurname().toLowerCase().contains(q))
+                .sorted(cmp).toList());
+        int safeSize = size <= 0 ? 20 : size;
+        int from = Math.min(Math.max(page, 0) * safeSize, matches.size());
+        int to = Math.min(from + safeSize, matches.size());
+        return new core.search.Page<>(matches.subList(from, to), Math.max(page, 0), safeSize, matches.size());
+    }
+
     @Override public Optional<Member> getMember(int id) {
         return members.stream().filter(m -> m.getID() == id).findFirst();
     }

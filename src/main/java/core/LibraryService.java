@@ -121,6 +121,21 @@ public interface LibraryService {
     List<Member> searchMembers(String field, String text);
 
     /**
+     * Paginated, multi-field, case-insensitive member search (SPEC-R06, extends SPEC-20).
+     * Matches {@code query} as a substring of <em>either</em> name or surname; a blank query
+     * matches all members.
+     *
+     * @param query     case-insensitive substring (blank ⇒ all)
+     * @param page      zero-based page index
+     * @param size      page size (positive)
+     * @param sortField "id", "name" or "surname"
+     * @param ascending sort direction
+     * @return a page of members plus pagination metadata; never null, never throws on no match
+     */
+    core.search.Page<Member> searchMembersPaged(String query, int page, int size,
+                                                String sortField, boolean ascending);
+
+    /**
      * Returns the member with the given ID.
      *
      * @throws LibraryException.NotFoundException if the ID does not exist

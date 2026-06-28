@@ -187,6 +187,31 @@ public class LibraryMcpTools {
     }
 
     /**
+     * Paginated, multi-field, case-insensitive member search (SPEC-R06). Read-only.
+     */
+    @Tool(name = "search_members_paged",
+          description = "Search members across name and surname (case-insensitive), paginated. "
+                      + "Returns a page of members with pagination metadata.")
+    public core.search.Page<MemberDto> searchMembersPaged(
+            @ToolParam(description = "Case-insensitive substring; blank matches all", required = false)
+            String query,
+            @ToolParam(description = "Zero-based page index", required = false)
+            Integer page,
+            @ToolParam(description = "Page size (default 20)", required = false)
+            Integer size,
+            @ToolParam(description = "Sort field: 'id', 'name' or 'surname'", required = false)
+            String sort,
+            @ToolParam(description = "Sort direction: 'asc' or 'desc'", required = false)
+            String dir) {
+        return library.searchMembersPaged(
+                query == null ? "" : query,
+                page == null ? 0 : page,
+                size == null ? 20 : size,
+                sort == null ? "id" : sort,
+                !"desc".equalsIgnoreCase(dir)).map(MemberDto::from);
+    }
+
+    /**
      * Returns the member with the given ID, or throws if not found.
      */
     @Tool(name = "get_member",

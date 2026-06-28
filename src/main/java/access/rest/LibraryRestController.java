@@ -159,6 +159,22 @@ public class LibraryRestController {
         return library.searchMembers(field, text).stream().map(MemberDto::from).toList();
     }
 
+    /**
+     * {@code GET /api/members/search/paged} — paginated, multi-field, case-insensitive member
+     * search (SPEC-R06). Query params: {@code q}, {@code page}, {@code size}, {@code sort}
+     * ("id"/"name"/"surname"), {@code dir} ("asc"/"desc"). Returns a page + metadata.
+     */
+    @GetMapping("/members/search/paged")
+    public core.search.Page<MemberDto> searchMembersPaged(
+            @RequestParam(defaultValue = "") String q,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "id") String sort,
+            @RequestParam(defaultValue = "asc") String dir) {
+        return library.searchMembersPaged(q, page, size, sort, !"desc".equalsIgnoreCase(dir))
+                .map(MemberDto::from);
+    }
+
     /** {@code GET /api/members/{id}} — get a single member by ID. */
     @GetMapping("/members/{id}")
     public ResponseEntity<MemberDto> getMember(@PathVariable int id) {

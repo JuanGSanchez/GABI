@@ -349,6 +349,56 @@ public class LibraryServiceImpl implements LibraryService {
     }
 
     @Override
+    public core.search.Page<Member> searchMembersPaged(String query, int page, int size,
+                                                       String sortField, boolean ascending) {
+        int safePage = Math.max(page, 0);
+        int safeSize = size <= 0 ? 20 : size;
+        // Sort identifier comes from a fixed whitelist and is re-validated against the
+        // [A-Za-z0-9_] allowlist before interpolation (SPEC-07): never raw user input.
+        String sortColumn = IdentifierValidator.validate(resolveMemberSortColumn(sortField), "sort column");
+        String direction = ascending ? "ASC" : "DESC";
+        String pattern = "%" + (query == null ? "" : query.toLowerCase()) + "%";
+
+        String where = " WHERE LOWER(" + mName + ") LIKE ? OR LOWER(" + mSurname + ") LIKE ?";
+        String countSql = "SELECT COUNT(*) FROM " + memberTable + where;
+        String pageSql  = "SELECT * FROM " + memberTable + where
+                + " ORDER BY " + sortColumn + " " + direction
+                + " OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+
+        List<Member> content = new ArrayList<>();
+        long total;
+        try (Connection c = dataSource.getConnection();
+             PreparedStatement countPs = c.prepareStatement(countSql);
+             PreparedStatement pagePs  = c.prepareStatement(pageSql)) {
+            countPs.setString(1, pattern);
+            countPs.setString(2, pattern);
+            try (ResultSet rs = countPs.executeQuery()) {
+                total = rs.next() ? rs.getLong(1) : 0L;
+            }
+            pagePs.setString(1, pattern);
+            pagePs.setString(2, pattern);
+            pagePs.setInt(3, safePage * safeSize);
+            pagePs.setInt(4, safeSize);
+            try (ResultSet rs = pagePs.executeQuery()) {
+                while (rs.next()) content.add(mapMember(rs));
+            }
+        } catch (SQLException e) {
+            log.error("searchMembersPaged failed: {}", e.getMessage(), e);
+            throw new LibraryException.PersistenceException("Failed to search members (paged)", e);
+        }
+        return new core.search.Page<>(content, safePage, safeSize, total);
+    }
+
+    private String resolveMemberSortColumn(String field) {
+        if (field == null) return mId;
+        return switch (field.toLowerCase()) {
+            case "name"    -> mName;
+            case "surname" -> mSurname;
+            default        -> mId;
+        };
+    }
+
+    @Override
     public Optional<Member> getMember(int id) {
         String sql = "SELECT * FROM " + memberTable + " WHERE " + mId + " = ?";
         try (Connection c = dataSource.getConnection();
