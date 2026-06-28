@@ -27,7 +27,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  *
  * @author JuanGS (workstream b — Spring Boot bootstrapping)
  */
-@SpringBootApplication(scanBasePackages = {"manager", "sql", "tables", "utils", "core", "rag", "access"})
+@SpringBootApplication(scanBasePackages = {"manager", "sql", "tables", "utils", "core", "rag", "access", "ui"})
 public class GabiApplication {
 
     public static void main(String[] args) {
