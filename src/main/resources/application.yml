@@ -84,6 +84,19 @@ gabi:
   vectorstore:
     file: ${GABI_VECTORSTORE_FILE:}
 
+  # Desktop UI locale (SPEC-18): 'en' or 'es'.
+  ui:
+    locale: ${GABI_UI_LOCALE:en}
+
+  # In-app AI assistant (SPEC-02), active only under the 'desktop' profile.
+  # Provider/model are runtime-selectable; NO API key here — keys are sourced by the
+  # Spring AI ChatClient from ${OPENAI_API_KEY} / ${ANTHROPIC_API_KEY} env placeholders.
+  assistant:
+    provider: ${GABI_ASSISTANT_PROVIDER:ollama}
+    model: ${GABI_ASSISTANT_MODEL:llama3.2}
+    enabled: ${GABI_ASSISTANT_ENABLED:true}
+    inject-context: ${GABI_ASSISTANT_INJECT_CONTEXT:true}
+
 # ============================================================
 # Spring AI — Ollama (DEFAULT provider, no profile needed)
 # Start Ollama with: ollama run llama3.2 && ollama pull nomic-embed-text

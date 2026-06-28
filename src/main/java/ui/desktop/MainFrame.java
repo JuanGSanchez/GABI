@@ -2,12 +2,16 @@ package ui.desktop;
 
 import core.LibraryService;
 import ui.UiText;
+import ui.assistant.AssistantPanel;
+import ui.assistant.AssistantService;
 import ui.info.WidgetInfo;
 
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import java.awt.BorderLayout;
 
@@ -36,10 +40,19 @@ public class MainFrame extends JFrame {
     private final LoansPanel loansPanel;
     private final UsersPanel usersPanel;
 
+    private final transient AssistantService assistantService;
+    private AssistantPanel assistantPanel;
+    private JSplitPane splitPane;
+
     public MainFrame(LibraryService service, UiText text) {
+        this(service, text, null);
+    }
+
+    public MainFrame(LibraryService service, UiText text, AssistantService assistantService) {
         super("GABI — " + text.getOr("program-name", "Library Manager"));
         this.service = service;
         this.text = text;
+        this.assistantService = assistantService;
 
         this.booksPanel = new BooksPanel(service, text);
         this.membersPanel = new MembersPanel(service, text);
@@ -59,9 +72,20 @@ public class MainFrame extends JFrame {
         WidgetInfo.register(usersPanel, "info.tab.users");
 
         setJMenuBar(buildMenuBar());
-        add(tabs, BorderLayout.CENTER);
+
+        // SPEC-02: dock the assistant panel on the right when a service is supplied.
+        if (assistantService != null) {
+            this.assistantPanel = new AssistantPanel(assistantService);
+            this.splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, tabs, assistantPanel);
+            splitPane.setResizeWeight(1.0);
+            splitPane.setOneTouchExpandable(true);
+            add(splitPane, BorderLayout.CENTER);
+        } else {
+            add(tabs, BorderLayout.CENTER);
+        }
+
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setSize(900, 600);
+        setSize(assistantService != null ? 1240 : 900, 600);
         setLocationRelativeTo(null);
     }
 
@@ -75,6 +99,19 @@ public class MainFrame extends JFrame {
         fileMenu.add(exit);
         bar.add(fileMenu);
 
+        // Assistant menu — toggles the dockable AI panel (SPEC-02). Closing it does not
+        // affect any catalogue function; it can be reopened from here.
+        if (assistantService != null) {
+            JMenu aiMenu = new JMenu("Assistant");
+            aiMenu.setName("assistant");
+            JCheckBoxMenuItem toggle = new JCheckBoxMenuItem("Show assistant", true);
+            toggle.setName("assistant-toggle");
+            toggle.addActionListener(e -> setAssistantVisible(toggle.isSelected()));
+            WidgetInfo.register(toggle, "info.assistant.provider");
+            aiMenu.add(toggle);
+            bar.add(aiMenu);
+        }
+
         // Help menu — hosts the centralized widget-info affordance (SPEC-01).
         JMenu helpMenu = new JMenu(text.getOr("program-properties", "Help"));
         helpMenu.setName("help");
@@ -82,6 +119,21 @@ public class MainFrame extends JFrame {
         bar.add(helpMenu);
 
         return bar;
+    }
+
+    /** Shows or hides the dockable assistant panel without disturbing the catalogue tabs. */
+    public void setAssistantVisible(boolean visible) {
+        if (assistantPanel == null || splitPane == null) {
+            return;
+        }
+        assistantPanel.setVisible(visible);
+        splitPane.setDividerLocation(visible ? 0.72 : 1.0);
+        splitPane.revalidate();
+    }
+
+    /** The dockable assistant panel, or {@code null} when no assistant service is wired. */
+    public AssistantPanel getAssistantPanel() {
+        return assistantPanel;
     }
 
     /** The tabbed content pane (exposed for SPEC-01/SPEC-02 wiring and tests). */

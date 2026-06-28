@@ -8,6 +8,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import ui.UiText;
+import ui.assistant.AssistantService;
 import ui.info.InfoRegistry;
 import ui.info.WidgetInfo;
 
@@ -33,12 +34,14 @@ public class GabiDesktopRunner implements CommandLineRunner {
     private static final Logger log = LoggerFactory.getLogger(GabiDesktopRunner.class);
 
     private final LibraryService service;
+    private final AssistantService assistantService;
 
     @Value("${gabi.ui.locale:en}")
     private String localeTag;
 
-    public GabiDesktopRunner(LibraryService service) {
+    public GabiDesktopRunner(LibraryService service, AssistantService assistantService) {
         this.service = service;
+        this.assistantService = assistantService;
     }
 
     @Override
@@ -55,7 +58,7 @@ public class GabiDesktopRunner implements CommandLineRunner {
             // SPEC-01: configure the single info surface once, before any widget registers.
             WidgetInfo.setRegistry(InfoRegistry.of(locale));
             WidgetInfo.installGlobalDefaults();
-            MainFrame frame = new MainFrame(service, text);
+            MainFrame frame = new MainFrame(service, text, assistantService);
             frame.setVisible(true);
         });
     }
