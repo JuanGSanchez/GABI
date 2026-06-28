@@ -21,8 +21,8 @@
 #           -Dspring.profiles.active=anthropic (Anthropic chat + Ollama embeddings)
 #
 # === CLI invocation (preserved) ===
-#   java -jar gabi-1.0.0-exec.jar admin 1234
-#   DB_USER=myuser DB_PASSWORD=secret java -jar gabi-1.0.0-exec.jar
+#   java -jar gabi-1.0.0-exec.jar <db-user> <db-password>
+#   DB_USER=$DB_USER DB_PASSWORD=$DB_PASSWORD java -jar gabi-1.0.0-exec.jar
 # ============================================================
 
 spring:
@@ -67,6 +67,19 @@ spring:
         annotation-scanner:
           enabled: true
 
+    # ============================================================
+    # Spring AI — Ollama (DEFAULT provider, no profile needed)
+    # Start Ollama with: ollama run llama3.2 && ollama pull nomic-embed-text
+    # ============================================================
+    ollama:
+      base-url: ${OLLAMA_BASE_URL:http://localhost:11434}
+      chat:
+        options:
+          model: ${OLLAMA_CHAT_MODEL:llama3.2}
+      embedding:
+        options:
+          model: ${OLLAMA_EMBED_MODEL:nomic-embed-text}
+
 # ============================================================
 # GABI database connection (headless core DataSource)
 # Credentials: set DB_USER / DB_PASSWORD environment variables.
@@ -96,21 +109,6 @@ gabi:
     model: ${GABI_ASSISTANT_MODEL:llama3.2}
     enabled: ${GABI_ASSISTANT_ENABLED:true}
     inject-context: ${GABI_ASSISTANT_INJECT_CONTEXT:true}
-
-# ============================================================
-# Spring AI — Ollama (DEFAULT provider, no profile needed)
-# Start Ollama with: ollama run llama3.2 && ollama pull nomic-embed-text
-# ============================================================
-spring:
-  ai:
-    ollama:
-      base-url: ${OLLAMA_BASE_URL:http://localhost:11434}
-      chat:
-        options:
-          model: ${OLLAMA_CHAT_MODEL:llama3.2}
-      embedding:
-        options:
-          model: ${OLLAMA_EMBED_MODEL:nomic-embed-text}
 
 # ============================================================
 # Logging

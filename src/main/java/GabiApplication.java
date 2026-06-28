@@ -15,8 +15,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * is driven by {@link GabiCliRunner}, a {@code CommandLineRunner} bean registered in
  * this context. When the Spring context starts, it immediately hands off to
  * {@code LibMenu}'s interactive loop, which runs until the user exits. This keeps
- * 100% backward compatibility: {@code java -jar gabi.jar admin 1234} still works
- * exactly as before.
+ * 100% backward compatibility: {@code java -jar gabi.jar <db-user> <db-password>}
+ * still works exactly as before.
  *
  * <p><b>Alternative invocation modes:</b>
  * <ul>
