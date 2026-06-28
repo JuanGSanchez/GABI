@@ -20,7 +20,7 @@ import java.util.Optional;
  * {@code [count,maxId]} pairs, {@code Optional} lookups) so a panel test against this fake
  * is behaviourally equivalent to one against {@code LibraryServiceImpl}.
  */
-class FakeLibraryService implements LibraryService {
+public class FakeLibraryService implements LibraryService {
 
     final List<Book> books = new ArrayList<>();
     final List<Member> members = new ArrayList<>();

@@ -3,6 +3,7 @@ package ui.desktop;
 import core.LibraryException;
 import core.LibraryService;
 import ui.UiText;
+import ui.info.WidgetInfo;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -117,6 +118,11 @@ public abstract class EntityPanel<T> extends JPanel {
         getComponentButton("search").addActionListener(e -> runSearch());
         toolbar.add(newButton("remove", text.format(menuKey(4), entityWord())));
         getComponentButton("remove").addActionListener(e -> guarded(this::onRemove));
+
+        // SPEC-01: centralized widget info — the ONLY registration path; never an inline literal.
+        for (String id : new String[]{"add", "list", "search", "remove"}) {
+            WidgetInfo.register(getComponentButton(id), "info.toolbar." + id);
+        }
     }
 
     /** Factory for a named action button; the name is the SPEC-01 info key suffix. */

@@ -2,6 +2,7 @@ package ui.desktop;
 
 import core.LibraryService;
 import ui.UiText;
+import ui.info.WidgetInfo;
 
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -51,6 +52,12 @@ public class MainFrame extends JFrame {
         tabs.addTab(text.getOr("program-properties-field-3-plural", "Loans"), loansPanel);
         tabs.addTab(text.getOr("program-properties-field-4-plural", "Users"), usersPanel);
 
+        // SPEC-01: register tab-level info through the single centralized surface.
+        WidgetInfo.register(booksPanel, "info.tab.books");
+        WidgetInfo.register(membersPanel, "info.tab.members");
+        WidgetInfo.register(loansPanel, "info.tab.loans");
+        WidgetInfo.register(usersPanel, "info.tab.users");
+
         setJMenuBar(buildMenuBar());
         add(tabs, BorderLayout.CENTER);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -64,12 +71,14 @@ public class MainFrame extends JFrame {
         JMenu fileMenu = new JMenu(text.getOr("program-intro-menu", "Menu"));
         JMenuItem exit = new JMenuItem(text.getOr("program-exit-2", "Exit"));
         exit.addActionListener(e -> dispose());
+        WidgetInfo.register(exit, "info.menu.exit");
         fileMenu.add(exit);
         bar.add(fileMenu);
 
-        // Help menu — hosts the centralized widget-info affordance (SPEC-01 wires it here).
+        // Help menu — hosts the centralized widget-info affordance (SPEC-01).
         JMenu helpMenu = new JMenu(text.getOr("program-properties", "Help"));
         helpMenu.setName("help");
+        WidgetInfo.register(helpMenu, "info.menu.help");
         bar.add(helpMenu);
 
         return bar;

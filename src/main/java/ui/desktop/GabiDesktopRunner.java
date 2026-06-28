@@ -8,6 +8,8 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import ui.UiText;
+import ui.info.InfoRegistry;
+import ui.info.WidgetInfo;
 
 import javax.swing.SwingUtilities;
 import java.awt.GraphicsEnvironment;
@@ -46,9 +48,13 @@ public class GabiDesktopRunner implements CommandLineRunner {
                     + "Use the default CLI or the 'server' profile instead.");
             return;
         }
-        UiText text = UiText.of(Locale.forLanguageTag(localeTag));
+        Locale locale = Locale.forLanguageTag(localeTag);
+        UiText text = UiText.of(locale);
         log.info("Launching GABI desktop UI (locale={})", localeTag);
         SwingUtilities.invokeLater(() -> {
+            // SPEC-01: configure the single info surface once, before any widget registers.
+            WidgetInfo.setRegistry(InfoRegistry.of(locale));
+            WidgetInfo.installGlobalDefaults();
             MainFrame frame = new MainFrame(service, text);
             frame.setVisible(true);
         });
