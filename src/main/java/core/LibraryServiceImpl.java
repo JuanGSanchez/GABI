@@ -94,7 +94,12 @@ public class LibraryServiceImpl implements LibraryService {
         maxMembers = Integer.parseInt(p.getProperty("database-table-2-maxsocs", "50"));
         maxLoan    = Integer.parseInt(p.getProperty("database-table-2-maxloan", "10"));
         maxUsers   = Integer.parseInt(p.getProperty("database-user-maxusers", "10"));
+        this.loanPolicy = new LoanPolicy(Integer.parseInt(
+                p.getProperty("loan-period-days", String.valueOf(LoanPolicy.DEFAULT_PERIOD_DAYS))));
     }
+
+    /** Loan-period policy for derived due dates / overdue tracking (SPEC-19). */
+    private final LoanPolicy loanPolicy;
 
     // =========================================================================
     // BOOKS
@@ -436,6 +441,28 @@ public class LibraryServiceImpl implements LibraryService {
             throw new LibraryException.PersistenceException("Failed to list loans with details", e);
         }
         return list;
+    }
+
+    @Override
+    public int loanPeriodDays() {
+        return loanPolicy.loanPeriodDays();
+    }
+
+    @Override
+    public LocalDate dueDate(Loan loan) {
+        return loanPolicy.dueDate(loan);
+    }
+
+    @Override
+    public List<Loan> listOverdueLoans() {
+        LocalDate today = LocalDate.now();
+        List<Loan> overdue = new ArrayList<>();
+        for (Loan loan : listLoansWithDetails()) {
+            if (loanPolicy.isOverdue(loan, today)) {
+                overdue.add(loan);
+            }
+        }
+        return overdue;
     }
 
     @Override

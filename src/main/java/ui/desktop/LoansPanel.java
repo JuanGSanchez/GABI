@@ -22,11 +22,17 @@ public class LoansPanel extends EntityPanel<Loan> {
 
     @Override
     protected List<EntityTableModel.Column<Loan>> columns() {
+        java.time.LocalDate today = java.time.LocalDate.now();
         return List.of(
                 new EntityTableModel.Column<>(text.getOr("program-loan-properties-1", "Loan ID"), Loan::getID),
                 new EntityTableModel.Column<>(text.getOr("program-loan-properties-2", "Member ID"), Loan::getIdMember),
                 new EntityTableModel.Column<>(text.getOr("program-loan-properties-3", "Book ID"), Loan::getIdBook),
-                new EntityTableModel.Column<>(text.getOr("program-loan-properties-4", "loan date"), Loan::getDateLoan));
+                new EntityTableModel.Column<>(text.getOr("program-loan-properties-4", "loan date"), Loan::getDateLoan),
+                // SPEC-19: derived due date + overdue indicator, computed via the core policy.
+                new EntityTableModel.Column<>(text.getOr("program-loan-properties-5", "due date"),
+                        service::dueDate),
+                new EntityTableModel.Column<>(text.getOr("program-loan-properties-6", "overdue"),
+                        l -> today.isAfter(service.dueDate(l)) ? "!" : ""));
     }
 
     @Override

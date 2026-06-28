@@ -179,4 +179,12 @@ public class LibraryRestController {
     public CountResult countLoans() {
         return CountResult.from(library.countLoans());
     }
+
+    /** {@code GET /api/loans/overdue} — read-only list of loans past their due date (SPEC-19). */
+    @GetMapping("/loans/overdue")
+    public List<access.rest.dto.OverdueLoanDto> listOverdueLoans() {
+        return library.listOverdueLoans().stream()
+                .map(l -> access.rest.dto.OverdueLoanDto.from(l, library.dueDate(l)))
+                .toList();
+    }
 }

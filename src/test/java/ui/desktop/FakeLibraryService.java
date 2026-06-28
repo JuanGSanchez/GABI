@@ -113,6 +113,20 @@ public class FakeLibraryService implements LibraryService {
 
     @Override public int[] countLoans() { return countOf(loans, Loan::getID); }
 
+    int loanPeriodDays = core.LoanPolicy.DEFAULT_PERIOD_DAYS;
+
+    @Override public int loanPeriodDays() { return loanPeriodDays; }
+
+    @Override public java.time.LocalDate dueDate(Loan loan) {
+        return new core.LoanPolicy(loanPeriodDays).dueDate(loan);
+    }
+
+    @Override public List<Loan> listOverdueLoans() {
+        core.LoanPolicy policy = new core.LoanPolicy(loanPeriodDays);
+        java.time.LocalDate today = java.time.LocalDate.now();
+        return loans.stream().filter(l -> policy.isOverdue(l, today)).toList();
+    }
+
     // ---- Users --------------------------------------------------------------
     @Override public List<User> listUsers() { return new ArrayList<>(users); }
 

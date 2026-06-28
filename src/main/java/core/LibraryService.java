@@ -5,6 +5,7 @@ import tables.Loan;
 import tables.Member;
 import tables.User;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -182,6 +183,20 @@ public interface LibraryService {
      * Returns {@code [count, maxId]} for the loans table.
      */
     int[] countLoans();
+
+    // ---- Due dates / overdue tracking (SPEC-19) -----------------------------
+
+    /** The configured loan period in days (the single overdue knob). */
+    int loanPeriodDays();
+
+    /** The derived due date for a loan ({@code loanDate + loanPeriodDays}). */
+    LocalDate dueDate(Loan loan);
+
+    /**
+     * Returns all loans that are past their due date as of today, with resolved Member and
+     * Book details. Never null; may be empty.
+     */
+    List<Loan> listOverdueLoans();
 
     // =========================================================================
     // USERS (admin)

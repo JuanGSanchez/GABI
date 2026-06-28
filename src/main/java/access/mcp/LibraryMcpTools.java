@@ -216,6 +216,15 @@ public class LibraryMcpTools {
         return CountResult.from(library.countLoans());
     }
 
+    /** Lists loans past their due date (read-only, SPEC-19). */
+    @Tool(name = "list_overdue_loans",
+          description = "List all loans that are past their due date, with each loan's due date.")
+    public List<access.rest.dto.OverdueLoanDto> listOverdueLoans() {
+        return library.listOverdueLoans().stream()
+                .map(l -> access.rest.dto.OverdueLoanDto.from(l, library.dueDate(l)))
+                .toList();
+    }
+
     // =========================================================================
     // HEALTH
     // =========================================================================
