@@ -51,6 +51,20 @@ public interface LibraryService {
     List<Book> searchBooks(String field, String text);
 
     /**
+     * Paginated, multi-field, case-insensitive book search (SPEC-20). Matches {@code query}
+     * as a substring of <em>either</em> title or author; a blank query matches all books.
+     *
+     * @param query     case-insensitive substring (blank ⇒ all)
+     * @param page      zero-based page index
+     * @param size      page size (positive)
+     * @param sortField "id", "title" or "author"
+     * @param ascending sort direction
+     * @return a page of books plus pagination metadata; never null, never throws on no match
+     */
+    core.search.Page<Book> searchBooksPaged(String query, int page, int size,
+                                            String sortField, boolean ascending);
+
+    /**
      * Returns the book with the given ID.
      *
      * @throws LibraryException.NotFoundException if the ID does not exist

@@ -107,6 +107,22 @@ public class LibraryRestController {
         return library.searchBooks(field, text).stream().map(BookDto::from).toList();
     }
 
+    /**
+     * {@code GET /api/books/search/paged} — paginated, multi-field, case-insensitive book
+     * search (SPEC-20). Query params: {@code q}, {@code page}, {@code size}, {@code sort}
+     * ("id"/"title"/"author"), {@code dir} ("asc"/"desc"). Returns a page + metadata.
+     */
+    @GetMapping("/books/search/paged")
+    public core.search.Page<BookDto> searchBooksPaged(
+            @RequestParam(defaultValue = "") String q,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "id") String sort,
+            @RequestParam(defaultValue = "asc") String dir) {
+        return library.searchBooksPaged(q, page, size, sort, !"desc".equalsIgnoreCase(dir))
+                .map(BookDto::from);
+    }
+
     /** {@code GET /api/books/{id}} — get a single book by ID. */
     @GetMapping("/books/{id}")
     public ResponseEntity<BookDto> getBook(@PathVariable int id) {

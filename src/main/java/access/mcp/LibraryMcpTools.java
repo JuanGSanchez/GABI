@@ -116,6 +116,29 @@ public class LibraryMcpTools {
         return library.searchBooks(field, text).stream().map(BookDto::from).toList();
     }
 
+    /** Paginated, multi-field, case-insensitive book search (read-only, SPEC-20). */
+    @Tool(name = "search_books_paged",
+          description = "Search books across title and author (case-insensitive), paginated. "
+                      + "Returns a page of books with pagination metadata.")
+    public core.search.Page<BookDto> searchBooksPaged(
+            @ToolParam(description = "Case-insensitive substring; blank matches all", required = false)
+            String query,
+            @ToolParam(description = "Zero-based page index", required = false)
+            Integer page,
+            @ToolParam(description = "Page size (default 20)", required = false)
+            Integer size,
+            @ToolParam(description = "Sort field: 'id', 'title' or 'author'", required = false)
+            String sort,
+            @ToolParam(description = "Sort direction: 'asc' or 'desc'", required = false)
+            String dir) {
+        return library.searchBooksPaged(
+                query == null ? "" : query,
+                page == null ? 0 : page,
+                size == null ? 20 : size,
+                sort == null ? "id" : sort,
+                !"desc".equalsIgnoreCase(dir)).map(BookDto::from);
+    }
+
     /**
      * Returns the book with the given ID, or throws if not found.
      */

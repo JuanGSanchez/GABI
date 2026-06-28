@@ -45,6 +45,26 @@ public class FakeLibraryService implements LibraryService {
         return hits;
     }
 
+    @Override public core.search.Page<Book> searchBooksPaged(String query, int page, int size,
+                                                             String sortField, boolean ascending) {
+        String q = query == null ? "" : query.toLowerCase();
+        java.util.Comparator<Book> cmp = switch (sortField == null ? "id" : sortField.toLowerCase()) {
+            case "title" -> java.util.Comparator.comparing(Book::getTitle);
+            case "author" -> java.util.Comparator.comparing(Book::getAuthor);
+            default -> java.util.Comparator.comparingInt(Book::getID);
+        };
+        if (!ascending) {
+            cmp = cmp.reversed();
+        }
+        List<Book> matches = new java.util.ArrayList<>(books.stream()
+                .filter(b -> b.getTitle().toLowerCase().contains(q) || b.getAuthor().toLowerCase().contains(q))
+                .sorted(cmp).toList());
+        int safeSize = size <= 0 ? 20 : size;
+        int from = Math.min(Math.max(page, 0) * safeSize, matches.size());
+        int to = Math.min(from + safeSize, matches.size());
+        return new core.search.Page<>(matches.subList(from, to), Math.max(page, 0), safeSize, matches.size());
+    }
+
     @Override public Optional<Book> getBook(int id) {
         return books.stream().filter(b -> b.getID() == id).findFirst();
     }

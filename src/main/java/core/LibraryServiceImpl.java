@@ -144,6 +144,56 @@ public class LibraryServiceImpl implements LibraryService {
     }
 
     @Override
+    public core.search.Page<Book> searchBooksPaged(String query, int page, int size,
+                                                   String sortField, boolean ascending) {
+        int safePage = Math.max(page, 0);
+        int safeSize = size <= 0 ? 20 : size;
+        // Sort identifier comes from a fixed whitelist and is re-validated against the
+        // [A-Za-z0-9_] allowlist before interpolation (SPEC-07): never raw user input.
+        String sortColumn = IdentifierValidator.validate(resolveBookSortColumn(sortField), "sort column");
+        String direction = ascending ? "ASC" : "DESC";
+        String pattern = "%" + (query == null ? "" : query.toLowerCase()) + "%";
+
+        String where = " WHERE LOWER(" + bTitle + ") LIKE ? OR LOWER(" + bAuthor + ") LIKE ?";
+        String countSql = "SELECT COUNT(*) FROM " + bookTable + where;
+        String pageSql  = "SELECT * FROM " + bookTable + where
+                + " ORDER BY " + sortColumn + " " + direction
+                + " OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+
+        List<Book> content = new ArrayList<>();
+        long total;
+        try (Connection c = dataSource.getConnection();
+             PreparedStatement countPs = c.prepareStatement(countSql);
+             PreparedStatement pagePs  = c.prepareStatement(pageSql)) {
+            countPs.setString(1, pattern);
+            countPs.setString(2, pattern);
+            try (ResultSet rs = countPs.executeQuery()) {
+                total = rs.next() ? rs.getLong(1) : 0L;
+            }
+            pagePs.setString(1, pattern);
+            pagePs.setString(2, pattern);
+            pagePs.setInt(3, safePage * safeSize);
+            pagePs.setInt(4, safeSize);
+            try (ResultSet rs = pagePs.executeQuery()) {
+                while (rs.next()) content.add(mapBook(rs));
+            }
+        } catch (SQLException e) {
+            log.error("searchBooksPaged failed: {}", e.getMessage(), e);
+            throw new LibraryException.PersistenceException("Failed to search books (paged)", e);
+        }
+        return new core.search.Page<>(content, safePage, safeSize, total);
+    }
+
+    private String resolveBookSortColumn(String field) {
+        if (field == null) return bId;
+        return switch (field.toLowerCase()) {
+            case "title"  -> bTitle;
+            case "author" -> bAuthor;
+            default        -> bId;
+        };
+    }
+
+    @Override
     public Optional<Book> getBook(int id) {
         String sql = "SELECT * FROM " + bookTable + " WHERE " + bId + " = ?";
         try (Connection c = dataSource.getConnection();
