@@ -1,6 +1,9 @@
 package ui.desktop;
 
 import core.LibraryService;
+import core.reports.ReportExporter;
+import core.reports.ReportService;
+import core.reports.ReportServiceImpl;
 import ui.UiText;
 import ui.assistant.AssistantPanel;
 import ui.assistant.AssistantService;
@@ -41,6 +44,7 @@ public class MainFrame extends JFrame {
     private final UsersPanel usersPanel;
 
     private final transient AssistantService assistantService;
+    private final transient ReportService reportService;
     private AssistantPanel assistantPanel;
     private JSplitPane splitPane;
 
@@ -53,6 +57,7 @@ public class MainFrame extends JFrame {
         this.service = service;
         this.text = text;
         this.assistantService = assistantService;
+        this.reportService = new ReportServiceImpl(service);
 
         this.booksPanel = new BooksPanel(service, text);
         this.membersPanel = new MembersPanel(service, text);
@@ -99,6 +104,16 @@ public class MainFrame extends JFrame {
         fileMenu.add(exit);
         bar.add(fileMenu);
 
+        // Reports menu — export catalogue/circulation reports as CSV (SPEC-21).
+        JMenu reportsMenu = new JMenu("Reports");
+        reportsMenu.setName("reports");
+        for (String reportId : reportService.available()) {
+            JMenuItem item = new JMenuItem("Export " + reportId + " (CSV)…");
+            item.addActionListener(e -> exportReportCsv(reportId));
+            reportsMenu.add(item);
+        }
+        bar.add(reportsMenu);
+
         // Assistant menu — toggles the dockable AI panel (SPEC-02). Closing it does not
         // affect any catalogue function; it can be reopened from here.
         if (assistantService != null) {
@@ -134,6 +149,22 @@ public class MainFrame extends JFrame {
     /** The dockable assistant panel, or {@code null} when no assistant service is wired. */
     public AssistantPanel getAssistantPanel() {
         return assistantPanel;
+    }
+
+    /** Exports a report to a user-chosen CSV file (SPEC-21). */
+    private void exportReportCsv(String reportId) {
+        javax.swing.JFileChooser chooser = new javax.swing.JFileChooser();
+        chooser.setSelectedFile(new java.io.File(reportId + ".csv"));
+        if (chooser.showSaveDialog(this) != javax.swing.JFileChooser.APPROVE_OPTION) {
+            return;
+        }
+        try {
+            String csv = ReportExporter.toCsv(reportService.byName(reportId));
+            java.nio.file.Files.writeString(chooser.getSelectedFile().toPath(), csv);
+        } catch (Exception ex) {
+            javax.swing.JOptionPane.showMessageDialog(this, ex.getMessage(),
+                    text.getOr("program-error-intro", "Error"), javax.swing.JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     /** The tabbed content pane (exposed for SPEC-01/SPEC-02 wiring and tests). */
