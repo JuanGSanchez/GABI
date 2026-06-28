@@ -20,13 +20,17 @@ import org.springframework.stereotype.Component;
  *
  * <p>CLI invocation is unchanged:
  * <pre>
- *   java -jar gabi.jar admin 1234
+ *   java -jar gabi.jar &lt;db-user&gt; &lt;db-password&gt;
  * </pre>
+ *
+ * <p>SPEC-R05: this runner is suppressed under the {@code server} profile (MCP + REST,
+ * no interactive console) and the {@code desktop} profile (Swing UI). It activates only
+ * for the default CLI path.
  *
  * @author JuanGS (workstream b — CLI preservation)
  */
 @Component
-@Profile("!desktop")
+@Profile("!desktop & !server")
 public class GabiCliRunner implements CommandLineRunner {
 
     private static final Logger log = LoggerFactory.getLogger(GabiCliRunner.class);
