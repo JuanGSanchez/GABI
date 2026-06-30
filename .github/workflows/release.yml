@@ -1,0 +1,94 @@
+# .github/workflows/release.yml
+# ---------------------------------------------------------------------------
+# Continuous Delivery for GABI (Java 17 / jpackage)
+#
+# Builds a self-contained app-image with jpackage (via the repo's packaging
+# scripts) on Windows, Linux, and macOS, then attaches all three to a Release.
+# jpackage bundles a trimmed JRE (via jlink), so each build runs without a
+# pre-installed Java on the end user's machine.
+#
+# WHAT THIS WORKFLOW DEMONSTRATES (beyond ci.yml):
+#   - Tag trigger        runs only when you push a version tag (e.g. v1.0.0)
+#   - OS build matrix    one self-contained app-image per operating system
+#   - OS-conditional steps  `if: runner.os == ...` picks the right build script
+#   - Job dependencies   `needs:` makes the release job wait for every build
+#   - GITHUB_TOKEN       `permissions: contents: write` lets the job cut a Release
+#
+# HOW TO TRIGGER:
+#   git tag v1.0.0
+#   git push origin v1.0.0
+# ---------------------------------------------------------------------------
+name: Release
+
+on:
+  push:
+    tags: ["v*"]            # any tag starting with v, e.g. v1.0.0
+
+permissions:
+  contents: write           # needed to create the GitHub Release
+
+jobs:
+  build:
+    name: build (${{ matrix.label }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            label: linux
+          - os: windows-latest
+            label: windows
+          - os: macos-latest
+            label: macos
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      # JDK 17 ships jpackage (since JDK 16 / JEP 392); cache ~/.m2.
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: maven
+
+      # POSIX runners: the script runs `mvn package` then jpackage --type app-image.
+      - name: Build app-image (Linux / macOS)
+        if: runner.os != 'Windows'
+        run: bash packaging/build_posix.sh app-image
+
+      # Windows runner: the PowerShell script defaults to --type app-image (no WiX needed).
+      - name: Build app-image (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: ./packaging/build_windows.ps1
+
+      # Both scripts emit the app-image under packaging/bin/. Archive it.
+      - name: Package app-image
+        shell: bash
+        run: |
+          tar -czf "GABI-${{ matrix.label }}.tar.gz" -C packaging/bin .
+          ls -la "GABI-${{ matrix.label }}.tar.gz"
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: GABI-${{ matrix.label }}
+          path: GABI-${{ matrix.label }}.tar.gz
+
+  release:
+    name: publish release
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/**/*.tar.gz
+          generate_release_notes: true
